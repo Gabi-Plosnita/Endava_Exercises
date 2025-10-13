@@ -1,11 +1,16 @@
-﻿namespace MiniBank_Console;
+﻿using MiniBank_Console.Models.Interfaces;
 
-public abstract class BankAccount
+namespace MiniBank_Console.Models;
+
+public abstract class BankAccount : ITransactable
 {
     private static int nextId = 1;
     public int Id { get; }
     public string Owner { get; protected set; }
     public decimal Balance { get; protected set; }
+
+    protected List<string> operationLog = new List<string>();
+    public IReadOnlyList<string> OperationLog => operationLog.AsReadOnly();
 
     public BankAccount(string owner, decimal balance)
     {
