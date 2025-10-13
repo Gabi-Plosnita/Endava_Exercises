@@ -4,9 +4,9 @@ namespace MiniBank_Console.Models;
 
 public class CheckingAccount : BankAccount, IOverdraftPolicy
 {
-    public CheckingAccount(string owner, decimal balance) : base(owner, balance)
+    public CheckingAccount(string owner, decimal amount) : base(owner, amount)
     {
-        Log($"Checking account (ID: {Id}) created for {owner} with initial balance {balance:C}");
+        Log($"Checking account (ID: {Id}) created for {owner} with initial balance {amount:C}");
     }
 
     public decimal OverdraftLimit => 200;

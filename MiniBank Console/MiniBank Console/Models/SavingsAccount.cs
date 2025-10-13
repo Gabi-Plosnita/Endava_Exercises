@@ -4,9 +4,9 @@ namespace MiniBank_Console.Models;
 
 public class SavingsAccount : BankAccount, IInterestBearing
 {
-    public SavingsAccount(string owner, decimal balance) : base(owner, balance)
+    public SavingsAccount(string owner, decimal amount) : base(owner, amount)
     {
-        Log($"Savings account (ID: {Id}) created for {owner} with initial balance {balance:C}");
+        Log($"Savings account (ID: {Id}) created for {owner} with initial balance {amount:C}");
     }
 
     public decimal MonthlyInterestRate => 0.01m; 
