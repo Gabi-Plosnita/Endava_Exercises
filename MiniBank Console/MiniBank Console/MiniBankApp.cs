@@ -1,4 +1,6 @@
-﻿using MiniBank_Console.Services.Interfaces;
+﻿using Microsoft.Win32;
+using MiniBank_Console.Models;
+using MiniBank_Console.Services.Interfaces;
 
 namespace MiniBank_Console;
 
@@ -58,23 +60,139 @@ public class MiniBankApp
 
     private void CreateAccount()
     {
-        // input owner, choose type, enter initial balance
-        // call _registry.CreateAccount(...)
+        Console.WriteLine("\n--- Create Account ---");
+        Console.WriteLine("Select account type:");
+        Console.WriteLine("1. Checking");
+        Console.WriteLine("2. Savings");
+        Console.WriteLine("3. Loan");
+        Console.Write("Enter choice (1-3): ");
+
+        if (!int.TryParse(Console.ReadLine(), out int choice) || choice < 1 || choice > 3)
+        {
+            Console.WriteLine("Invalid selection. Please enter a number between 1 and 3.");
+            return;
+        }
+
+        AccountType type = (AccountType)(choice - 1);
+
+        Console.Write("Enter owner name: ");
+        string? owner = Console.ReadLine();
+
+        if (string.IsNullOrWhiteSpace(owner))
+        {
+            Console.WriteLine("Owner name cannot be empty.");
+            return;
+        }
+
+        Console.Write("Enter initial deposit or loan amount: ");
+        if (!decimal.TryParse(Console.ReadLine(), out decimal amount) || amount <= 0)
+        {
+            Console.WriteLine("Invalid amount. Please enter a positive number.");
+            return;
+        }
+
+        if (bankAccountService.CreateAccount(owner, amount, type, out string? error))
+            Console.WriteLine($"Account created successfully for {owner} with initial amount {amount:C}.");
+        else
+            Console.WriteLine($"Account creation failed: {error}");
     }
 
     private void Deposit()
     {
-        // prompt for account id, amount, etc.
+        Console.WriteLine("\n--- Deposit ---");
+
+        Console.Write("Enter account ID: ");
+        if (!int.TryParse(Console.ReadLine(), out int id))
+        {
+            Console.WriteLine("Invalid ID. Please enter a number.");
+            return;
+        }
+
+        var account = bankAccountService.GetAccountById(id);
+        if (account == null)
+        {
+            Console.WriteLine($"No account found with ID {id}.");
+            return;
+        }
+
+        Console.Write("Enter amount to deposit: ");
+        if (!decimal.TryParse(Console.ReadLine(), out decimal amount))
+        {
+            Console.WriteLine("Invalid amount. Please enter a numeric value.");
+            return;
+        }
+
+        if (account.Deposit(amount, out string? error))
+        {
+            Console.WriteLine($"Successfully deposited {amount:C} into account {id}.");
+        }
+        else
+        {
+            Console.WriteLine($"Deposit failed: {error}");
+        }
     }
 
     private void Withdraw()
     {
-        // prompt for account id, amount, etc.
+        Console.WriteLine("\n--- Withdraw ---");
+
+        Console.Write("Enter account ID: ");
+        if (!int.TryParse(Console.ReadLine(), out int id))
+        {
+            Console.WriteLine("Invalid ID. Please enter a number.");
+            return;
+        }
+
+        var account = bankAccountService.GetAccountById(id);
+        if (account == null)
+        {
+            Console.WriteLine($"No account found with ID {id}.");
+            return;
+        }
+
+        Console.Write("Enter amount to withdraw: ");
+        if (!decimal.TryParse(Console.ReadLine(), out decimal amount))
+        {
+            Console.WriteLine("Invalid amount. Please enter a numeric value.");
+            return;
+        }
+
+        if (amount <= 0)
+        {
+            Console.WriteLine("Withdrawal amount must be positive.");
+            return;
+        }
+
+        if (account.Withdraw(amount, out string? error))
+        {
+            Console.WriteLine($"Successfully withdrew {amount:C} from account {id}.");
+        }
+        else
+        {
+            Console.WriteLine($"Withdrawal failed: {error}");
+        }
     }
 
     private void ViewStatement()
     {
-        // prompt for account id and call PrintStatement()
+        Console.WriteLine("\n--- View Account Statement ---");
+
+        Console.Write("Enter account ID: ");
+        if (!int.TryParse(Console.ReadLine(), out int id))
+        {
+            Console.WriteLine("Invalid ID. Please enter a numeric value.");
+            return;
+        }
+
+        var account = bankAccountService.GetAccountById(id);
+        if (account == null)
+        {
+            Console.WriteLine($"No account found with ID {id}.");
+            return;
+        }
+
+        Console.WriteLine();
+        account.PrintStatement();
     }
 
     private void RunMonthEnd()
