@@ -41,7 +41,7 @@ public abstract class BankAccount : ITransactable
         return true;
     }
 
-    public virtual bool Withdraw(decimal amount, out string? error)
+    public bool Withdraw(decimal amount, out string? error)
     {
         if (amount <= 0)
         {
