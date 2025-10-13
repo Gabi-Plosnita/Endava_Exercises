@@ -2,5 +2,6 @@
 
 public interface IInterestBearing
 {
+    decimal MonthlyInterestRate { get; }
     void ApplyMonthlyInterest();
 }
