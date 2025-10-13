@@ -4,6 +4,7 @@ namespace MiniBank_Console.Services.Interfaces;
 
 public interface IBankAccountService
 {
-    IReadOnlyList<BankAccount> Accounts { get; }
+    IReadOnlyList<BankAccount> GetAccounts();
+    BankAccount? GetAccountById(int id);
     bool CreateAccount(string owner, decimal balance, AccountType accountType, out string? error);
 }
