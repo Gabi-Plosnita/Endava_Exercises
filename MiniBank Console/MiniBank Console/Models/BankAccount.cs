@@ -2,7 +2,7 @@
 
 namespace MiniBank_Console.Models;
 
-public abstract class BankAccount : ITransactable
+public abstract class BankAccount : ITransactable, IStatement
 {
     private static int nextId = 1;
     public int Id { get; }
@@ -58,6 +58,23 @@ public abstract class BankAccount : ITransactable
     }
 
     protected abstract bool CanWithdraw(decimal amount, out string? error);
+
+    public void PrintStatement()
+    {
+        Console.WriteLine($"--- Statement for {Owner} (ID: {Id}) ---");
+        Console.WriteLine($"Current balance: {Balance:C}");
+        Console.WriteLine();
+
+        if (operationLog.Count == 0)
+            Console.WriteLine("No operations recorded yet.");
+        else
+        {
+            foreach (var entry in operationLog)
+                Console.WriteLine(entry);
+        }
+
+        Console.WriteLine("---------------------------------------\n");
+    }
 
     protected void Log(string message)
     {
