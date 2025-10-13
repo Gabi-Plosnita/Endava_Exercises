@@ -6,7 +6,10 @@ namespace MiniBank_Console.Services;
 public class BankAccountService : IBankAccountService
 {
     private readonly List<BankAccount> bankAccounts = [];
-    public IReadOnlyList<BankAccount> Accounts => bankAccounts.AsReadOnly();
+
+    public IReadOnlyList<BankAccount> GetAccounts() => bankAccounts.AsReadOnly();
+
+    public BankAccount? GetAccountById(int Id) => bankAccounts.Find(x => x.Id == Id);
 
     public bool CreateAccount(string owner, decimal balance, AccountType accountType, out string? error)
     {
