@@ -19,6 +19,48 @@ public abstract class BankAccount : ITransactable
         Balance = balance;
     }
 
-    public abstract void Deposit(decimal amount);
-    public abstract bool Withdraw(decimal amount, out string? error);
+    public bool Deposit(decimal amount, out string? error)
+    {
+        if (amount <= 0)
+        {
+            error = "Deposit amount must be positive.";
+            return false;
+        }
+
+        if (!CanDeposit(amount, out error))
+            return false;
+
+        Balance += amount;
+        Log($"Deposited {amount:C}. New balance: {Balance:C}");
+        return true;
+    }
+
+    protected virtual bool CanDeposit(decimal amount, out string? error)
+    {
+        error = null;
+        return true;
+    }
+
+    public virtual bool Withdraw(decimal amount, out string? error)
+    {
+        if (amount <= 0)
+        {
+            error = "Withdrawal amount must be positive.";
+            return false;
+        }
+
+        if (!CanWithdraw(amount, out error))
+            return false;
+
+        Balance -= amount;
+        Log($"Withdrew {amount:C}. New balance: {Balance:C}");
+        return true;
+    }
+
+    protected abstract bool CanWithdraw(decimal amount, out string? error);
+
+    protected void Log(string message)
+    {
+        operationLog.Add($"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] {message}");
+    }
 }
