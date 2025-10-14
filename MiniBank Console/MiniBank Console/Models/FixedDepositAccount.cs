@@ -31,6 +31,21 @@ public class FixedDepositAccount : BankAccount, IInterestBearing
         return false;
     }
 
+    public override bool Withdraw(decimal amount, out string? error)
+    {
+        if (!base.Withdraw(amount, out error)) 
+            return false;
+
+        if (DateTime.Now < EndDate)
+        {
+            var penalty = amount * PenaltyRate;
+            Balance -= penalty;
+            Log($"Early withdrawal penalty charged: {penalty:C}. New balance: {Balance:C}");
+        }
+
+        return true;
+    }
+
     protected override bool CanWithdraw(decimal amount, out string? error)
     {
         if (DateTime.Now < EndDate)
