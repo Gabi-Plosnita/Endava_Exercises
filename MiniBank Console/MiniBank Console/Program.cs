@@ -1,6 +1,7 @@
 ﻿using MiniBank_Console;
 using MiniBank_Console.Services;
+using MiniBank_Console.Services.Interfaces;
 
-var bankAccountService = new BankAccountService();
+IBankAccountService bankAccountService = new BankAccountService();
 var app = new MiniBankApp(bankAccountService);
 app.Run();
