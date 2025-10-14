@@ -1,5 +1,4 @@
-﻿using Microsoft.Win32;
-using MiniBank_Console.Models;
+﻿using MiniBank_Console.Models;
 using MiniBank_Console.Services.Interfaces;
 
 namespace MiniBank_Console;
