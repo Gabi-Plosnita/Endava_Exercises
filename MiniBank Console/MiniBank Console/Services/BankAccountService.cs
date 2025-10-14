@@ -12,6 +12,7 @@ public class BankAccountService : IBankAccountService
         bankAccounts.Add(new CheckingAccount("Alice", 1000));
         bankAccounts.Add(new SavingsAccount("Bob", 5000));
         bankAccounts.Add(new LoanAccount("Charlie", 20000));
+        bankAccounts.Add(new FixedDepositAccount("Diana", 10000, DateTime.Now.AddMonths(6)));
     }
 
     public IReadOnlyList<BankAccount> GetAccounts() => bankAccounts.AsReadOnly();
