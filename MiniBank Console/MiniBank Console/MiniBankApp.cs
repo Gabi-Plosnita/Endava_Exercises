@@ -206,7 +206,15 @@ public class MiniBankApp
 
     private void RunMonthEnd()
     {
-        // iterate all accounts, apply monthly interest, etc.
+        var accounts = bankAccountService.GetAccounts();
+        foreach (var account in accounts)
+        {
+            if (account is SavingsAccount savingsAccount)
+                savingsAccount.ApplyMonthlyInterest();
+            else if(account is LoanAccount loanAccount)
+                loanAccount.ApplyMonthlyInterest();
+        }
+        Console.WriteLine("Month-end processing completed.");
     }
 
     private void Exit()
