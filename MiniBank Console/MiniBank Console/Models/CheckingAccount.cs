@@ -24,6 +24,6 @@ public class CheckingAccount : BankAccount, IOverdraftPolicy
 
     public override string ToString()
     {
-        return $"Type: Checking Account | ID: {Id} | Owner: {Owner} | Balance: {(Balance < 0 ? "-" : "")}{Math.Abs(Balance):C}";
+        return $"Type: Checking Account | ID: {Id} | Owner: {Owner} | Balance: {GetBalanceString()}";
     }
 }

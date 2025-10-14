@@ -31,6 +31,6 @@ public class SavingsAccount : BankAccount, IInterestBearing
 
     public override string ToString()
     {
-        return $"Type: Savings Account | ID: {Id} | Owner: {Owner} | Balance: {(Balance < 0 ? "-" : "")}{Math.Abs(Balance):C}";
+        return $"Type: Savings Account | ID: {Id} | Owner: {Owner} | Balance: {GetBalanceString()}";
     }
 }

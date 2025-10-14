@@ -37,6 +37,6 @@ public class LoanAccount : BankAccount, IInterestBearing
 
     public override string ToString()
     {
-        return $"Type: Loan Account | ID: {Id} | Owner: {Owner} | Balance: {(Balance < 0 ? "-" : "")}{Math.Abs(Balance):C}";
+        return $"Type: Loan Account | ID: {Id} | Owner: {Owner} | Balance: {GetBalanceString()}";
     }
 }
