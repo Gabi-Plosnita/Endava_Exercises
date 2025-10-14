@@ -31,7 +31,7 @@ public abstract class BankAccount : ITransactable, IStatement
             return false;
 
         Balance += amount;
-        Log($"Deposited {amount:C}. New balance: {Balance:C}");
+        Log($"Deposited {amount:C}. New balance: {GetBalanceString()}");
         return true;
     }
 
@@ -53,7 +53,7 @@ public abstract class BankAccount : ITransactable, IStatement
             return false;
 
         Balance -= amount;
-        Log($"Withdrew {amount:C}. New balance: {Balance:C}");
+        Log($"Withdrew {amount:C}. New balance: {GetBalanceString()}");
         return true;
     }
 
@@ -62,7 +62,7 @@ public abstract class BankAccount : ITransactable, IStatement
     public void PrintStatement()
     {
         Console.WriteLine($"--- Statement for {Owner} (ID: {Id}) ---");
-        Console.WriteLine($"Current balance: {Balance:C}");
+        Console.WriteLine($"Current balance: {GetBalanceString()}");
         Console.WriteLine();
 
         if (operationLog.Count == 0)
@@ -80,4 +80,6 @@ public abstract class BankAccount : ITransactable, IStatement
     {
         operationLog.Add($"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] {message}");
     }
+
+    protected string GetBalanceString() => $"{(Balance < 0 ? "-" : "")}{Math.Abs(Balance):C}";
 }
