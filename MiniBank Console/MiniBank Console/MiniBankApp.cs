@@ -1,5 +1,5 @@
 ﻿using MiniBank_Console.Models;
-using MiniBank_Console.Services;
+using MiniBank_Console.Models.Interfaces;
 using MiniBank_Console.Services.Interfaces;
 
 namespace MiniBank_Console;
@@ -76,11 +76,12 @@ public class MiniBankApp
         Console.WriteLine("1. Checking");
         Console.WriteLine("2. Savings");
         Console.WriteLine("3. Loan");
-        Console.Write("Enter choice (1-3): ");
+        Console.WriteLine("4. Fixed Deposit");
+        Console.Write("Enter choice (1-4): ");
 
-        if (!int.TryParse(Console.ReadLine(), out int choice) || choice < 1 || choice > 3)
+        if (!int.TryParse(Console.ReadLine(), out int choice) || choice < 1 || choice > 4)
         {
-            Console.WriteLine("Invalid selection. Please enter a number between 1 and 3.");
+            Console.WriteLine("Invalid selection. Please enter a number between 1 and 4.");
             return;
         }
 
@@ -248,10 +249,8 @@ public class MiniBankApp
         var accounts = bankAccountService.GetAccounts();
         foreach (var account in accounts)
         {
-            if (account is SavingsAccount savingsAccount)
-                savingsAccount.ApplyMonthlyInterest();
-            else if(account is LoanAccount loanAccount)
-                loanAccount.ApplyMonthlyInterest();
+            if(account is IInterestBearing interestBearingAccount)
+                interestBearingAccount.ApplyMonthlyInterest();
         }
         Console.WriteLine("Month-end processing completed.");
     }
