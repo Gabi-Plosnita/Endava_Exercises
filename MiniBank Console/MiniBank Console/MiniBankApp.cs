@@ -55,7 +55,16 @@ public class MiniBankApp
     private void ListAccounts()
     {
         Console.WriteLine("\n--- All Accounts ---");
-        // iterate bankAccountService.Accounts and print details
+        var accounts = bankAccountService.GetAccounts();
+        if (accounts.Count == 0)
+        {
+            Console.WriteLine("No accounts found.");
+            return;
+        }
+        foreach (var account in accounts)
+        {
+            Console.WriteLine(account);
+        }
     }
 
     private void CreateAccount()
