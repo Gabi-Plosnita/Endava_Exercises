@@ -5,7 +5,7 @@ namespace MiniBank_Console.Models;
 public class LoanAccount : BankAccount, IInterestBearing
 {
     public LoanAccount(string owner, decimal amount)
-        : base(owner, amount, AccountType.Loan)
+        : base(owner, -amount, AccountType.Loan)
     {
     }
 
