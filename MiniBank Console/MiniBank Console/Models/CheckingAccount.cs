@@ -4,9 +4,9 @@ namespace MiniBank_Console.Models;
 
 public class CheckingAccount : BankAccount, IOverdraftPolicy
 {
-    public CheckingAccount(string owner, decimal amount) : base(owner, amount)
+    public CheckingAccount(string owner, decimal amount) 
+        : base(owner, amount, AccountType.Checking)
     {
-        Log($"Checking account (ID: {Id}) created for {owner} with initial balance {amount:C}");
     }
 
     public decimal OverdraftLimit => 200;
@@ -20,10 +20,5 @@ public class CheckingAccount : BankAccount, IOverdraftPolicy
         }
         error = null;
         return true;
-    }
-
-    public override string ToString()
-    {
-        return $"Type: Checking Account | ID: {Id} | Owner: {Owner} | Balance: {GetBalanceString()}";
     }
 }

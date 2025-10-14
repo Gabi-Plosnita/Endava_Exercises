@@ -4,9 +4,9 @@ namespace MiniBank_Console.Models;
 
 public class LoanAccount : BankAccount, IInterestBearing
 {
-    public LoanAccount(string owner, decimal amount) : base(owner, -amount)
+    public LoanAccount(string owner, decimal amount)
+        : base(owner, amount, AccountType.Loan)
     {
-        Log($"Loan account (ID: {Id}) created for {owner} with initial loan amount {amount:C}");
     }
 
     public decimal MonthlyInterestRate => 0.01m;
@@ -33,10 +33,5 @@ public class LoanAccount : BankAccount, IInterestBearing
     {
         error = null;
         return true;
-    }
-
-    public override string ToString()
-    {
-        return $"Type: Loan Account | ID: {Id} | Owner: {Owner} | Balance: {GetBalanceString()}";
     }
 }

@@ -8,15 +8,18 @@ public abstract class BankAccount : ITransactable, IStatement
     public int Id { get; }
     public string Owner { get; protected set; }
     public decimal Balance { get; protected set; }
+    public AccountType AccountType { get; }
 
     protected List<string> operationLog = new List<string>();
     public IReadOnlyList<string> OperationLog => operationLog.AsReadOnly();
 
-    public BankAccount(string owner, decimal balance)
+    public BankAccount(string owner, decimal balance, AccountType accountType)
     {
         Id = nextId++;
         Owner = owner;
         Balance = balance;
+        AccountType = accountType;
+        Log($"{AccountType} account (ID: {Id}) created for {owner} with initial balance {balance:C}");
     }
 
     public bool Deposit(decimal amount, out string? error)
@@ -74,6 +77,11 @@ public abstract class BankAccount : ITransactable, IStatement
         }
 
         Console.WriteLine("---------------------------------------\n");
+    }
+
+    public override string ToString()
+    {
+        return $"Type: {AccountType} Account | ID: {Id} | Owner: {Owner} | Balance: {GetBalanceString()}";
     }
 
     protected void Log(string message)
