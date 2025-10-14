@@ -7,6 +7,13 @@ public class BankAccountService : IBankAccountService
 {
     private readonly List<BankAccount> bankAccounts = [];
 
+    public void SeedData()
+    {
+        bankAccounts.Add(new CheckingAccount("Alice", 1000));
+        bankAccounts.Add(new SavingsAccount("Bob", 5000));
+        bankAccounts.Add(new LoanAccount("Charlie", 20000));
+    }
+
     public IReadOnlyList<BankAccount> GetAccounts() => bankAccounts.AsReadOnly();
 
     public BankAccount? GetAccountById(int Id) => bankAccounts.Find(x => x.Id == Id);
