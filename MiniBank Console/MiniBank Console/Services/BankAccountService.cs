@@ -76,14 +76,14 @@ public class BankAccountService : IBankAccountService
 
         if (!fromAccount.Withdraw(amount, out string? withdrawError))
         {
-            error = $"Transfer failed: {withdrawError}";
+            error = $"{withdrawError}";
             return false;
         }
 
         if (!toAccount.Deposit(amount, out string? depositError))
         {
             fromAccount.Deposit(amount, out _);
-            error = $"Transfer failed: {depositError}";
+            error = $"{depositError}";
             return false;
         }
 
