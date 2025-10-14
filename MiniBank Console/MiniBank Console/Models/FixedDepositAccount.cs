@@ -13,6 +13,11 @@ public class FixedDepositAccount : BankAccount, IInterestBearing
     {
         EndDate = endDate;
     }
+    public FixedDepositAccount(int id, string owner, decimal amount, DateTime endDate, IEnumerable<string>? log)
+        : base(id, owner, amount, log) 
+    {
+        EndDate = endDate;
+    }
 
     public decimal MonthlyInterestRate => 0.01m;
 

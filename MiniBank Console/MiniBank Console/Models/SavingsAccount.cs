@@ -5,9 +5,10 @@ namespace MiniBank_Console.Models;
 public class SavingsAccount : BankAccount, IInterestBearing
 {
     public SavingsAccount(string owner, decimal amount)
-        : base(owner, amount, AccountType.Savings)
-    {
-    }
+        : base(owner, amount, AccountType.Savings) { }
+
+    public SavingsAccount(int id, string owner, decimal amount, IEnumerable<string>? log)
+        : base(id, owner, amount, log) { }
 
     public decimal MonthlyInterestRate => 0.01m; 
 

@@ -5,9 +5,9 @@ namespace MiniBank_Console.Models;
 public class CheckingAccount : BankAccount, IOverdraftPolicy
 {
     public CheckingAccount(string owner, decimal amount) 
-        : base(owner, amount, AccountType.Checking)
-    {
-    }
+        : base(owner, amount, AccountType.Checking) { }
+    public CheckingAccount(int id, string owner, decimal amount, IEnumerable<string>? log)
+        : base(id, owner, amount, log) { }
 
     public decimal OverdraftLimit => 200;
 

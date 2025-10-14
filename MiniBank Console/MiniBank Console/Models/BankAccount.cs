@@ -13,13 +13,22 @@ public abstract class BankAccount : ITransactable, IStatement
     protected List<string> operationLog = new List<string>();
     public IReadOnlyList<string> OperationLog => operationLog.AsReadOnly();
 
-    public BankAccount(string owner, decimal balance, AccountType accountType)
+    protected BankAccount(string owner, decimal balance, AccountType accountType)
     {
         Id = nextId++;
         Owner = owner;
         Balance = balance;
         AccountType = accountType;
         Log($"{AccountType} account (ID: {Id}) created for {owner} with initial balance {balance:C}");
+    }
+
+    protected BankAccount(int id, string owner, decimal balance, IEnumerable<string>? log)
+    {
+        Id = id;
+        Owner = owner;
+        Balance = balance;
+        if (log != null) operationLog.AddRange(log);
+        if (id >= nextId) nextId = id + 1;
     }
 
     public bool Deposit(decimal amount, out string? error)

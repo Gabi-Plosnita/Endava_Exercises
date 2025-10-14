@@ -8,6 +8,8 @@ public class LoanAccount : BankAccount, IInterestBearing
         : base(owner, -amount, AccountType.Loan)
     {
     }
+    public LoanAccount(int id, string owner, decimal amount, IEnumerable<string>? log)
+        : base(id, owner, amount, log) { }
 
     public decimal MonthlyInterestRate => 0.01m;
 
