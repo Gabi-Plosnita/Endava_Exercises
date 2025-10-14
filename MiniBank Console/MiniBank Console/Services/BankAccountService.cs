@@ -50,4 +50,45 @@ public class BankAccountService : IBankAccountService
         error = null;
         return true;
     }
+
+    public bool TransferFunds(int fromAccountId, int toAccountId, decimal amount, out string? error)
+    {
+        if (fromAccountId == toAccountId)
+        {
+            error = "Source and destination accounts cannot be the same.";
+            return false;
+        }
+
+        var fromAccount = GetAccountById(fromAccountId);
+        var toAccount = GetAccountById(toAccountId);
+
+        if (fromAccount == null || toAccount == null)
+        {
+            error = "One or both accounts not found.";
+            return false;
+        }
+
+        if (amount <= 0)
+        {
+            error = "Amount must be positive.";
+            return false;
+        }
+
+        if (!fromAccount.Withdraw(amount, out string? withdrawError))
+        {
+            error = $"Transfer failed: {withdrawError}";
+            return false;
+        }
+
+        if (!toAccount.Deposit(amount, out string? depositError))
+        {
+            fromAccount.Deposit(amount, out _);
+            error = $"Transfer failed: {depositError}";
+            return false;
+        }
+
+        error = null;
+        return true;
+    }
 }
+
