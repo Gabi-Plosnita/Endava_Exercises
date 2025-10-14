@@ -34,4 +34,9 @@ public class LoanAccount : BankAccount, IInterestBearing
         error = null;
         return true;
     }
+
+    public override string ToString()
+    {
+        return $"Type: Loan Account | ID: {Id} | Owner: {Owner} | Balance: {(Balance < 0 ? "-" : "")}{Math.Abs(Balance):C}";
+    }
 }

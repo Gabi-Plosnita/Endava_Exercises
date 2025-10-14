@@ -21,4 +21,9 @@ public class CheckingAccount : BankAccount, IOverdraftPolicy
         error = null;
         return true;
     }
+
+    public override string ToString()
+    {
+        return $"Type: Checking Account | ID: {Id} | Owner: {Owner} | Balance: {(Balance < 0 ? "-" : "")}{Math.Abs(Balance):C}";
+    }
 }
