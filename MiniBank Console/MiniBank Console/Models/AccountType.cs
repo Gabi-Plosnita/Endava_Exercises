@@ -4,5 +4,6 @@ public enum AccountType
 {
     Checking,
     Savings, 
-    Loan
+    Loan,
+    FixedDepositAccount
 }
