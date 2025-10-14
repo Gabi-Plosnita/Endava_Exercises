@@ -4,7 +4,6 @@ namespace MiniBank_Console.Models;
 
 public class FixedDepositAccount : BankAccount, IInterestBearing
 {
-    public DateTime StartDate { get; }
     public DateTime EndDate { get; }
 
     private const decimal PenaltyRate = 0.05m;
@@ -12,7 +11,6 @@ public class FixedDepositAccount : BankAccount, IInterestBearing
     public FixedDepositAccount(string owner, decimal amount, DateTime endDate)
         : base(owner, amount, AccountType.FixedDepositAccount)
     {
-        StartDate = DateTime.Now;
         EndDate = endDate;
     }
 
