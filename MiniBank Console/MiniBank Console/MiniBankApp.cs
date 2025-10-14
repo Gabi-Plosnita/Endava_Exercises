@@ -1,4 +1,5 @@
 ﻿using MiniBank_Console.Models;
+using MiniBank_Console.Services;
 using MiniBank_Console.Services.Interfaces;
 
 namespace MiniBank_Console;
@@ -28,9 +29,10 @@ public class MiniBankApp
                 case "2": CreateAccount(); break;
                 case "3": Deposit(); break;
                 case "4": Withdraw(); break;
-                case "5": ViewStatement(); break;
-                case "6": RunMonthEnd(); break;
-                case "7": Exit(); break;
+                case "5": TransferFuds(); break;
+                case "6": ViewStatement(); break;
+                case "7": RunMonthEnd(); break;
+                case "8": Exit(); break;
                 default:
                     Console.WriteLine("Invalid option. Please try again.");
                     break;
@@ -45,9 +47,10 @@ public class MiniBankApp
         Console.WriteLine("2. Create account");
         Console.WriteLine("3. Deposit");
         Console.WriteLine("4. Withdraw");
-        Console.WriteLine("5. View statement");
-        Console.WriteLine("6. Run month-end");
-        Console.WriteLine("7. Exit");
+        Console.WriteLine("5. Transfer");
+        Console.WriteLine("6. View statement");
+        Console.WriteLine("7. Run month-end");
+        Console.WriteLine("8. Exit");
         Console.WriteLine();
     }
 
@@ -179,6 +182,43 @@ public class MiniBankApp
         {
             Console.WriteLine($"Withdrawal failed: {error}");
         }
+    }
+
+    private void TransferFuds()
+    {
+        Console.WriteLine("\n--- Transfer Funds ---");
+
+        Console.Write("Enter source account ID: ");
+        if (!int.TryParse(Console.ReadLine(), out int fromAccountId))
+        {
+            Console.WriteLine("Invalid source account ID. Please enter a number.");
+            return;
+        }
+
+        Console.Write("Enter destination account ID: ");
+        if (!int.TryParse(Console.ReadLine(), out int toAccountId))
+        {
+            Console.WriteLine("Invalid destination account ID. Please enter a number.");
+            return;
+        }
+
+        if (fromAccountId == toAccountId)
+        {
+            Console.WriteLine("Source and destination accounts cannot be the same.");
+            return;
+        }
+
+        Console.Write("Enter amount to transfer: ");
+        if (!decimal.TryParse(Console.ReadLine(), out decimal amount) || amount <= 0)
+        {
+            Console.WriteLine("Invalid amount. Please enter a positive number.");
+            return;
+        }
+
+        if (bankAccountService.TransferFunds(fromAccountId, toAccountId, amount, out string? error))
+            Console.WriteLine($"Successfully transferred {amount:C} from account {fromAccountId} to {toAccountId}.");
+        else
+            Console.WriteLine($"Transfer failed: {error}");
     }
 
     private void ViewStatement()
