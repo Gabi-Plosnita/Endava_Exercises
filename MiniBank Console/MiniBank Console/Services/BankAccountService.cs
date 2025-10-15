@@ -1,4 +1,5 @@
 ﻿using MiniBank_Console.Dtos;
+using MiniBank_Console.Mappers;
 using MiniBank_Console.Models;
 using MiniBank_Console.Services.Interfaces;
 using System.Text.Json;
@@ -96,7 +97,7 @@ public class BankAccountService : IBankAccountService
 
     public void SaveAccountsToJsonFile(string path)
     {
-        var dtos = bankAccounts.Select(ToDto).ToList();
+        var dtos = bankAccounts.Select(a => a.ToBankAccountDto()).ToList();
 
         var json = JsonSerializer.Serialize(
             dtos,
@@ -144,36 +145,10 @@ public class BankAccountService : IBankAccountService
 
         bankAccounts.Clear();
         foreach (var dto in dtos)
-            bankAccounts.Add(FromDto(dto));
+            bankAccounts.Add(dto.ToBankAccount());
 
         error = null;
         return true;
     }
-
-    // ---------- Mapping helpers ----------
-    private static BankAccountDto ToDto(BankAccount a) => new()
-    {
-        Type = a switch
-        {
-            CheckingAccount => AccountType.Checking,
-            SavingsAccount => AccountType.Savings,
-            LoanAccount => AccountType.Loan,
-            FixedDepositAccount => AccountType.FixedDepositAccount,
-            _ => throw new InvalidOperationException($"Unknown account type: {a.GetType().Name}")
-        },
-        Id = a.Id,
-        Owner = a.Owner,
-        Balance = a.Balance,
-        OperationLog = a.OperationLog.ToList()
-    };
-
-    private static BankAccount FromDto(BankAccountDto dto) => dto.Type switch
-    {
-        AccountType.Checking => new CheckingAccount(dto.Id, dto.Owner, dto.Balance, dto.OperationLog),
-        AccountType.Savings => new SavingsAccount(dto.Id, dto.Owner, dto.Balance, dto.OperationLog),
-        AccountType.Loan => new LoanAccount(dto.Id, dto.Owner, dto.Balance, dto.OperationLog),
-        AccountType.FixedDepositAccount => new FixedDepositAccount(dto.Id, dto.Owner, dto.Balance, dto.EndDate, dto.OperationLog),
-        _ => throw new InvalidOperationException($"Unknown account type '{dto.Type}'.")
-    };
 }
 
