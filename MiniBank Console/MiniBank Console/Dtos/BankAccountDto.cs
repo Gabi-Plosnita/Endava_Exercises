@@ -2,12 +2,12 @@
 
 namespace MiniBank_Console.Dtos;
 
-public class BankAccountDto
+public record BankAccountDto
 {
-    public AccountType Type { get; set; }
+    public AccountType AccountType { get; set; }
     public int Id { get; set; }
     public string Owner { get; set; } = string.Empty;
     public decimal Balance { get; set; }
     public List<string> OperationLog { get; set; } = [];
-    public DateTime EndDate { get; set; }
+    public DateTime? EndDate { get; set; }
 }

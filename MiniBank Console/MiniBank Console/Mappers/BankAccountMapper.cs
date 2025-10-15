@@ -7,7 +7,7 @@ public static class BankAccountMapper
 {
     public static BankAccountDto ToBankAccountDto(this BankAccount bankAccount) => new()
     {
-        Type = bankAccount switch
+        AccountType = bankAccount switch
         {
             CheckingAccount => AccountType.Checking,
             SavingsAccount => AccountType.Savings,
@@ -21,12 +21,12 @@ public static class BankAccountMapper
         OperationLog = bankAccount.OperationLog.ToList()
     };
 
-    public static BankAccount ToBankAccount(this BankAccountDto dto) => dto.Type switch
+    public static BankAccount ToBankAccount(this BankAccountDto dto) => dto.AccountType switch
     {
         AccountType.Checking => new CheckingAccount(dto.Id, dto.Owner, dto.Balance, dto.OperationLog),
         AccountType.Savings => new SavingsAccount(dto.Id, dto.Owner, dto.Balance, dto.OperationLog),
         AccountType.Loan => new LoanAccount(dto.Id, dto.Owner, dto.Balance, dto.OperationLog),
         AccountType.FixedDepositAccount => new FixedDepositAccount(dto.Id, dto.Owner, dto.Balance, dto.EndDate, dto.OperationLog),
-        _ => throw new InvalidOperationException($"Unknown account type '{dto.Type}'.")
+        _ => throw new InvalidOperationException($"Unknown account type '{dto.AccountType}'.")
     };
 }
