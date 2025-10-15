@@ -21,12 +21,30 @@ public static class BankAccountMapper
         OperationLog = bankAccount.OperationLog.ToList()
     };
 
-    public static BankAccount ToBankAccount(this BankAccountDto dto) => dto.AccountType switch
+    public static BankAccount ToBankAccount(this BankAccountDto dto)
     {
-        AccountType.Checking => new CheckingAccount(dto.Id, dto.Owner, dto.Balance, dto.OperationLog),
-        AccountType.Savings => new SavingsAccount(dto.Id, dto.Owner, dto.Balance, dto.OperationLog),
-        AccountType.Loan => new LoanAccount(dto.Id, dto.Owner, dto.Balance, dto.OperationLog),
-        AccountType.FixedDepositAccount => new FixedDepositAccount(dto.Id, dto.Owner, dto.Balance, dto.EndDate, dto.OperationLog),
-        _ => throw new InvalidOperationException($"Unknown account type '{dto.AccountType}'.")
-    };
+        switch (dto.AccountType)
+        {
+            case AccountType.Checking:
+                return new CheckingAccount(dto.Id, dto.Owner, dto.Balance, dto.OperationLog);
+
+            case AccountType.Savings:
+                return new SavingsAccount(dto.Id, dto.Owner, dto.Balance, dto.OperationLog);
+
+            case AccountType.Loan:
+                return new LoanAccount(dto.Id, dto.Owner, dto.Balance, dto.OperationLog);
+
+            case AccountType.FixedDepositAccount:
+                {
+                    if (dto.EndDate == null || dto.EndDate <= DateTime.Now)
+                        throw new InvalidOperationException("End date must be a future date.");
+
+                    return new FixedDepositAccount(dto.Id, dto.Owner, dto.Balance, dto.EndDate.Value, dto.OperationLog);
+                }
+
+            default:
+                throw new InvalidOperationException($"Unknown account type '{dto.AccountType}'.");
+        }
+    }
+
 }
