@@ -1,5 +1,7 @@
-﻿using MiniBank_Console.Models;
+﻿using MiniBank_Console.Dtos;
+using MiniBank_Console.Models;
 using MiniBank_Console.Services.Interfaces;
+using System.Text.Json;
 
 namespace MiniBank_Console.Services;
 
@@ -91,5 +93,87 @@ public class BankAccountService : IBankAccountService
         error = null;
         return true;
     }
+
+    public void SaveAccountsToJsonFile(string path)
+    {
+        var dtos = bankAccounts.Select(ToDto).ToList();
+
+        var json = JsonSerializer.Serialize(
+            dtos,
+            new JsonSerializerOptions { WriteIndented = true } 
+        );
+
+        File.WriteAllText(path, json);
+    }
+
+    public bool LoadAccountsFromJsonFile(string path, out string? error)
+    {
+        if (!File.Exists(path))
+        {
+            error = $"File not found: {path}";
+            return false;
+        }
+
+        string json;
+        try
+        {
+            json = File.ReadAllText(path);
+        }
+        catch (Exception ex)
+        {
+            error = $"Failed to read file: {ex.Message}";
+            return false;
+        }
+
+        List<BankAccountDto>? dtos;
+        try
+        {
+            dtos = JsonSerializer.Deserialize<List<BankAccountDto>>(json);
+        }
+        catch (Exception ex)
+        {
+            error = $"Invalid JSON format: {ex.Message}";
+            return false;
+        }
+
+        if (dtos == null)
+        {
+            error = "No data found in file.";
+            return false;
+        }
+
+        bankAccounts.Clear();
+        foreach (var dto in dtos)
+            bankAccounts.Add(FromDto(dto));
+
+        error = null;
+        return true;
+    }
+
+    // ---------- Mapping helpers ----------
+    private static BankAccountDto ToDto(BankAccount a) => new()
+    {
+        Type = a switch
+        {
+            CheckingAccount => AccountType.Checking,
+            SavingsAccount => AccountType.Savings,
+            LoanAccount => AccountType.Loan,
+            FixedDepositAccount => AccountType.FixedDepositAccount,
+            _ => throw new InvalidOperationException($"Unknown account type: {a.GetType().Name}")
+        },
+        Id = a.Id,
+        Owner = a.Owner,
+        Balance = a.Balance,
+        OperationLog = a.OperationLog.ToList()
+    };
+
+    private static BankAccount FromDto(BankAccountDto dto) => dto.Type switch
+    {
+        AccountType.Checking => new CheckingAccount(dto.Id, dto.Owner, dto.Balance, dto.OperationLog),
+        AccountType.Savings => new SavingsAccount(dto.Id, dto.Owner, dto.Balance, dto.OperationLog),
+        AccountType.Loan => new LoanAccount(dto.Id, dto.Owner, dto.Balance, dto.OperationLog),
+        AccountType.FixedDepositAccount => new FixedDepositAccount(dto.Id, dto.Owner, dto.Balance, dto.EndDate, dto.OperationLog),
+        _ => throw new InvalidOperationException($"Unknown account type '{dto.Type}'.")
+    };
 }
 
