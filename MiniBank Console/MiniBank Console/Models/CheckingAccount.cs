@@ -7,7 +7,7 @@ public class CheckingAccount : BankAccount, IOverdraftPolicy
     public CheckingAccount(string owner, decimal amount) 
         : base(owner, amount, AccountType.Checking) { }
     public CheckingAccount(int id, string owner, decimal amount, IEnumerable<string>? log)
-        : base(id, owner, amount, log) { }
+        : base(id, owner, amount, AccountType.Checking, log) { }
 
     public decimal OverdraftLimit => 200;
 

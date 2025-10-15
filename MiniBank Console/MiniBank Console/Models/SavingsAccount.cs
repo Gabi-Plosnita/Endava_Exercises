@@ -8,7 +8,7 @@ public class SavingsAccount : BankAccount, IInterestBearing
         : base(owner, amount, AccountType.Savings) { }
 
     public SavingsAccount(int id, string owner, decimal amount, IEnumerable<string>? log)
-        : base(id, owner, amount, log) { }
+        : base(id, owner, amount, AccountType.Savings, log) { }
 
     public decimal MonthlyInterestRate => 0.01m; 
 

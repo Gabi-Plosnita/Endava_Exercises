@@ -22,11 +22,12 @@ public abstract class BankAccount : ITransactable, IStatement
         Log($"{AccountType} account (ID: {Id}) created for {owner} with initial balance {balance:C}");
     }
 
-    protected BankAccount(int id, string owner, decimal balance, IEnumerable<string>? log)
+    protected BankAccount(int id, string owner, decimal balance, AccountType accountType, IEnumerable<string>? log)
     {
         Id = id;
         Owner = owner;
         Balance = balance;
+        AccountType = accountType;
         if (log != null) operationLog.AddRange(log);
         if (id >= nextId) nextId = id + 1;
     }

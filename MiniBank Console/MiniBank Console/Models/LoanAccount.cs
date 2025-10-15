@@ -9,7 +9,7 @@ public class LoanAccount : BankAccount, IInterestBearing
     {
     }
     public LoanAccount(int id, string owner, decimal amount, IEnumerable<string>? log)
-        : base(id, owner, amount, log) { }
+        : base(id, owner, amount, AccountType.Loan, log) { }
 
     public decimal MonthlyInterestRate => 0.01m;
 

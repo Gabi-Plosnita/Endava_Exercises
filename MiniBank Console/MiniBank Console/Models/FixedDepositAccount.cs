@@ -14,7 +14,7 @@ public class FixedDepositAccount : BankAccount, IInterestBearing
         EndDate = endDate;
     }
     public FixedDepositAccount(int id, string owner, decimal amount, DateTime endDate, IEnumerable<string>? log)
-        : base(id, owner, amount, log) 
+        : base(id, owner, amount, AccountType.FixedDeposit, log) 
     {
         EndDate = endDate;
     }
