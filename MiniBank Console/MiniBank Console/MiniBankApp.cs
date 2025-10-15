@@ -1,6 +1,7 @@
 ﻿using MiniBank_Console.Models;
 using MiniBank_Console.Models.Interfaces;
 using MiniBank_Console.Services.Interfaces;
+using System.Globalization;
 
 namespace MiniBank_Console;
 
@@ -106,7 +107,32 @@ public class MiniBankApp
             return;
         }
 
-        if (bankAccountService.CreateAccount(owner, amount, type, out string? error))
+        var bankAccountDto = new Dtos.BankAccountDto
+        {
+            AccountType = type,
+            Owner = owner,
+            Balance = amount
+        };
+
+        if (type == AccountType.FixedDepositAccount)
+        {
+            Console.Write("Enter end date (dd-MM-yyyy): ");
+
+            if (!DateTime.TryParseExact(
+                    Console.ReadLine(),
+                    "dd-MM-yyyy",
+                    CultureInfo.InvariantCulture,
+                    DateTimeStyles.None,
+                    out DateTime endDateParsed)
+                || endDateParsed <= DateTime.Now)
+            {
+                Console.WriteLine("Invalid end date. Please enter a valid future date in format dd-MM-yyyy.");
+                return;
+            }
+            bankAccountDto.EndDate = endDateParsed;
+        }
+
+        if (bankAccountService.CreateAccount(bankAccountDto, out string? error))
             Console.WriteLine($"Account created successfully for {owner} with initial amount {amount:C}.");
         else
             Console.WriteLine($"Account creation failed: {error}");
