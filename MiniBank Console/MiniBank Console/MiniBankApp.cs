@@ -17,6 +17,9 @@ public class MiniBankApp
 
     public void Run()
     {
+        if(!bankAccountService.LoadAccountsFromJsonFile(Constants.AccountsJsonFilePath, out string? error))
+            Console.WriteLine($"Warning: {error}");
+
         while (running)
         {
             ShowMenu();
@@ -257,6 +260,7 @@ public class MiniBankApp
 
     private void Exit()
     {
+        bankAccountService.SaveAccountsToJsonFile(Constants.AccountsJsonFilePath);
         Console.WriteLine("Thank you for using MiniBank!");
         running = false;
     }
