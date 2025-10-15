@@ -18,6 +18,7 @@ public static class BankAccountMapper
         Id = bankAccount.Id,
         Owner = bankAccount.Owner,
         Balance = bankAccount.Balance,
+        EndDate = bankAccount is FixedDepositAccount account ? account.EndDate : null,
         OperationLog = bankAccount.OperationLog.ToList()
     };
 
@@ -36,7 +37,7 @@ public static class BankAccountMapper
 
             case AccountType.FixedDeposit:
                 {
-                    if (dto.EndDate == null || dto.EndDate <= DateTime.Now)
+                    if (dto.EndDate == null)
                         throw new InvalidOperationException("End date must be a future date.");
 
                     return new FixedDepositAccount(dto.Id, dto.Owner, dto.Balance, dto.EndDate.Value, dto.OperationLog);
