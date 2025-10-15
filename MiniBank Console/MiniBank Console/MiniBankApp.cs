@@ -114,7 +114,7 @@ public class MiniBankApp
             Balance = amount
         };
 
-        if (type == AccountType.FixedDepositAccount)
+        if (type == AccountType.FixedDeposit)
         {
             Console.Write("Enter end date (dd-MM-yyyy): ");
 

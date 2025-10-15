@@ -9,7 +9,7 @@ public class FixedDepositAccount : BankAccount, IInterestBearing
     private const decimal PenaltyRate = 0.05m;
 
     public FixedDepositAccount(string owner, decimal amount, DateTime endDate)
-        : base(owner, amount, AccountType.FixedDepositAccount)
+        : base(owner, amount, AccountType.FixedDeposit)
     {
         EndDate = endDate;
     }

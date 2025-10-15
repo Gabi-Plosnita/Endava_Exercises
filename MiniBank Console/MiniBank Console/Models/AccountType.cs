@@ -5,5 +5,5 @@ public enum AccountType
     Checking,
     Savings, 
     Loan,
-    FixedDepositAccount
+    FixedDeposit
 }

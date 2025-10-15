@@ -41,7 +41,7 @@ public class BankAccountService : IBankAccountService
             AccountType.Checking => new CheckingAccount(dto.Owner, dto.Balance),
             AccountType.Savings => new SavingsAccount(dto.Owner, dto.Balance),
             AccountType.Loan => new LoanAccount(dto.Owner, dto.Balance),
-            AccountType.FixedDepositAccount => new FixedDepositAccount(dto.Owner, dto.Balance, dto.EndDate ?? DateTime.Now.AddYears(1)),
+            AccountType.FixedDeposit => new FixedDepositAccount(dto.Owner, dto.Balance, dto.EndDate ?? DateTime.Now.AddYears(1)),
             _ => throw new InvalidOperationException($"Unknown account type: {dto.AccountType}")
         });
 

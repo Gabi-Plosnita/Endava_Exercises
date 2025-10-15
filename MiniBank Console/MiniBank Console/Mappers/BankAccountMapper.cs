@@ -12,7 +12,7 @@ public static class BankAccountMapper
             CheckingAccount => AccountType.Checking,
             SavingsAccount => AccountType.Savings,
             LoanAccount => AccountType.Loan,
-            FixedDepositAccount => AccountType.FixedDepositAccount,
+            FixedDepositAccount => AccountType.FixedDeposit,
             _ => throw new InvalidOperationException($"Unknown account type: {bankAccount.GetType().Name}")
         },
         Id = bankAccount.Id,
@@ -34,7 +34,7 @@ public static class BankAccountMapper
             case AccountType.Loan:
                 return new LoanAccount(dto.Id, dto.Owner, dto.Balance, dto.OperationLog);
 
-            case AccountType.FixedDepositAccount:
+            case AccountType.FixedDeposit:
                 {
                     if (dto.EndDate == null || dto.EndDate <= DateTime.Now)
                         throw new InvalidOperationException("End date must be a future date.");
