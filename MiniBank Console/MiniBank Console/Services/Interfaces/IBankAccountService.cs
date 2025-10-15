@@ -9,4 +9,6 @@ public interface IBankAccountService
     BankAccount? GetAccountById(int id);
     bool CreateAccount(string owner, decimal balance, AccountType accountType, out string? error);
     bool TransferFunds(int fromAccountId, int toAccountId, decimal amount, out string? error);
+    void SaveAccountsToJsonFile(string path);
+    bool LoadAccountsFromJsonFile(string path, out string? error);
 }
