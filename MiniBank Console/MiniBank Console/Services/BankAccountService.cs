@@ -22,34 +22,28 @@ public class BankAccountService : IBankAccountService
 
     public BankAccount? GetAccountById(int Id) => bankAccounts.Find(x => x.Id == Id);
 
-    public bool CreateAccount(string owner, decimal balance, AccountType accountType, out string? error)
+    public bool CreateAccount(BankAccountDto dto, out string? error)
     {
-        if (string.IsNullOrWhiteSpace(owner))
+        if (string.IsNullOrWhiteSpace(dto.Owner))
         {
             error = "Owner name can't be empty!";
             return false;
         }
 
-        if (balance < 0)
+        if (dto.Balance < 0)
         {
             error = "Amount can't be negative";
             return false;
         }
 
-        switch (accountType)
+        bankAccounts.Add(dto.AccountType switch
         {
-            case AccountType.Checking:
-                bankAccounts.Add(new CheckingAccount(owner, balance));
-                break;
-
-            case AccountType.Savings:
-                bankAccounts.Add(new SavingsAccount(owner, balance));
-                break;
-
-            case AccountType.Loan:
-                bankAccounts.Add(new LoanAccount(owner, balance));
-                break;
-        }
+            AccountType.Checking => new CheckingAccount(dto.Owner, dto.Balance),
+            AccountType.Savings => new SavingsAccount(dto.Owner, dto.Balance),
+            AccountType.Loan => new LoanAccount(dto.Owner, dto.Balance),
+            AccountType.FixedDepositAccount => new FixedDepositAccount(dto.Owner, dto.Balance, dto.EndDate ?? DateTime.Now.AddYears(1)),
+            _ => throw new InvalidOperationException($"Unknown account type: {dto.AccountType}")
+        });
 
         error = null;
         return true;
