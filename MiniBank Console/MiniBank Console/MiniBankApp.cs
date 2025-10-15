@@ -68,9 +68,7 @@ public class MiniBankApp
             return;
         }
         foreach (var account in accounts)
-        {
             Console.WriteLine(account);
-        }
     }
 
     private void CreateAccount()
