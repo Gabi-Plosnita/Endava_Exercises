@@ -36,8 +36,10 @@ public class FixedDepositAccount : BankAccount, IInterestBearing
 
     public override bool Withdraw(decimal amount, out string? error)
     {
-        if (!base.Withdraw(amount, out error)) 
+        if (!base.Withdraw(amount, out error))
+        {
             return false;
+        }
 
         if (DateTime.Now < EndDate)
         {

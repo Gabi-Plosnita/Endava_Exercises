@@ -28,8 +28,14 @@ public abstract class BankAccount : ITransactable, IStatement
         Owner = owner;
         Balance = balance;
         AccountType = accountType;
-        if (log != null) operationLog.AddRange(log);
-        if (id >= nextId) nextId = id + 1;
+        if (log != null)
+        {
+            operationLog.AddRange(log);
+        }
+        if (id >= nextId)
+        {
+            nextId = id + 1;
+        }
     }
 
     public bool Deposit(decimal amount, out string? error)
@@ -41,7 +47,9 @@ public abstract class BankAccount : ITransactable, IStatement
         }
 
         if (!CanDeposit(amount, out error))
+        {
             return false;
+        }
 
         Balance += amount;
         Log($"Deposited {amount:C}. New balance: {GetBalanceString()}");
@@ -63,7 +71,9 @@ public abstract class BankAccount : ITransactable, IStatement
         }
 
         if (!CanWithdraw(amount, out error))
+        {
             return false;
+        }
 
         Balance -= amount;
         Log($"Withdrew {amount:C}. New balance: {GetBalanceString()}");
@@ -79,11 +89,15 @@ public abstract class BankAccount : ITransactable, IStatement
         Console.WriteLine();
 
         if (operationLog.Count == 0)
+        {
             Console.WriteLine("No operations recorded yet.");
+        }
         else
         {
             foreach (var entry in operationLog)
+            {
                 Console.WriteLine(entry);
+            }
         }
 
         Console.WriteLine("---------------------------------------\n");

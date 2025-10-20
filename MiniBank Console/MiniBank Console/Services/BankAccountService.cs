@@ -139,7 +139,9 @@ public class BankAccountService : IBankAccountService
 
         bankAccounts.Clear();
         foreach (var dto in dtos)
+        {
             bankAccounts.Add(dto.ToBankAccount());
+        }
 
         error = null;
         return true;

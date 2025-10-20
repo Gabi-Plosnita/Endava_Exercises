@@ -19,7 +19,9 @@ public class MiniBankApp
     public void Run()
     {
         if(!bankAccountService.LoadAccountsFromJsonFile(Constants.AccountsJsonFilePath, out string? error))
+        {
             Console.WriteLine($"Warning: {error}");
+        }
 
         while (running)
         {
@@ -68,7 +70,9 @@ public class MiniBankApp
             return;
         }
         foreach (var account in accounts)
+        {
             Console.WriteLine(account);
+        }
     }
 
     private void CreateAccount()
@@ -131,9 +135,13 @@ public class MiniBankApp
         }
 
         if (bankAccountService.CreateAccount(bankAccountDto, out string? error))
+        {
             Console.WriteLine($"Account created successfully for {owner} with initial amount {amount:C}.");
+        }
         else
+        {
             Console.WriteLine($"Account creation failed: {error}");
+        }
     }
 
     private void Deposit()
@@ -238,9 +246,13 @@ public class MiniBankApp
         }
 
         if (bankAccountService.TransferFunds(fromAccountId, toAccountId, amount, out string? error))
+        {
             Console.WriteLine($"Successfully transferred {amount:C} from account {fromAccountId} to {toAccountId}.");
+        }
         else
+        {
             Console.WriteLine($"Transfer failed: {error}");
+        }
     }
 
     private void ViewStatement()
@@ -271,7 +283,9 @@ public class MiniBankApp
         foreach (var account in accounts)
         {
             if(account is IInterestBearing interestBearingAccount)
+            {
                 interestBearingAccount.ApplyMonthlyInterest();
+            }
         }
         Console.WriteLine("Month-end processing completed.");
     }
