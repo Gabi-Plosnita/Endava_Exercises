@@ -230,12 +230,6 @@ public class MiniBankApp
             return;
         }
 
-        if (fromAccountId == toAccountId)
-        {
-            Console.WriteLine("Source and destination accounts cannot be the same.");
-            return;
-        }
-
         Console.Write("Enter amount to transfer: ");
         if (!decimal.TryParse(Console.ReadLine(), out decimal amount) || amount <= 0)
         {
