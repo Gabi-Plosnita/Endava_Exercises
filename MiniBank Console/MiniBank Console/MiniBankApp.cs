@@ -24,7 +24,6 @@ public class MiniBankApp
         while (running)
         {
             ShowMenu();
-            Console.Write("Choose an option: ");
             string? input = Console.ReadLine();
 
             switch (input)
@@ -56,6 +55,7 @@ public class MiniBankApp
         Console.WriteLine("7. Run month-end");
         Console.WriteLine("8. Exit");
         Console.WriteLine();
+        Console.Write("Choose an option: ");
     }
 
     private void ListAccounts()
