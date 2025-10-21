@@ -1,0 +1,150 @@
+﻿using MiniBank_Console.Dtos;
+using MiniBank_Console.Mappers;
+using MiniBank_Console.Models;
+using MiniBank_Console.Services.Interfaces;
+using System.Text.Json;
+
+namespace MiniBank_Console.Services;
+
+public class BankAccountService : IBankAccountService
+{
+    private readonly List<BankAccount> bankAccounts = [];
+
+    public void SeedData()
+    {
+        bankAccounts.Add(new CheckingAccount("Alice", 1000));
+        bankAccounts.Add(new SavingsAccount("Bob", 5000));
+        bankAccounts.Add(new LoanAccount("Charlie", 20000));
+        bankAccounts.Add(new FixedDepositAccount("Diana", 10000, DateTime.Now.AddMonths(6)));
+    }
+
+    public IReadOnlyList<BankAccount> GetAccounts() => bankAccounts.AsReadOnly();
+
+    public BankAccount? GetAccountById(int Id) => bankAccounts.Find(x => x.Id == Id);
+
+    public bool CreateAccount(BankAccountDto dto, out string? error)
+    {
+        if (string.IsNullOrWhiteSpace(dto.Owner))
+        {
+            error = "Owner name can't be empty!";
+            return false;
+        }
+
+        if (dto.Balance < 0)
+        {
+            error = "Amount can't be negative";
+            return false;
+        }
+
+        bankAccounts.Add(dto.AccountType switch
+        {
+            AccountType.Checking => new CheckingAccount(dto.Owner, dto.Balance),
+            AccountType.Savings => new SavingsAccount(dto.Owner, dto.Balance),
+            AccountType.Loan => new LoanAccount(dto.Owner, dto.Balance),
+            AccountType.FixedDeposit => new FixedDepositAccount(dto.Owner, dto.Balance, dto.EndDate ?? DateTime.Now.AddYears(1)),
+            _ => throw new InvalidOperationException($"Unknown account type: {dto.AccountType}")
+        });
+
+        error = null;
+        return true;
+    }
+
+    public bool TransferFunds(int fromAccountId, int toAccountId, decimal amount, out string? error)
+    {
+        if (fromAccountId == toAccountId)
+        {
+            error = "Source and destination accounts cannot be the same.";
+            return false;
+        }
+
+        var fromAccount = GetAccountById(fromAccountId);
+        var toAccount = GetAccountById(toAccountId);
+
+        if (fromAccount == null || toAccount == null)
+        {
+            error = "One or both accounts not found.";
+            return false;
+        }
+
+        if (amount <= 0)
+        {
+            error = "Amount must be positive.";
+            return false;
+        }
+
+        if (!fromAccount.Withdraw(amount, out string? withdrawError))
+        {
+            error = $"{withdrawError}";
+            return false;
+        }
+
+        if (!toAccount.Deposit(amount, out string? depositError))
+        {
+            fromAccount.Deposit(amount, out _);
+            error = $"{depositError}";
+            return false;
+        }
+
+        error = null;
+        return true;
+    }
+
+    public void SaveAccountsToJsonFile(string path)
+    {
+        var dtos = bankAccounts.Select(a => a.ToBankAccountDto()).ToList();
+
+        var json = JsonSerializer.Serialize(
+            dtos,
+            new JsonSerializerOptions { WriteIndented = true } 
+        );
+
+        File.WriteAllText(path, json);
+    }
+
+    public bool LoadAccountsFromJsonFile(string path, out string? error)
+    {
+        if (!File.Exists(path))
+        {
+            error = $"File not found: {path}";
+            return false;
+        }
+
+        string json;
+        try
+        {
+            json = File.ReadAllText(path);
+        }
+        catch (Exception ex)
+        {
+            error = $"Failed to read file: {ex.Message}";
+            return false;
+        }
+
+        List<BankAccountDto>? dtos;
+        try
+        {
+            dtos = JsonSerializer.Deserialize<List<BankAccountDto>>(json);
+        }
+        catch (Exception ex)
+        {
+            error = $"Invalid JSON format: {ex.Message}";
+            return false;
+        }
+
+        if (dtos == null)
+        {
+            error = "No data found in file.";
+            return false;
+        }
+
+        bankAccounts.Clear();
+        foreach (var dto in dtos)
+        {
+            bankAccounts.Add(dto.ToBankAccount());
+        }
+
+        error = null;
+        return true;
+    }
+}
+

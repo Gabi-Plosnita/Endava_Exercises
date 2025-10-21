@@ -416,3 +416,6 @@ FodyWeavers.xsd
 *.msix
 *.msm
 *.msp
+
+# Custom files
+MiniBank Console/MiniBank Console/accounts.json
