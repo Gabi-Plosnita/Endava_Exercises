@@ -4,7 +4,7 @@ using CsvHelper.TypeConversion;
 using ReadingList.Domain;
 using System.Globalization;
 
-public sealed class CsvBookParser : ICsvBookParser
+public class CsvBookParser : ICsvBookParser
 {
     private readonly CsvConfiguration _configuration;
 
