@@ -35,6 +35,11 @@ public class CsvBookParser : ICsvBookParser
         {
             using var reader = new StringReader(csvLine);
             using var csv = new CsvReader(reader, _configuration);
+
+            var boolOpts = csv.Context.TypeConverterOptionsCache.GetOptions<bool>();
+            boolOpts.BooleanTrueValues.AddRange(new[] { "true", "1", "yes", "y" });
+            boolOpts.BooleanFalseValues.AddRange(new[] { "false", "0", "no", "n" });
+
             csv.Context.RegisterClassMap<BookMap>();
 
             if (!csv.Read())
