@@ -1,51 +1,61 @@
 ﻿using Microsoft.Extensions.Logging;
 using ReadingList.Domain;
 using System.Collections.Concurrent;
+using System.IO.Abstractions;
 
 namespace ReadingList.Infrastructure;
 
 public class BookImportService(IRepository<Book, int> _repository,
-                               ICsvBookParser _csvBookParser,   
-                               ILogger<BookImportService> _logger) : IImportService
+                               ICsvBookParser _csvBookParser,
+                               ILogger<BookImportService> _logger,
+                               IFileSystem _fileSystem) : IImportService
 {
-    public async Task<ImportReport> ImportAsync(IEnumerable<string> paths, CancellationToken ct)
+    public async Task<Result<ImportReport>> ImportAsync(IEnumerable<string> paths, CancellationToken ct)
     {
+        var errors = new ConcurrentBag<string>();
         var fileReports = new ConcurrentBag<FileImportReport>();
 
         await Parallel.ForEachAsync(paths, ct, async (path, token) =>
         {
-            var report = await ImportFileAsync(path, token);
-            fileReports.Add(report);
+            var reportResult = await ImportFileAsync(path, token);
+            reportResult.Errors.ForEach(e => errors.Add(e));
+            fileReports.Add(reportResult.Value!);
+
         });
 
         var files = fileReports.ToList();
-        return new ImportReport(
-            files,
-            files.Sum(r => r.Imported),
-            files.Sum(r => r.Duplicates),
-            files.Sum(r => r.Malformed));
+        var importReport = new ImportReport(files,
+                                            files.Sum(r => r.Imported),
+                                            files.Sum(r => r.Duplicates),
+                                            files.Sum(r => r.Malformed));
+        return new Result<ImportReport>(importReport, errors.ToList());
     }
 
-    private async Task<FileImportReport> ImportFileAsync(string path, CancellationToken ct)
+    private async Task<Result<FileImportReport>> ImportFileAsync(string path, CancellationToken ct)
     {
+        var errors = new List<string>();
         int imported = 0, duplicates = 0, malformed = 0;
-        string fileName = Path.GetFileName(path);
+        var fileName = _fileSystem.Path.GetFileName(path);
 
-        if (!File.Exists(path))
+        if (!_fileSystem.File.Exists(path))
         {
             _logger.LogError("File not found: {Path}", path);
-            return new FileImportReport(fileName, 0, 0, 0);
+            errors.Add($"File not found: {path}");
+            var fileImportReport = new FileImportReport(fileName, 0, 0, 0);
+            return new Result<FileImportReport>(fileImportReport, errors);
         }
 
         string[] lines;
         try
         {
-            lines = await File.ReadAllLinesAsync(path, ct);
+            lines = await _fileSystem.File.ReadAllLinesAsync(path, ct);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error reading file {FileName}", fileName);
-            return new FileImportReport(fileName, 0, 0, 0);
+            errors.Add($"Error reading file {fileName}");
+            var fileImportReport = new FileImportReport(fileName, 0, 0, 0);
+            return new Result<FileImportReport>(fileImportReport, errors);
         }
 
         foreach (var (line, index) in lines.Skip(1).Select((l, i) => (l, i + 2)))
@@ -56,21 +66,16 @@ public class BookImportService(IRepository<Book, int> _repository,
                 break;
             }
 
-            var result = _csvBookParser.TryParse(line);
-            if (result.IsFailure)
+            var parseResult = _csvBookParser.TryParse(line);
+            if(parseResult.IsFailure || parseResult.Value == null)
             {
                 malformed++;
-                _logger.LogWarning("Failed to parse at line {Line}. {Result}", index, result);
+                var message = parseResult.IsFailure ? parseResult.ToString() : string.Empty;
+                _logger.LogWarning("Parsing error at line {Line}. \n{Message}", index, message);
                 continue;
             }
 
-            var book = result.Value;
-            if(book == null)
-            {
-                malformed++;
-                _logger.LogWarning("PaFailed to parse at line {Line}", index);
-                continue;
-            }
+            var book = parseResult.Value;
 
             if (!_repository.Add(book))
             {
@@ -82,9 +87,11 @@ public class BookImportService(IRepository<Book, int> _repository,
             imported++;
         }
 
-        _logger.LogInformation("[{File}] imported: {Imported}, duplicates: {Duplicates}, malformed: {Malformed}",
+        _logger.LogInformation(
+            "[{File}] imported: {Imported}, duplicates: {Duplicates}, malformed: {Malformed}",
             fileName, imported, duplicates, malformed);
 
-        return new FileImportReport(fileName, imported, duplicates, malformed);
+        var fileReport = new FileImportReport(fileName, imported, duplicates, malformed);
+        return new Result<FileImportReport>(fileReport, errors);
     }
 }
