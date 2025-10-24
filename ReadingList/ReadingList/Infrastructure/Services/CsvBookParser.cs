@@ -4,6 +4,8 @@ using CsvHelper.TypeConversion;
 using ReadingList.Domain;
 using System.Globalization;
 
+namespace ReadingList.Infrastructure;
+
 public class CsvBookParser : ICsvBookParser
 {
     private readonly CsvConfiguration _configuration;
