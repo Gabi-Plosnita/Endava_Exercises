@@ -1,4 +1,6 @@
-﻿namespace ReadingList.Domain;
+﻿using System.Text;
+
+namespace ReadingList.Domain;
 
 public class Result
 {
@@ -33,6 +35,25 @@ public class Result
             Errors.AddRange(errors);
         }
     }
+
+    public override string ToString()
+    {
+        if (Errors.Count == 0)
+        {
+            return "Success";
+        }
+
+        var sb = new StringBuilder();
+        sb.AppendLine("Errors:");
+
+        for (int i = 0; i < Errors.Count; i++)
+        {
+            sb.AppendLine($"  {i + 1}. {Errors[i]}");
+        }
+
+        return sb.ToString().TrimEnd();
+    }
+
 }
 
 public class Result<T> : Result
