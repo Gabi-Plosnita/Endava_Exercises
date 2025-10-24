@@ -2,5 +2,5 @@
 
 public interface IImportService
 {
-    Task<ImportReport> ImportAsync(IEnumerable<string> csvPaths, CancellationToken ct);
+    Task<ImportReport> ImportAsync(IEnumerable<string> paths, CancellationToken ct);
 }
