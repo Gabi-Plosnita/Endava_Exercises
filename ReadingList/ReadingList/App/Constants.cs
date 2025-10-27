@@ -3,6 +3,7 @@
 public static class Constants
 {
     public const string LoggingFilePath = "Logs/log.txt";
+    public const string ExistCommandKeyword = "exist";
 
     // Commands //
     public const string ImportCommandKeyword = "import";
