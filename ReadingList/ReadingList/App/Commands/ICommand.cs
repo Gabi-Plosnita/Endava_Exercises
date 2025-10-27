@@ -1,10 +1,8 @@
-﻿using ReadingList.Domain;
+﻿namespace ReadingList.App;
 
-namespace ReadingList.App;
-
-public interface ICommand<T>
+public interface ICommand
 {
     string Keyword { get; }
     string Summary { get; }
-    Task<Result<T>> ExecuteAsync(string[] args, CancellationToken ct);
+    Task ExecuteAsync(string[] args, CancellationToken ct);
 }
