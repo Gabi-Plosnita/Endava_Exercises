@@ -10,4 +10,9 @@ public class Book
     public required Genre Genre { get; set; }
     public required bool Finished { get; set; }
     public required double Rating { get; set; }
+
+    public override string ToString()
+    {
+        return $"{Id}: {Title} by {Author} ({Year}) - {Pages} pages - Genre: {Genre} - Finished: {Finished} - Rating: {Rating}/5";
+    }
 }
