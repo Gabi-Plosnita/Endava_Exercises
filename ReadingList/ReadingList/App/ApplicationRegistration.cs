@@ -10,6 +10,7 @@ public static class ApplicationRegistration
         services.AddScoped<CommandApp>();
 
         services.AddScoped<ICommand, ImportCommand>();
+        services.AddScoped<ICommand, ListAllCommand>();
         return services;
     }
 }
