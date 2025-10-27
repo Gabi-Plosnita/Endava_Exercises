@@ -9,7 +9,7 @@ public class CommandApp
         _dispatcher = dispatcher;
     }
 
-    public async Task Run()
+    public async Task RunAsync()
     {
         while (true)
         {
