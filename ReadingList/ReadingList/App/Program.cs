@@ -15,7 +15,8 @@ var provider = services.BuildServiceProvider();
 // Main Execution //
 try
 {
-    // Read input from console and call the right command
+    var app = provider.GetRequiredService<CommandApp>();
+    await app.RunAsync();
 }
 finally
 {
