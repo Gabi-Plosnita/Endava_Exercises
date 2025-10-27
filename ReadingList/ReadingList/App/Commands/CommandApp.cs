@@ -23,6 +23,11 @@ public class CommandApp
             {
                 break;
             }
+            if (line.Equals(Constants.HelpCommandKeyword, StringComparison.OrdinalIgnoreCase))
+            {
+                DisplayCommands();
+                continue;
+            }
 
             using var cts = new CancellationTokenSource();
 
@@ -45,6 +50,15 @@ public class CommandApp
             {
                 Console.CancelKeyPress -= handler;
             }
+        }
+    }
+
+    private void DisplayCommands()
+    {
+        Console.WriteLine("Available commands:");
+        foreach (var cmd in _dispatcher.Commands)
+        {
+            Console.WriteLine($"- {cmd.Keyword}: {cmd.Summary}");
         }
     }
 }
