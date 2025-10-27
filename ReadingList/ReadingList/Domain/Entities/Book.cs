@@ -13,6 +13,6 @@ public class Book
 
     public override string ToString()
     {
-        return $"{Id}: {Title} by {Author} ({Year}) - {Pages} pages - Genre: {Genre} - Finished: {Finished} - Rating: {Rating}/5";
+        return $"{Id}: {Title} by {Author} ({Year}) - {Pages} pages - Genre: {Genre} - Finished: {Finished} - Rating: {Rating}";
     }
 }
