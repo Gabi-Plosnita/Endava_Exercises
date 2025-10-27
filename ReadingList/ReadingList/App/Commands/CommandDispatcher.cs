@@ -3,7 +3,7 @@
 public class CommandDispatcher
 {
     private readonly Dictionary<string, ICommand> _byKeyword;
-    public IReadOnlyCollection<ICommand> Commands => _byKeyword.Values.Distinct().ToArray();
+    public IReadOnlyCollection<ICommand> Commands => _byKeyword.Values.ToArray();
 
     public CommandDispatcher(IEnumerable<ICommand> commands)
     {
