@@ -8,6 +8,8 @@ public static class ApplicationRegistration
     {
         services.AddScoped<CommandDispatcher>();
         services.AddScoped<CommandApp>();
+
+        services.AddScoped<ICommand, ImportCommand>();
         return services;
     }
 }
