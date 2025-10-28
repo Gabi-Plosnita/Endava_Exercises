@@ -3,7 +3,7 @@ using System.Collections.Concurrent;
 
 namespace ReadingList.Infrastructure;
 
-public sealed class InMemoryRepository<T, TKey> : IRepository<T, TKey> where TKey : notnull
+public class InMemoryRepository<T, TKey> : IRepository<T, TKey> where TKey : notnull
 {
     private readonly ConcurrentDictionary<TKey, T> _store = new();
     private readonly Func<T, TKey> _keySelector;
