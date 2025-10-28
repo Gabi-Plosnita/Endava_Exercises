@@ -13,6 +13,7 @@ public static class ApplicationRegistration
         services.AddScoped<ICommand, ListAllCommand>();
         services.AddScoped<ICommand, FilterFinishedCommand>();
         services.AddScoped<ICommand, TopRatedCommand>();
+        services.AddScoped<ICommand, ByAuthorCommand>();
         return services;
     }
 }
