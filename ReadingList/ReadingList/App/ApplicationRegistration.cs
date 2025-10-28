@@ -11,6 +11,7 @@ public static class ApplicationRegistration
 
         services.AddScoped<ICommand, ImportCommand>();
         services.AddScoped<ICommand, ListAllCommand>();
+        services.AddScoped<ICommand, FilterFinishedCommand>();
         return services;
     }
 }
