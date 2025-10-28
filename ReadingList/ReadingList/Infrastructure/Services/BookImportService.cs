@@ -15,13 +15,21 @@ public class BookImportService(IRepository<Book, int> _repository,
         var errors = new ConcurrentBag<string>();
         var fileReports = new ConcurrentBag<FileImportReport>();
 
-        await Parallel.ForEachAsync(paths, ct, async (path, token) =>
+        try
         {
-            var reportResult = await ImportFileAsync(path, token);
-            reportResult.Errors.ForEach(e => errors.Add(e));
-            fileReports.Add(reportResult.Value!);
+            await Parallel.ForEachAsync(paths, ct, async (path, token) =>
+            {
+                var reportResult = await ImportFileAsync(path, token);
+                reportResult.Errors.ForEach(e => errors.Add(e));
+                fileReports.Add(reportResult.Value!);
 
-        });
+            });
+        }
+        catch (OperationCanceledException ex)
+        {
+            _logger.LogWarning(ex, "Import operation was cancelled.");
+            errors.Add("Import operation was cancelled.");
+        }
 
         var files = fileReports.ToList();
         var importReport = new ImportReport(files,
@@ -60,6 +68,8 @@ public class BookImportService(IRepository<Book, int> _repository,
 
         foreach (var (line, index) in lines.Skip(1).Select((l, i) => (l, i + 2)))
         {
+            await Task.Delay(1000, ct); // Simulate processing time
+
             if (ct.IsCancellationRequested)
             {
                 _logger.LogWarning("Import cancelled by user.");
