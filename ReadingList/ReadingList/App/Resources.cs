@@ -2,7 +2,7 @@
 
 public static class Resources
 {
-    public const string LoggingFilePath = "Logs/log.txt";
+    public const string LoggingFilePath = "../../../Logs/log.txt";
 
     // Commands //
     public const string ExistCommandKeyword = "exit";
