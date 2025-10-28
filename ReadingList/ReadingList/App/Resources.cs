@@ -14,5 +14,7 @@ public static class Resources
     public const string ListAllCommandSummary = "list_all — lists all books.";
     public const string FilterFinishedCommandKeyword = "filter_finished";
     public const string FilterFinishedCommandSummary = "filter_finished — lists all finished books.";
+    public const string TopRatedCommandKeyword = "top_rated";
+    public const string TopRatedCommandSummary = "top_rated <N> — lists the top N rated books.";
 
 }
