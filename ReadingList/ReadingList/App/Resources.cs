@@ -18,4 +18,6 @@ public static class Resources
     public const string TopRatedCommandSummary = "top_rated <N> — lists the top N rated books.";
     public const string ByAuthorCommandKeyword = "by_author";
     public const string ByAuthorCommandSummary = "by_author <author_name> — lists all books by the specified author.";
+    public const string StatsCommandKeyword = "stats";
+    public const string StatsCommandSummary = "stats - show total books, finished count, average rating, pages by genre, and top 3 authors by book count.";
 }
