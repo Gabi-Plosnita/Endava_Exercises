@@ -20,4 +20,6 @@ public static class Resources
     public const string ByAuthorCommandSummary = "by_author <author_name> — lists all books by the specified author.";
     public const string StatsCommandKeyword = "stats";
     public const string StatsCommandSummary = "stats - show total books, finished count, average rating, pages by genre, and top 3 authors by book count.";
+    public const string MarkFinishedCommandKeyword = "mark_finished";
+    public const string MarkFinishedCommandSummary = "mark_finished <book_id> — marks the book with the specified ID as finished.";
 }
