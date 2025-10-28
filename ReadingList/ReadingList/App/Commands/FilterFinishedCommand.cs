@@ -11,21 +11,19 @@ public class FilterFinishedCommand(IRepository<Book, int> _repository) : IComman
 
     public Task ExecuteAsync(string[] args, CancellationToken ct)
     {
-        var finishedBooks = _repository.All()
-                                       .Where(book => book.Finished)
-                                       .ToList();
+        var finishedBooks = _repository.All().Where(book => book.Finished);
 
-        if (finishedBooks.Count == 0)
+        if (!finishedBooks.Any())
         {
             Console.WriteLine("No finished books found.");
+            return Task.CompletedTask;
         }
-        else
+
+        foreach (var book in finishedBooks)
         {
-            foreach (var book in finishedBooks)
-            {
-                Console.WriteLine(book);
-            }
+            Console.WriteLine(book);
         }
+
         return Task.CompletedTask;
     }
 }

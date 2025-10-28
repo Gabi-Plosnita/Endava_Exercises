@@ -12,15 +12,18 @@ public class ListAllCommand(IRepository<Book, int> _repository) : ICommand
     public Task ExecuteAsync(string[] args, CancellationToken ct)
     {
         var books = _repository.All();
+
         if (!books.Any())
         {
             Console.WriteLine("No books found.");
             return Task.CompletedTask;
         }
+
         foreach (var book in books)
         {
             Console.WriteLine(book);
         }
+
         return Task.CompletedTask;
     }
 }
