@@ -22,4 +22,6 @@ public static class Resources
     public const string StatsCommandSummary = "stats - show total books, finished count, average rating, pages by genre, and top 3 authors by book count.";
     public const string MarkFinishedCommandKeyword = "mark_finished";
     public const string MarkFinishedCommandSummary = "mark_finished <book_id> — marks the book with the specified ID as finished.";
+    public const string RateCommandKeyword = "rate";
+    public const string RateCommandSummary = "rate <book_id> <rating> — rates the book with the specified ID.";
 }
