@@ -1,6 +1,6 @@
 ﻿namespace ReadingList.App;
 
-public static class Constants
+public static class Resources
 {
     public const string LoggingFilePath = "Logs/log.txt";
 

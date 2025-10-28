@@ -5,9 +5,9 @@ namespace ReadingList.App;
 
 public class ListAllCommand(IRepository<Book, int> _repository) : ICommand
 {
-    public string Keyword => Constants.ListAllCommandKeyword;
+    public string Keyword => Resources.ListAllCommandKeyword;
 
-    public string Summary => Constants.ListAllCommandSummary;
+    public string Summary => Resources.ListAllCommandSummary;
 
     public Task ExecuteAsync(string[] args, CancellationToken ct)
     {

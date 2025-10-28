@@ -5,9 +5,9 @@ namespace ReadingList.App;
 
 public class FilterFinishedCommand(IRepository<Book, int> _repository) : ICommand
 {
-    public string Keyword => Constants.FilterFinishedCommandKeyword;
+    public string Keyword => Resources.FilterFinishedCommandKeyword;
 
-    public string Summary => Constants.FilterFinishedCommandSummary;
+    public string Summary => Resources.FilterFinishedCommandSummary;
 
     public Task ExecuteAsync(string[] args, CancellationToken ct)
     {

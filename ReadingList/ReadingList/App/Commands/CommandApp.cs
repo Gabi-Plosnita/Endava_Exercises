@@ -19,11 +19,11 @@ public class CommandApp
             {
                 continue;
             }
-            if (line.Equals(Constants.ExistCommandKeyword, StringComparison.OrdinalIgnoreCase))
+            if (line.Equals(Resources.ExistCommandKeyword, StringComparison.OrdinalIgnoreCase))
             {
                 break;
             }
-            if (line.Equals(Constants.HelpCommandKeyword, StringComparison.OrdinalIgnoreCase))
+            if (line.Equals(Resources.HelpCommandKeyword, StringComparison.OrdinalIgnoreCase))
             {
                 DisplayCommands();
                 continue;
