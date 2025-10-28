@@ -26,4 +26,21 @@ public static class BookExtensions
                     .Take(topN)
                     .Select(g => g.Key);
     }
+
+    public static IEnumerable<Book> ByAuthor(this IEnumerable<Book> books, string author)
+    {
+        return books.Where(b => b.Author.Equals(author, StringComparison.OrdinalIgnoreCase));
+    }
+
+    public static IEnumerable<Book> Finished(this IEnumerable<Book> books)
+    {
+        return books.Where(b => b.Finished);
+    }
+
+    public static IEnumerable<Book> TopRated(this IEnumerable<Book> books, int topN)
+    {
+        return books.OrderByDescending(b => b.Rating)
+                    .ThenBy(b => b.Title)
+                    .Take(topN);
+    }
 }

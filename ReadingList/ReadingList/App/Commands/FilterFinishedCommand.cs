@@ -11,7 +11,7 @@ public class FilterFinishedCommand(IRepository<Book, int> _repository) : IComman
 
     public Task ExecuteAsync(string[] args, CancellationToken ct)
     {
-        var finishedBooks = _repository.All().Where(book => book.Finished);
+        var finishedBooks = _repository.All().Finished();
 
         if (!finishedBooks.Any())
         {

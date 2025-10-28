@@ -19,10 +19,9 @@ public class ByAuthorCommand(IRepository<Book, int> _repository) : ICommand
             return Task.CompletedTask;
         }
 
-        var byAuthorBooks = _repository.All()
-                                       .Where(b => b.Author.Equals(author, StringComparison.OrdinalIgnoreCase));
+        var byAuthorBooks = _repository.All().ByAuthor(author);
 
-        if(!byAuthorBooks.Any())
+        if (!byAuthorBooks.Any())
         {
             Console.WriteLine($"No books found by author: {author}.");
             return Task.CompletedTask;

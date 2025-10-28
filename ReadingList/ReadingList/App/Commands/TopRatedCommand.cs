@@ -13,19 +13,17 @@ public class TopRatedCommand(IRepository<Book, int> _repository) : ICommand
     {
         if(args.Length < 1)
         {
-            Console.WriteLine("Error: Missing argument N for top_rated command.");
+            Console.WriteLine("Error: Missing argument for the number of top rated in top_rated command.");
             return Task.CompletedTask;
         }
 
-        if(!int.TryParse(args[0], out int n) || n <= 0)
+        if(!int.TryParse(args[0], out int topRatedNumber) || topRatedNumber <= 0)
         {
-            Console.WriteLine("Error: N must be a positive integer.");
+            Console.WriteLine("Error: Number of top rated must be a positive integer.");
             return Task.CompletedTask;
         }
 
-        var topRatedBooks = _repository.All()
-                                       .OrderByDescending(b => b.Rating)
-                                       .Take(n);
+        var topRatedBooks = _repository.All().TopRated(topRatedNumber);
 
         if(!topRatedBooks.Any())
         {
