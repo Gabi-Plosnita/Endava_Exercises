@@ -33,9 +33,5 @@ public class CommandDispatcher
         }
 
         await cmd.ExecuteAsync(args, ct);
-        if(ct.IsCancellationRequested)
-        {
-            Console.WriteLine("Operation cancelled.");
-        }
     }
 }
