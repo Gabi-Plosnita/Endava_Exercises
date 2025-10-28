@@ -24,8 +24,8 @@ public class TopRatedCommand(IRepository<Book, int> _repository) : ICommand
         }
 
         var topRatedBooks = _repository.All()
-                               .OrderByDescending(b => b.Rating)
-                               .Take(n);
+                                       .OrderByDescending(b => b.Rating)
+                                       .Take(n);
 
         if(!topRatedBooks.Any())
         {
