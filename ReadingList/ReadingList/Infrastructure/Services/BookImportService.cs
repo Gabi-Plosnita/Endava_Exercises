@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using ReadingList.App;
 using ReadingList.Domain;
 using System.Collections.Concurrent;
 using System.IO.Abstractions;
@@ -6,7 +7,7 @@ using System.IO.Abstractions;
 namespace ReadingList.Infrastructure;
 
 public class BookImportService(IRepository<Book, int> _repository,
-                               ICsvBookParser _csvBookParser,
+                               IBookParser _csvBookParser,
                                ILogger<BookImportService> _logger,
                                IFileSystem _fileSystem) : IImportService
 {

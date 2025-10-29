@@ -1,4 +1,4 @@
-﻿using ReadingList.Domain;
+﻿using ReadingList.App;
 using System.Collections.Concurrent;
 
 namespace ReadingList.Infrastructure;

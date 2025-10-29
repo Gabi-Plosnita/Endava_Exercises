@@ -1,4 +1,4 @@
-﻿namespace ReadingList.Domain;
+﻿namespace ReadingList.App;
 
 public interface IRepository<T, TKey> where TKey : notnull
 {

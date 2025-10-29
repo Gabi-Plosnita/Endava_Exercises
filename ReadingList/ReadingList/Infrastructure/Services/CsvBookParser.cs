@@ -1,12 +1,13 @@
 ﻿using CsvHelper;
 using CsvHelper.Configuration;
 using CsvHelper.TypeConversion;
+using ReadingList.App;
 using ReadingList.Domain;
 using System.Globalization;
 
 namespace ReadingList.Infrastructure;
 
-public class CsvBookParser : ICsvBookParser
+public class CsvBookParser : IBookParser
 {
     private readonly CsvConfiguration _configuration;
 

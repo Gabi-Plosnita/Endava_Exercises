@@ -1,6 +1,4 @@
-﻿using ReadingList.Domain;
-
-namespace ReadingList.App;
+﻿namespace ReadingList.App;
 
 public class ImportCommand(IImportService _importService) : ICommand
 {

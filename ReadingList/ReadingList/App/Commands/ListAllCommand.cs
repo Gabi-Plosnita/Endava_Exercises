@@ -1,5 +1,4 @@
-﻿
-using ReadingList.Domain;
+﻿using ReadingList.Domain;
 
 namespace ReadingList.App;
 

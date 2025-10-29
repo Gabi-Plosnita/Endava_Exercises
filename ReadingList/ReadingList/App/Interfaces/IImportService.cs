@@ -1,4 +1,6 @@
-﻿namespace ReadingList.Domain;
+﻿using ReadingList.Domain;
+
+namespace ReadingList.App;
 
 public interface IImportService
 {
