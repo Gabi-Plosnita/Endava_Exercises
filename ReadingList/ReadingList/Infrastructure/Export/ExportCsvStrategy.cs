@@ -42,10 +42,15 @@ public class ExportCsvStrategy<T>(IFileSystem _fileSystem) : IExportStrategy<T>
                                       .Where(p => p.CanRead)
                                       .ToArray();
 
-            await using var stream = _fileSystem.File.Create(path);
+            await using var stream = _fileSystem.File.Open(path,
+                                                           shouldOverride ? FileMode.Create : FileMode.Append,
+                                                           FileAccess.Write);
             await using var writer = new StreamWriter(stream, Encoding.UTF8);
 
-            await writer.WriteLineAsync(string.Join(",", properties.Select(p => p.Name)));
+            if (stream.Length == 0)
+            {
+                await writer.WriteLineAsync(string.Join(",", properties.Select(p => p.Name)));
+            }
 
             foreach (var item in items)
             {
