@@ -1,4 +1,4 @@
-﻿namespace ReadingList.Domain;
+﻿namespace ReadingList.App;
 
 public record ImportReport(
     IReadOnlyList<FileImportReport> Files,
