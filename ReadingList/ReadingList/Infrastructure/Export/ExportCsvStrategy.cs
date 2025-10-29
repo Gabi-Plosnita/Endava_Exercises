@@ -13,7 +13,7 @@ public class ExportCsvStrategy<T>(IFileSystem _fileSystem) : IExportStrategy<T>
     public async Task<Result> ExportAsync(
         IEnumerable<T> items,
         string path,
-        bool shouldOverride = false,
+        bool shouldOverwrite = false,
         CancellationToken cancellationToken = default)
     {
         var result = new Result();
@@ -43,7 +43,7 @@ public class ExportCsvStrategy<T>(IFileSystem _fileSystem) : IExportStrategy<T>
                                       .ToArray();
 
             await using var stream = _fileSystem.File.Open(path,
-                                                           shouldOverride ? FileMode.Create : FileMode.Append,
+                                                           shouldOverwrite ? FileMode.Create : FileMode.Append,
                                                            FileAccess.Write);
             await using var writer = new StreamWriter(stream, Encoding.UTF8);
 

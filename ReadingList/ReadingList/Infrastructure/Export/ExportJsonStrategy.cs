@@ -13,7 +13,7 @@ public class ExportJsonStrategy<T>(IFileSystem _fileSystem) : IExportStrategy<T>
     public async Task<Result> ExportAsync(
         IEnumerable<T> items,
         string path,
-        bool shouldOverride = false,
+        bool shouldOverwrite = false,
         CancellationToken cancellationToken = default)
     {
         {
@@ -40,7 +40,7 @@ public class ExportJsonStrategy<T>(IFileSystem _fileSystem) : IExportStrategy<T>
 
                 var options = new JsonSerializerOptions { WriteIndented = true };
 
-                if (shouldOverride)
+                if (shouldOverwrite)
                 {
                     var fileName = _fileSystem.Path.GetFileName(path);
                     var tempName = $"{fileName}.{Guid.NewGuid():N}.tmp";
