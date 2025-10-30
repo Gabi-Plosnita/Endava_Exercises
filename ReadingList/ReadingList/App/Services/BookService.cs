@@ -14,4 +14,9 @@ public class BookService(IRepository<Book, int> _repository) : IBookService
         }
         return result;
     }
+
+    public IEnumerable<Book> GetFinished(bool isFinished)
+    {
+        return _repository.All().Finished(isFinished);
+    }
 }

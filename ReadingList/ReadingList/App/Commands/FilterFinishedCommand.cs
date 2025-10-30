@@ -1,8 +1,6 @@
-﻿using ReadingList.Domain;
+﻿namespace ReadingList.App;
 
-namespace ReadingList.App;
-
-public class FilterFinishedCommand(IRepository<Book, int> _repository) : ICommand
+public class FilterFinishedCommand(IBookService _bookService) : ICommand
 {
     public string Keyword => Resources.FilterFinishedCommandKeyword;
 
@@ -10,15 +8,15 @@ public class FilterFinishedCommand(IRepository<Book, int> _repository) : IComman
 
     public Task ExecuteAsync(string[] args, CancellationToken ct)
     {
-        var finishedBooks = _repository.All().Finished();
+        var books = _bookService.GetFinished(true);
 
-        if (!finishedBooks.Any())
+        if (!books.Any())
         {
             Console.WriteLine("No finished books found.");
             return Task.CompletedTask;
         }
 
-        foreach (var book in finishedBooks)
+        foreach (var book in books)
         {
             Console.WriteLine(book);
         }

@@ -32,9 +32,9 @@ public static class BookExtensions
         return books.Where(b => b.Author.Equals(author, StringComparison.OrdinalIgnoreCase));
     }
 
-    public static IEnumerable<Book> Finished(this IEnumerable<Book> books)
+    public static IEnumerable<Book> Finished(this IEnumerable<Book> books, bool isFinished)
     {
-        return books.Where(b => b.Finished);
+        return books.Where(b => b.Finished == isFinished);
     }
 
     public static IEnumerable<Book> TopRated(this IEnumerable<Book> books, int topN)
