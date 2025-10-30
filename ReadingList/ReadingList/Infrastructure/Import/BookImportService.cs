@@ -75,7 +75,7 @@ public class BookImportService(IRepository<Book, int> _repository,
 
         foreach (var (line, index) in lines.Skip(1).Select((l, i) => (l, i + 2)))
         {
-            //await Task.Delay(1000, ct); // Simulate processing time
+            //await Task.Delay(1000, cancellationToken); // Simulate processing time
             cancellationToken.ThrowIfCancellationRequested();
 
             var parseResult = _csvBookParser.TryParse(line);
