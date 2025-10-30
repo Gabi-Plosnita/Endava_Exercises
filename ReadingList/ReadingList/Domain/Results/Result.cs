@@ -58,7 +58,7 @@ public class Result
 
 public class Result<T> : Result
 {
-    public T? Value { get; }
+    public T? Value { get; set; }
 
     public Result()
     {
