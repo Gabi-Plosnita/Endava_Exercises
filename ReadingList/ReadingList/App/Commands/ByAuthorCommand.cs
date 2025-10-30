@@ -2,7 +2,7 @@
 
 namespace ReadingList.App;
 
-public class ByAuthorCommand(IRepository<Book, int> _repository) : ICommand
+public class ByAuthorCommand(IBookService _bookService) : ICommand
 {
     public string Keyword => Resources.ByAuthorCommandKeyword;
 
@@ -10,27 +10,45 @@ public class ByAuthorCommand(IRepository<Book, int> _repository) : ICommand
 
     public Task ExecuteAsync(string[] args, CancellationToken ct)
     {
-        var author = string.Join(" ", args);
-
-        if(string.IsNullOrWhiteSpace(author))
+        var argumentsValidation = ValidateArgs(args);
+        if (argumentsValidation.IsFailure)
         {
-            Console.WriteLine("Error: author_name cannot be empty.");
+            Console.WriteLine(argumentsValidation);
             return Task.CompletedTask;
         }
 
-        var byAuthorBooks = _repository.All().ByAuthor(author);
+        var author = string.Join(" ", args);
+        var booksResult = _bookService.GetBooksByAuthor(author);
 
-        if (!byAuthorBooks.Any())
+        if(booksResult.IsFailure)
+        {
+            Console.WriteLine(booksResult);
+            return Task.CompletedTask;
+        }
+
+        if(booksResult.Value == null || !booksResult.Value.Any())
         {
             Console.WriteLine($"No books found by author: {author}.");
             return Task.CompletedTask;
         }
 
-        foreach(var book in byAuthorBooks)
+        foreach (var book in booksResult.Value)
         {
             Console.WriteLine(book);
         }
 
         return Task.CompletedTask;
+    }
+
+    private Result ValidateArgs(string[] args)
+    {
+        var result = new Result();
+        var author = string.Join(" ", args);
+
+        if (string.IsNullOrWhiteSpace(author))
+        {
+            result.AddError("Author name cannot be empty.");
+        }
+        return result;
     }
 }
