@@ -27,9 +27,11 @@ public class CsvBookParser : IBookParser
 
     public Result<Book> TryParse(string csvLine)
     {
+        var result = new Result<Book>();
         if (string.IsNullOrWhiteSpace(csvLine))
         {
-            return new Result<Book>(new[] { "Input line is null or empty." });
+            result.AddError("Input line is null or empty.");
+            return result;
         }
 
         try
@@ -45,29 +47,34 @@ public class CsvBookParser : IBookParser
 
             if (!csv.Read())
             {
-                return new Result<Book>(new[] { "No fields found in line." });
+                result.AddError("No fields found in line.");
+                return result;
             }
 
             var record = csv.GetRecord<Book>();
             var validationResult = record.Validate();
             if (validationResult.IsFailure)
             {
-                return new Result<Book>(new[] { $"Validation failed for book: {record}. Errors: {validationResult}" });
+                result.AddError($"Validation failed for book: {record}. Errors: {validationResult}");
+                return result;
             }
 
             return new Result<Book>(record);
         }
         catch (TypeConverterException ex)
         {
-            return new Result<Book>(new[] { $"CSV parse error: {ex.Message}" });
+            result.AddError($"CSV parse error: {ex.Message}");
+            return result;
         }
         catch (CsvHelperException ex)
         {
-            return new Result<Book>(new[] { $"CSV parse error: {ex.Message}" });
+            result.AddError($"CSV parse error: {ex.Message}");
+            return result;
         }
         catch (Exception ex)
         {
-            return new Result<Book>(new[] { $"CSV parse error: {ex.Message}" });
+            result.AddError($"CSV parse error: {ex.Message}");
+            return result;
         }
     }
 }
