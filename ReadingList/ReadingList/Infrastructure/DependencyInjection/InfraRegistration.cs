@@ -13,6 +13,11 @@ public static class InfraRegistration
         services.AddScoped<IImportService, BookImportService>();
         services.AddScoped<IBookParser, CsvBookParser>();
         services.AddScoped<IRepository<Book, int>>(sp => new InMemoryRepository<Book, int>(book => book.Id));
+
+        services.AddSingleton<IExportService<Book>, ExportService<Book>>();
+        services.AddSingleton<IExportStrategy<Book>, ExportCsvStrategy<Book>>();
+        services.AddSingleton<IExportStrategy<Book>, ExportJsonStrategy<Book>>();
+
         return services;
     }
 }
