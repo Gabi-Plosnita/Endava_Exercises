@@ -11,6 +11,36 @@ public class Book
     public required bool Finished { get; set; }
     public required double Rating { get; set; }
 
+    public Result IsValid()
+    {
+        var result = new Result();
+        if (Id <= 0)
+        {
+            result.AddError("Id must be grater than 0");
+        }
+        if (string.IsNullOrWhiteSpace(Title))
+        {
+            result.AddError("Title is required");
+        }
+        if (string.IsNullOrWhiteSpace(Author))
+        {
+            result.AddError("Author is required");
+        }
+        if (Year <= 0)
+        {
+            result.AddError("Year must be greater than 0");
+        }
+        if (Pages <= 0)
+        {
+            result.AddError("Pages must be greater than 0");
+        }
+        if (Rating < 0 || Rating > 5)
+        {
+            result.AddError("Rating must be between 0 and 5");
+        }
+        return result;
+    }
+
     public override string ToString()
     {
         return $"{Id}: {Title} by {Author} ({Year}) - {Pages} pages - Genre: {Genre} - Finished: {Finished} - Rating: {Rating}";
