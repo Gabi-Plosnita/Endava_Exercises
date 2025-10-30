@@ -18,17 +18,16 @@ public class ImportCommand(IImportService _importService) : ICommand
         }
 
         var result = await _importService.ImportAsync(args, ct);
+        if(result.IsFailure)
+        {
+            Console.WriteLine(result);
+            return;
+        }
+
         if (result.Value != null)
         {
             Console.WriteLine(result.Value);
-        }
-        if (result.IsSuccessful)
-        {
             Console.WriteLine("Import completed successfully.");
-        }
-        else
-        {
-            Console.WriteLine(result);
         }
     }
 
