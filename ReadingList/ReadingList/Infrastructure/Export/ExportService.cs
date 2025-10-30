@@ -26,7 +26,7 @@ public class ExportService<T> : IExportService<T>
             return result;
         }
 
-        return await strategy.ExportAsync(items, path, shouldOverwrite, cancellationToken);
+        return await strategy.ExportAsync(items, path, cancellationToken);
     }
 }
 
