@@ -56,6 +56,7 @@ public class ExportCsvStrategy<T>(IFileSystem _fileSystem) : IExportStrategy<T>
 
                 foreach (var item in items)
                 {
+                    //await Task.Delay(1000, cancellationToken); // Simulate processing time
                     cancellationToken.ThrowIfCancellationRequested();
 
                     var line = string.Join(",", _props.Select(prop =>
