@@ -10,11 +10,11 @@ public class StatsCommand(IRepository<Book, int> _repository) : ICommand
 
     public Task ExecuteAsync(string[] args, CancellationToken ct)
     {
-        var totalBooks = _repository.All().Count();
-        var finishedCount = _repository.All().FinishedCount();
-        var averageRating = _repository.All().AverageRating();
-        var pagesByGenre = _repository.All().PagesByGenre();
-        var topAuthors = _repository.All().TopAuthorsByBookCount().ToList();
+        var totalBooks = _repository.GetAll().Count();
+        var finishedCount = _repository.GetAll().FinishedCount();
+        var averageRating = _repository.GetAll().AverageRating();
+        var pagesByGenre = _repository.GetAll().PagesByGenre();
+        var topAuthors = _repository.GetAll().TopAuthorsByBookCount().ToList();
 
         if(totalBooks == 0)
         {

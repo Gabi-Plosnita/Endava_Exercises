@@ -22,7 +22,7 @@ public class TopRatedCommand(IRepository<Book, int> _repository) : ICommand
             return Task.CompletedTask;
         }
 
-        var topRatedBooks = _repository.All().TopRated(topRatedNumber);
+        var topRatedBooks = _repository.GetAll().TopRated(topRatedNumber);
 
         if(!topRatedBooks.Any())
         {

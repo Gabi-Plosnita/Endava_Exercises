@@ -10,7 +10,7 @@ public class ListAllCommand(IRepository<Book, int> _repository) : ICommand
 
     public Task ExecuteAsync(string[] args, CancellationToken ct)
     {
-        var books = _repository.All();
+        var books = _repository.GetAll();
 
         if (!books.Any())
         {

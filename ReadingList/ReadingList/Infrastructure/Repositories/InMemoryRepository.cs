@@ -28,5 +28,5 @@ public class InMemoryRepository<T, TKey> : IRepository<T, TKey> where TKey : not
 
     public bool TryGet(TKey key, out T? item) => _store.TryGetValue(key, out item);
 
-    public IEnumerable<T> All() => _store.Values;
+    public IEnumerable<T> GetAll() => _store.Values;
 }

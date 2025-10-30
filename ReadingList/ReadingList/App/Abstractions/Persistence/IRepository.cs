@@ -6,6 +6,6 @@ public interface IRepository<T, TKey> where TKey : notnull
     bool Update(T item);              
     bool Contains(TKey key);
     bool TryGet(TKey key, out T? item);
-    IEnumerable<T> All();
+    IEnumerable<T> GetAll();
 }
 
