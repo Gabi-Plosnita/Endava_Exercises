@@ -4,6 +4,11 @@ namespace ReadingList.App;
 
 public class BookService(IRepository<Book, int> _repository) : IBookService
 {
+    public IEnumerable<Book> GetAll()
+    {
+        return _repository.GetAll();
+    }
+
     public Result<IEnumerable<Book>> GetBooksByAuthor(string author)
     {
         var result = new Result<IEnumerable<Book>>();

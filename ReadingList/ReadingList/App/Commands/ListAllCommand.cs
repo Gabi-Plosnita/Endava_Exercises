@@ -1,8 +1,6 @@
-﻿using ReadingList.Domain;
+﻿namespace ReadingList.App;
 
-namespace ReadingList.App;
-
-public class ListAllCommand(IRepository<Book, int> _repository) : ICommand
+public class ListAllCommand(IBookService _bookService) : ICommand
 {
     public string Keyword => Resources.ListAllCommandKeyword;
 
@@ -10,7 +8,7 @@ public class ListAllCommand(IRepository<Book, int> _repository) : ICommand
 
     public Task ExecuteAsync(string[] args, CancellationToken ct)
     {
-        var books = _repository.GetAll();
+        var books = _bookService.GetAll();
 
         if (!books.Any())
         {
