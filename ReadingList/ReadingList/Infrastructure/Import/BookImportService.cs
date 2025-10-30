@@ -11,25 +11,25 @@ public class BookImportService(IRepository<Book, int> _repository,
                                ILogger<BookImportService> _logger,
                                IFileSystem _fileSystem) : IImportService
 {
-    public async Task<Result<ImportReport>> ImportAsync(IEnumerable<string> paths, CancellationToken ct)
+    public async Task<Result<ImportReport>> ImportAsync(IEnumerable<string> paths, CancellationToken cancellationToken)
     {
         var errors = new ConcurrentBag<string>();
         var fileReports = new ConcurrentBag<FileImportReport>();
 
         try
         {
-            await Parallel.ForEachAsync(paths, ct, async (path, token) =>
+            await Parallel.ForEachAsync(paths, cancellationToken, async (path, token) =>
             {
                 var reportResult = await ImportFileAsync(path, token);
                 reportResult.Errors.ForEach(e => errors.Add(e));
                 fileReports.Add(reportResult.Value!);
-
             });
         }
         catch (OperationCanceledException ex)
         {
-            _logger.LogWarning(ex, "Import operation was cancelled.");
-            errors.Add("Import operation was cancelled.");
+            var message = "Import operation was cancelled";
+            _logger.LogWarning(ex, message);
+            errors.Add(message);
         }
 
         var files = fileReports.ToList();
@@ -40,7 +40,7 @@ public class BookImportService(IRepository<Book, int> _repository,
         return new Result<ImportReport>(importReport, errors.ToList());
     }
 
-    private async Task<Result<FileImportReport>> ImportFileAsync(string path, CancellationToken ct)
+    private async Task<Result<FileImportReport>> ImportFileAsync(string path, CancellationToken cancellationToken)
     {
         var errors = new List<string>();
         int imported = 0, duplicates = 0, malformed = 0;
@@ -48,8 +48,9 @@ public class BookImportService(IRepository<Book, int> _repository,
 
         if (!_fileSystem.File.Exists(path))
         {
-            _logger.LogError("File not found: {Path}", path);
-            errors.Add($"File not found: {path}");
+            var message = $"File not found: {path}";
+            _logger.LogError(message);
+            errors.Add(message);
             var fileImportReport = new FileImportReport(fileName, 0, 0, 0);
             return new Result<FileImportReport>(fileImportReport, errors);
         }
@@ -57,12 +58,17 @@ public class BookImportService(IRepository<Book, int> _repository,
         string[] lines;
         try
         {
-            lines = await _fileSystem.File.ReadAllLinesAsync(path, ct);
+            lines = await _fileSystem.File.ReadAllLinesAsync(path, cancellationToken);
+        }
+        catch(OperationCanceledException)
+        {
+            throw;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error reading file {FileName}", fileName);
-            errors.Add($"Error reading file {fileName}");
+            var message = $"Error reading file {fileName}";
+            _logger.LogError(ex, message);
+            errors.Add(message);
             var fileImportReport = new FileImportReport(fileName, 0, 0, 0);
             return new Result<FileImportReport>(fileImportReport, errors);
         }
@@ -70,12 +76,7 @@ public class BookImportService(IRepository<Book, int> _repository,
         foreach (var (line, index) in lines.Skip(1).Select((l, i) => (l, i + 2)))
         {
             //await Task.Delay(1000, ct); // Simulate processing time
-
-            if (ct.IsCancellationRequested)
-            {
-                _logger.LogWarning("Import cancelled by user.");
-                break;
-            }
+            cancellationToken.ThrowIfCancellationRequested();
 
             var parseResult = _csvBookParser.TryParse(line);
             if(parseResult.IsFailure || parseResult.Value == null)
