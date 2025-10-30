@@ -6,6 +6,8 @@ public static class ApplicationRegistration
 {
     public static IServiceCollection AddApplication(this IServiceCollection services)
     {
+        services.AddScoped<IBookService, BookService>();
+
         services.AddScoped<CommandDispatcher>();
         services.AddScoped<CommandApp>();
 
