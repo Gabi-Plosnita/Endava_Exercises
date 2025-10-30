@@ -24,4 +24,6 @@ public static class Resources
     public const string MarkFinishedCommandSummary = "mark_finished <book_id> — marks the book with the specified ID as finished.";
     public const string RateCommandKeyword = "rate";
     public const string RateCommandSummary = "rate <book_id> <rating> — rates the book with the specified ID.";
+    public const string ExportCommandKeyword = "export";
+    public const string ExportCommandSummary = "export json <path> | export csv <path> — asynchronously exports data to JSON or CSV, prompting before overwrite.";
 }

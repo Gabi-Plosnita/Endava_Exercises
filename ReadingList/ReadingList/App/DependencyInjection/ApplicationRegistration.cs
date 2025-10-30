@@ -17,6 +17,7 @@ public static class ApplicationRegistration
         services.AddScoped<ICommand, StatsCommand>();
         services.AddScoped<ICommand, MarkFinishedCommand>();
         services.AddScoped<ICommand, RateCommand>();
+        services.AddScoped<ICommand, ExportCommand>();
         return services;
     }
 }
