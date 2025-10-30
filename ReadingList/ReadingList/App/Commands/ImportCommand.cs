@@ -9,7 +9,7 @@ public class ImportCommand(IImportService _importService) : ICommand
     public async Task ExecuteAsync(string[] args, CancellationToken ct)
     {
         var result = await _importService.ImportAsync(args, ct);
-        if (result.Value is not null)
+        if (result.Value != null)
         {
             Console.WriteLine(result.Value);
         }
