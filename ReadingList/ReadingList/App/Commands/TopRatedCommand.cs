@@ -2,7 +2,7 @@
 
 namespace ReadingList.App;
 
-public class TopRatedCommand(IRepository<Book, int> _repository) : ICommand
+public class TopRatedCommand(IBookService _bookService) : ICommand
 {
     public string Keyword => Resources.TopRatedCommandKeyword;
 
@@ -10,19 +10,15 @@ public class TopRatedCommand(IRepository<Book, int> _repository) : ICommand
 
     public Task ExecuteAsync(string[] args, CancellationToken ct)
     {
-        if(args.Length < 1)
+        var argumentValidation = ValidateArguments(args);
+        if(argumentValidation.IsFailure)
         {
-            Console.WriteLine("Error: Missing argument for the number of top rated in top_rated command.");
+            Console.WriteLine(argumentValidation);
             return Task.CompletedTask;
         }
 
-        if(!int.TryParse(args[0], out int topRatedNumber) || topRatedNumber <= 0)
-        {
-            Console.WriteLine("Error: Number of top rated must be a positive integer.");
-            return Task.CompletedTask;
-        }
-
-        var topRatedBooks = _repository.GetAll().TopRated(topRatedNumber);
+        var topRatedNumber = argumentValidation.Value;
+        var topRatedBooks = _bookService.GetAll().TopRated(topRatedNumber);
 
         if(!topRatedBooks.Any())
         {
@@ -36,5 +32,22 @@ public class TopRatedCommand(IRepository<Book, int> _repository) : ICommand
         }
 
         return Task.CompletedTask;
+    }
+
+    private Result<int> ValidateArguments(string[] args)
+    {
+        var result = new Result<int>();
+        if(args.Length != 1)
+        {
+            result.AddError("Invalid number of arguments.");
+            return result;
+        }
+        if(!int.TryParse(args[0], out int topRatedNumber) || topRatedNumber <= 0)
+        {
+            result.AddError("Number of top rated must be a positive integer.");
+            return result;
+        }
+        result.Value = topRatedNumber;
+        return result;
     }
 }
