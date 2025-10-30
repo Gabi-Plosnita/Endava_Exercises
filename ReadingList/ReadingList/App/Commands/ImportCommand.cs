@@ -1,4 +1,6 @@
-﻿namespace ReadingList.App;
+﻿using ReadingList.Domain;
+
+namespace ReadingList.App;
 
 public class ImportCommand(IImportService _importService) : ICommand
 {
@@ -8,6 +10,13 @@ public class ImportCommand(IImportService _importService) : ICommand
 
     public async Task ExecuteAsync(string[] args, CancellationToken ct)
     {
+        var argumentsValidation = ValidateArgs(args);
+        if (argumentsValidation.IsFailure)
+        {
+            Console.WriteLine(argumentsValidation);
+            return;
+        }
+
         var result = await _importService.ImportAsync(args, ct);
         if (result.Value != null)
         {
@@ -21,5 +30,15 @@ public class ImportCommand(IImportService _importService) : ICommand
         {
             Console.WriteLine(result);
         }
+    }
+
+    private Result ValidateArgs(string[] args)
+    {
+        var result = new Result();
+        if (args.Length == 0)
+        {
+            result.AddError("No import file specified.");
+        }
+        return result;
     }
 }
