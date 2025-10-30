@@ -55,9 +55,13 @@ public class ExportJsonStrategy<T>(IFileSystem _fileSystem) : IExportStrategy<T>
                     }
 
                     if (_fileSystem.File.Exists(path))
+                    {
                         _fileSystem.File.Replace(tmpPath, path, destinationBackupFileName: null);
+                    }
                     else
+                    {
                         _fileSystem.File.Move(tmpPath, path);
+                    }
                 }
                 else
                 {
