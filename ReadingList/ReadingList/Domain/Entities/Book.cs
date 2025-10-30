@@ -11,7 +11,7 @@ public class Book
     public required bool Finished { get; set; }
     public required double Rating { get; set; }
 
-    public Result IsValid()
+    public Result Validate()
     {
         var result = new Result();
         if (Id <= 0)

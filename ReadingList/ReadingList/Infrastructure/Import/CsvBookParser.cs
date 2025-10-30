@@ -44,9 +44,16 @@ public class CsvBookParser : IBookParser
             csv.Context.RegisterClassMap<BookMap>();
 
             if (!csv.Read())
+            {
                 return new Result<Book>(new[] { "No fields found in line." });
+            }
 
             var record = csv.GetRecord<Book>();
+            var validationResult = record.Validate();
+            if (validationResult.IsFailure)
+            {
+                return new Result<Book>(new[] { $"Validation failed for book: {record}. Errors: {validationResult}" });
+            }
 
             return new Result<Book>(record);
         }
