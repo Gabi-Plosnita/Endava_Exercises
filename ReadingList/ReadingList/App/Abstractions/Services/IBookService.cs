@@ -6,9 +6,11 @@ public interface IBookService
 {
     IEnumerable<Book> GetAll();
 
+    Book? GetById(int id);
+
     Result<IEnumerable<Book>> GetBooksByAuthor(string author);
 
     IEnumerable<Book> GetFinished(bool isFinished);
 
-    Result MarkFinished(int id, bool isFinished);
+    Result Update(int id, Book book);
 }

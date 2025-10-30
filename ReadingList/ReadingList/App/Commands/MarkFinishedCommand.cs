@@ -16,9 +16,16 @@ public class MarkFinishedCommand(IBookService _bookService) : ICommand
             Console.WriteLine(argumentValidation);
             return Task.CompletedTask;
         }
-        var bookId = argumentValidation.Value;
 
-        var updateResult = _bookService.MarkFinished(bookId, true);
+        var bookId = argumentValidation.Value;
+        var bookToUpdate = _bookService.GetById(bookId);
+        if (bookToUpdate == null)
+        {
+            Console.WriteLine($"No book found with id {bookId}.");
+            return Task.CompletedTask;
+        }
+
+        var updateResult = _bookService.Update(bookId, bookToUpdate);
         if(updateResult.IsFailure)
         {
             Console.WriteLine(updateResult);

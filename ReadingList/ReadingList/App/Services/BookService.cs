@@ -1,5 +1,4 @@
 ﻿using ReadingList.Domain;
-using System.Net;
 
 namespace ReadingList.App;
 
@@ -8,6 +7,12 @@ public class BookService(IRepository<Book, int> _repository) : IBookService
     public IEnumerable<Book> GetAll()
     {
         return _repository.GetAll();
+    }
+
+    public Book? GetById(int id)
+    {
+        _repository.TryGet(id, out var book);
+        return book;
     }
 
     public Result<IEnumerable<Book>> GetBooksByAuthor(string author)
@@ -26,7 +31,7 @@ public class BookService(IRepository<Book, int> _repository) : IBookService
         return _repository.GetAll().Finished(isFinished);
     }
 
-    public Result MarkFinished(int id, bool isFinished)
+    public Result Update(int id, Book book)
     {
         var result = new Result();
         if (!_repository.TryGet(id, out var foundBook) || foundBook == null)
@@ -35,7 +40,7 @@ public class BookService(IRepository<Book, int> _repository) : IBookService
             return result;
         }
 
-        foundBook.Finished = true;
+        foundBook.CopyFrom(book);
         var updateSuccess = _repository.Update(foundBook);
         if (!updateSuccess)
         {

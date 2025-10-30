@@ -41,6 +41,17 @@ public class Book
         return result;
     }
 
+    public void CopyFrom(Book book)
+    {
+        Title = book.Title;
+        Author = book.Author;
+        Year = book.Year;
+        Pages = book.Pages;
+        Genre = book.Genre;
+        Finished = book.Finished;
+        Rating = book.Rating;
+    }
+
     public override string ToString()
     {
         return $"{Id}: {Title} by {Author} ({Year}) - {Pages} pages - Genre: {Genre} - Finished: {Finished} - Rating: {Rating}";
