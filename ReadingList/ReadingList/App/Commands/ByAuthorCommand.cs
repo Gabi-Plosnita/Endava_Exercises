@@ -17,7 +17,7 @@ public class ByAuthorCommand(IBookService _bookService) : ICommand
             return Task.CompletedTask;
         }
 
-        var author = string.Join(" ", args);
+        var author = argumentsValidation.Value!;
         var booksResult = _bookService.GetBooksByAuthor(author);
 
         if(booksResult.IsFailure)
@@ -40,15 +40,18 @@ public class ByAuthorCommand(IBookService _bookService) : ICommand
         return Task.CompletedTask;
     }
 
-    private Result ValidateArgs(string[] args)
+    private Result<string> ValidateArgs(string[] args)
     {
-        var result = new Result();
+        var result = new Result<string>();
         var author = string.Join(" ", args);
 
         if (string.IsNullOrWhiteSpace(author))
         {
             result.AddError("Author name cannot be empty.");
+            return result;
         }
+
+        result.Value = author;
         return result;
     }
 }
