@@ -2,7 +2,7 @@
 
 namespace ReadingList.App;
 
-public class MarkFinishedCommand(IRepository<Book, int> _repository) : ICommand
+public class MarkFinishedCommand(IBookService _bookService) : ICommand
 {
     public string Keyword => Resources.MarkFinishedCommandKeyword;
 
@@ -10,35 +10,44 @@ public class MarkFinishedCommand(IRepository<Book, int> _repository) : ICommand
 
     public Task ExecuteAsync(string[] args, CancellationToken ct)
     {
-        if(args.Length < 1)
+        var argumentValidation = ValidateArgs(args);
+        if(argumentValidation.IsFailure)
         {
-            Console.WriteLine("Error: No book ID provided.");
+            Console.WriteLine(argumentValidation);
+            return Task.CompletedTask;
+        }
+        var bookId = argumentValidation.Value;
+
+        var updateResult = _bookService.MarkFinished(bookId, true);
+        if(updateResult.IsFailure)
+        {
+            Console.WriteLine(updateResult);
             return Task.CompletedTask;
         }
 
+        Console.WriteLine($"Book with id {bookId} marked as finished.");
+        return Task.CompletedTask;
+    }
+
+    private Result<int> ValidateArgs(string[] args)
+    {
+        var result = new Result<int>();
+        if(args.Length != 1)
+        {
+            result.AddError("Invalid number of arguments.");
+            return result;
+        }
         if(!int.TryParse(args[0], out int bookId))
         {
-            Console.WriteLine("Error: Invalid book ID format.");
-            return Task.CompletedTask;
+            result.AddError("Invalid book ID format.");
+            return result;
         }
-
-        if(!_repository.TryGet(bookId, out var foundBook) || foundBook == null)
+        if(bookId < 0)
         {
-            Console.WriteLine($"Error: No book found with ID {bookId}.");
-            return Task.CompletedTask;
+            result.AddError("Id must be grater than 0.");
+            return result;
         }
-
-        foundBook.Finished = true;
-        var updateSuccess = _repository.Update(foundBook);
-        if(updateSuccess)
-        {
-            Console.WriteLine($"Book ID {bookId} marked as finished.");
-        }
-        else
-        {
-            Console.WriteLine($"Error: Failed to update book ID {bookId}.");
-        }
-
-        return Task.CompletedTask;
+        result.Value = bookId;
+        return result;
     }
 }

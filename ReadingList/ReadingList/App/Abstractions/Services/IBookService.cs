@@ -9,4 +9,6 @@ public interface IBookService
     Result<IEnumerable<Book>> GetBooksByAuthor(string author);
 
     IEnumerable<Book> GetFinished(bool isFinished);
+
+    Result MarkFinished(int id, bool isFinished);
 }
