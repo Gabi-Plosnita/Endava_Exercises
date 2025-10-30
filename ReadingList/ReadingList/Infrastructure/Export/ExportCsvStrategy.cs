@@ -10,6 +10,13 @@ public class ExportCsvStrategy<T>(IFileSystem _fileSystem) : IExportStrategy<T>
 {
     public ExportType ExportType => ExportType.Csv;
 
+    private static readonly PropertyInfo[] _props = typeof(T)
+        .GetProperties(BindingFlags.Public | BindingFlags.Instance)
+        .Where(p => p.CanRead)
+        .ToArray();
+
+    private static readonly byte[] NewLine = Encoding.UTF8.GetBytes(Environment.NewLine);
+
     public async Task<Result> ExportAsync(
         IEnumerable<T> items,
         string path,
@@ -17,6 +24,7 @@ public class ExportCsvStrategy<T>(IFileSystem _fileSystem) : IExportStrategy<T>
         CancellationToken cancellationToken = default)
     {
         var result = new Result();
+        string? tmpPath = null;
 
         try
         {
@@ -38,45 +46,94 @@ public class ExportCsvStrategy<T>(IFileSystem _fileSystem) : IExportStrategy<T>
                 _fileSystem.Directory.CreateDirectory(directory);
             }
 
-            var properties = typeof(T).GetProperties(BindingFlags.Public | BindingFlags.Instance)
-                                      .Where(p => p.CanRead)
-                                      .ToArray();
+            var header = string.Join(",", _props.Select(p => p.Name));
+            var headerBytes = Encoding.UTF8.GetBytes(header);
 
-            await using var stream = _fileSystem.File.Open(path,
-                                                           shouldOverwrite ? FileMode.Create : FileMode.Append,
-                                                           FileAccess.Write);
-            await using var writer = new StreamWriter(stream, Encoding.UTF8);
-
-            if (stream.Length == 0)
+            if (shouldOverwrite)
             {
-                await writer.WriteLineAsync(string.Join(",", properties.Select(p => p.Name)));
-            }
+                var fileName = _fileSystem.Path.GetFileName(path);
+                var tempName = $"{fileName}.{Guid.NewGuid():N}.tmp";
+                tmpPath = string.IsNullOrEmpty(directory) ? tempName : _fileSystem.Path.Combine(directory, tempName);
 
-            foreach (var item in items)
-            {
-                //await Task.Delay(1000, cancellationToken); // Simulate a long-running operation
-                if (cancellationToken.IsCancellationRequested)
+                await using (var temporary = _fileSystem.File.Open(tmpPath, FileMode.CreateNew, FileAccess.Write, FileShare.None))
                 {
-                    result.AddError("Export operation was cancelled.");
-                    return result;
+                    await temporary.WriteAsync(headerBytes, cancellationToken);
+                    await temporary.WriteAsync(NewLine, cancellationToken);
+
+                    foreach (var item in items)
+                    {
+                        cancellationToken.ThrowIfCancellationRequested();
+
+                        var line = string.Join(",", _props.Select(prop =>
+                        {
+                            var value = prop.GetValue(item);
+                            return CsvHelper.EscapeCsv(value?.ToString() ?? string.Empty);
+                        }));
+
+                        var lineBytes = Encoding.UTF8.GetBytes(line);
+                        await temporary.WriteAsync(lineBytes, cancellationToken);
+                        await temporary.WriteAsync(NewLine, cancellationToken);
+                    }
+
+                    await temporary.FlushAsync(cancellationToken);
                 }
 
-                var values = properties.Select(p =>
+                if (_fileSystem.File.Exists(path))
                 {
-                    var value = p.GetValue(item);
-                    return CsvHelper.EscapeCsv(value?.ToString() ?? string.Empty);
-                });
+                    _fileSystem.File.Replace(tmpPath, path, destinationBackupFileName: null);
+                }
+                else
+                {
+                    _fileSystem.File.Move(tmpPath, path);
+                }
 
-                await writer.WriteLineAsync(string.Join(",", values));
+                return result; 
             }
+            else
+            {
+                await using var stream = _fileSystem.File.Open(path, FileMode.Append, FileAccess.Write, FileShare.None);
 
-            await writer.FlushAsync();
+                if (stream.Length == 0)
+                {
+                    await stream.WriteAsync(headerBytes, cancellationToken);
+                    await stream.WriteAsync(NewLine, cancellationToken);
+                }
+
+                foreach (var item in items)
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+
+                    var line = string.Join(",", _props.Select(p =>
+                    {
+                        var v = p.GetValue(item);
+                        return CsvHelper.EscapeCsv(v?.ToString() ?? string.Empty);
+                    }));
+
+                    var lineBytes = Encoding.UTF8.GetBytes(line);
+                    await stream.WriteAsync(lineBytes, cancellationToken);
+                    await stream.WriteAsync(NewLine, cancellationToken);
+                }
+
+                await stream.FlushAsync(cancellationToken);
+                return result; 
+            }
         }
-        catch (Exception ex)
+        catch (OperationCanceledException)
         {
-            result.AddError(ex.Message);
+            result.AddError("Export operation was canceled.");
+            return result;
         }
-
-        return result;
+        catch (Exception)
+        {
+            result.AddError("Unexpected error during export!");
+            return result;
+        }
+        finally
+        {
+            if (tmpPath is not null && _fileSystem.File.Exists(tmpPath))
+            {
+                try { _fileSystem.File.Delete(tmpPath); } catch { }
+            }
+        }
     }
 }
