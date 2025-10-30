@@ -2,7 +2,7 @@
 
 namespace ReadingList.App;
 
-public class StatsCommand(IRepository<Book, int> _repository) : ICommand
+public class StatsCommand(IBookService _bookService) : ICommand
 {
     public string Keyword => Resources.StatsCommandKeyword;
 
@@ -10,11 +10,11 @@ public class StatsCommand(IRepository<Book, int> _repository) : ICommand
 
     public Task ExecuteAsync(string[] args, CancellationToken ct)
     {
-        var totalBooks = _repository.GetAll().Count();
-        var finishedCount = _repository.GetAll().FinishedCount();
-        var averageRating = _repository.GetAll().AverageRating();
-        var pagesByGenre = _repository.GetAll().PagesByGenre();
-        var topAuthors = _repository.GetAll().TopAuthorsByBookCount().ToList();
+        var totalBooks = _bookService.GetAll().Count();
+        var finishedCount = _bookService.GetAll().FinishedCount();
+        var averageRating = _bookService.GetAll().AverageRating();
+        var pagesByGenre = _bookService.GetAll().PagesByGenre();
+        var topAuthors = _bookService.GetAll().TopAuthorsByBookCount().ToList();
 
         if(totalBooks == 0)
         {

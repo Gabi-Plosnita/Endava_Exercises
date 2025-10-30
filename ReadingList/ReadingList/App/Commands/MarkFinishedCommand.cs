@@ -25,6 +25,7 @@ public class MarkFinishedCommand(IBookService _bookService) : ICommand
             return Task.CompletedTask;
         }
 
+        bookToUpdate.Finished = true;
         var updateResult = _bookService.Update(bookId, bookToUpdate);
         if(updateResult.IsFailure)
         {

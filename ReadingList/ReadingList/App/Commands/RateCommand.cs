@@ -2,7 +2,7 @@
 
 namespace ReadingList.App;
 
-public class RateCommand(IRepository<Book, int> _repository) : ICommand
+public class RateCommand(IBookService _bookService) : ICommand
 {
     public string Keyword => Resources.RateCommandKeyword;
 
@@ -10,41 +10,26 @@ public class RateCommand(IRepository<Book, int> _repository) : ICommand
 
     public Task ExecuteAsync(string[] args, CancellationToken ct)
     {
-        if (args.Length < 2)
+        var argumentsValidation = ValidateArguments(args);
+        if (argumentsValidation.IsFailure)
         {
-            Console.WriteLine("Error: Missing arguments. Usage: rate <bookId> <rating (0–5)>");
+            Console.WriteLine(argumentsValidation);
             return Task.CompletedTask;
         }
 
-        if (!int.TryParse(args[0], out var bookId))
+        var (bookId, rating) = argumentsValidation.Value;
+        var bookToUpdate = _bookService.GetById(bookId);
+        if (bookToUpdate == null)
         {
-            Console.WriteLine("Error: Invalid book ID. It must be a number.");
+            Console.WriteLine($"No book found with ID {bookId}.");
             return Task.CompletedTask;
         }
 
-        if (!double.TryParse(args[1], out var rating))
+        bookToUpdate.Rating = rating;
+        var updateResult = _bookService.Update(bookId, bookToUpdate);
+        if (updateResult.IsSuccessful)
         {
-            Console.WriteLine("Error: Invalid rating. It must be a number between 0 and 5.");
-            return Task.CompletedTask;
-        }
-
-        if (rating < 0 || rating > 5)
-        {
-            Console.WriteLine("Error: Rating must be between 0 and 5.");
-            return Task.CompletedTask;
-        }
-
-        if (!_repository.TryGet(bookId, out var book) || book == null)
-        {
-            Console.WriteLine($"Error: Book with ID {bookId} not found.");
-            return Task.CompletedTask;
-        }
-
-        book.Rating = rating;
-
-        if (_repository.Update(book))
-        {
-            Console.WriteLine($"Successfully rated '{book.Title}' by {book.Author} — {rating}");
+            Console.WriteLine($"Successfully rated '{bookToUpdate.Title}' by {bookToUpdate.Author} — {rating}");
         }
         else
         {
@@ -52,5 +37,31 @@ public class RateCommand(IRepository<Book, int> _repository) : ICommand
         }
 
         return Task.CompletedTask;
+    }
+
+    private Result<(int bookId, double raiting)> ValidateArguments(string[] args)
+    {
+        var result = new Result<(int bookId, double raiting)>();
+        if (args.Length != 2)
+        {
+            result.AddError("Invalid number of arguments.");
+            return result;
+        }
+        if (!int.TryParse(args[0], out int bookId))
+        {
+            result.AddError("Invalid book ID. It must be a number.");
+        }
+        if (!double.TryParse(args[1], out var rating) || rating < 0 || rating > 5)
+        {
+            result.AddError("Invalid rating. It must be a number between 0 and 5.");
+        }
+
+        if (result.IsFailure)
+        {
+            return result;
+        }
+
+        result.Value = (bookId, rating);
+        return result;
     }
 }
