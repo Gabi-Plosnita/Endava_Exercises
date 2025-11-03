@@ -4,7 +4,6 @@ using Moq;
 using ReadingList.App;
 using ReadingList.Domain;
 using ReadingList.Infrastructure;
-using System.Globalization;
 using System.IO.Abstractions.TestingHelpers;
 
 
@@ -20,20 +19,29 @@ public class BookImportServiceTests
         var file1Path = @"C:\import\file1.csv";
         var file2Path = @"C:\import\file2.csv";
 
+        var file1Line1 = "Id,Title,Author,Year,Pages,Genre,Finished,Rating";
+        var file1Line2 = "1,Title1,Alice,2020,100,1,true,4.0";
+        var file1Line3 = "2,Title2,Bob,2020,120,1,true,3.0";
+        var file1Line4 = "BADLINE";
+
+        var file2Line1 = "Id,Title,Author,Year,Pages,Genre,Finished,Rating";
+        var file2Line2 = "2,Title2-DUP,Bob,2020,120,1,true,3.0";
+        var file2Line3 = "3,Title3,Cat,2022,200,2,false,4.5";
+
         var file1Content = string.Join('\n', new[]
         {
-                "Id,Title,Author,Year,Pages,Genre,Finished,Rating",
-                "1,Title1,Alice,2020,100,1,true,4.0",
-                "2,Title2,Bob,2020,120,1,true,3.0",
-                "BADLINE"
-            });
+            file1Line1,
+            file1Line2,
+            file1Line3,
+            file1Line4,
+        });
 
         var file2Content = string.Join('\n', new[]
         {
-                "Id,Title,Author,Year,Pages,Genre,Finished,Rating",
-                "2,Another dup id,Other,2021,90,1,false,2.5",  
-                "3,Title3,Cat,2022,200,2,false,4.5"
-            });
+            file2Line1,
+            file2Line2,
+            file2Line3,
+        });
 
         var mockFileSystem = new MockFileSystem(new Dictionary<string, MockFileData>
         {
@@ -42,36 +50,69 @@ public class BookImportServiceTests
         });
 
         var repo = new InMemoryRepository<Book, int>(b => b.Id);
+
         var parser = new Mock<IBookParser>();
+        Result<Book> Ok(Book b) => new(b);
+        Result<Book> Fail(string err) => new(new[] { err });
 
-        parser.Setup(p => p.TryParse(It.Is<string>(s => s == "BADLINE")))
-              .Returns((Result<Book>)new Result<Book>(new List<string> { "CSV parse error: malformed" }));
+        var map = new Dictionary<string, Result<Book>>
+        {
+            [file1Line2] = Ok(new Book
+            {
+                Id = 1,
+                Title = "Title1",
+                Author = "Alice",
+                Year = 2020,
+                Pages = 100,
+                Genre = (Genre)1,
+                Finished = true,
+                Rating = 4.0
+            }),
 
-        parser.Setup(p => p.TryParse(It.Is<string>(s => s != "BADLINE")))
-              .Returns<string>(line =>
-              {
-                  var parts = line.Split(',');
-                  if (parts.Length < 8)
-                      return new Result<Book>(new List<string> { "CSV parse error: not enough fields" });
+            ["BADLINE"] = Fail("CSV parse error: malformed"),
 
-                  var book = new Book
-                  {
-                      Id = int.Parse(parts[0], CultureInfo.InvariantCulture),
-                      Title = parts[1],
-                      Author = parts[2],
-                      Year = int.Parse(parts[3], CultureInfo.InvariantCulture),
-                      Pages = int.Parse(parts[4], CultureInfo.InvariantCulture),
-                      Genre = (Genre)int.Parse(parts[5], CultureInfo.InvariantCulture),
-                      Finished = bool.Parse(parts[6]),
-                      Rating = double.Parse(parts[7], CultureInfo.InvariantCulture)
-                  };
+            [file1Line3] = Ok(new Book
+            {
+                Id = 2,
+                Title = "Title2",
+                Author = "Bob",
+                Year = 2020,
+                Pages = 120,
+                Genre = (Genre)1,
+                Finished = true,
+                Rating = 3.0
+            }),
 
-                  var validation = book.Validate();
-                  if (validation.IsFailure)
-                      return new Result<Book>(validation.Errors);
+            [file2Line2] = Ok(new Book
+            {
+                Id = 2,
+                Title = "Title2-DUP",
+                Author = "Bob",
+                Year = 2020,
+                Pages = 120,
+                Genre = (Genre)1,
+                Finished = true,
+                Rating = 3.0
+            }),
 
-                  return new Result<Book>(book);
-              });
+            [file2Line3] = Ok(new Book
+            {
+                Id = 3,
+                Title = "Title3",
+                Author = "Cat",
+                Year = 2022,
+                Pages = 200,
+                Genre = (Genre)2,
+                Finished = false,
+                Rating = 4.5
+            }),
+        };
+
+        parser.Setup(p => p.TryParse(It.Is<string>(s => map.ContainsKey(s))))
+              .Returns((string s) => map[s]);
+
+        parser.Setup(p => p.TryParse(It.Is<string>(s => !map.ContainsKey(s))))
+              .Returns<string>(s => Fail($"Unexpected line in test: '{s}'"));
 
         var logger = new Mock<ILogger<BookImportService>>();
 
@@ -96,7 +137,7 @@ public class BookImportServiceTests
         report.Files.Should().HaveCount(2);
 
         repo.Contains(1).Should().BeTrue();
-        repo.Contains(2).Should().BeTrue(); 
+        repo.Contains(2).Should().BeTrue();
         repo.Contains(3).Should().BeTrue();
 
         //logger.VerifyLogContains(LogLevel.Warning, "Parsing error at line 4");
