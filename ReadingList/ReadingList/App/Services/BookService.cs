@@ -11,8 +11,7 @@ public class BookService(IRepository<Book, int> _repository) : IBookService
 
     public Book? GetById(int id)
     {
-        _repository.TryGet(id, out var book);
-        return book;
+        return _repository.GetById(id);
     }
 
     public Result<IEnumerable<Book>> GetBooksByAuthor(string author)
@@ -34,14 +33,15 @@ public class BookService(IRepository<Book, int> _repository) : IBookService
     public Result Update(int id, Book book)
     {
         var result = new Result();
-        if (!_repository.TryGet(id, out var foundBook) || foundBook == null)
+        var bookToUpdate = _repository.GetById(id);
+        if (bookToUpdate == null)
         {
             result.AddError($"No book found with ID {id}.");
             return result;
         }
 
-        foundBook.CopyFrom(book);
-        var updateSuccess = _repository.Update(foundBook);
+        bookToUpdate.CopyFrom(book);
+        var updateSuccess = _repository.Update(bookToUpdate);
         if (!updateSuccess)
         {
             result.AddError($"Failed to update book ID {id}.");

@@ -26,7 +26,11 @@ public class InMemoryRepository<T, TKey> : IRepository<T, TKey> where TKey : not
 
     public bool Contains(TKey key) => _store.ContainsKey(key);
 
-    public bool TryGet(TKey key, out T? item) => _store.TryGetValue(key, out item);
+    public T? GetById(TKey key)
+    {
+        _store.TryGetValue(key, out var item);
+        return item;
+    }
 
     public IEnumerable<T> GetAll() => _store.Values;
 }
