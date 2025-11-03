@@ -2,7 +2,6 @@
 using AwesomeAssertions.Execution;
 using ReadingList.Domain;
 using ReadingList.Infrastructure;
-using System.Globalization;
 
 namespace ReadingList_Tests;
 
