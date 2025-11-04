@@ -15,7 +15,11 @@ public class CommandApp
         {
             Console.Write("> ");
             var line = Console.ReadLine();
-            if (line is null || string.IsNullOrEmpty(line))
+            if (line == null)
+            {
+                break;
+            }
+            if (string.IsNullOrEmpty(line))
             {
                 continue;
             }
