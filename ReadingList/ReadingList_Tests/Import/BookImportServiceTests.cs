@@ -140,6 +140,9 @@ public class BookImportServiceTests
         repo.Contains(2).Should().BeTrue();
         repo.Contains(3).Should().BeTrue();
 
+        logger.VerifyLogContains(LogLevel.Information, string.Empty, Times.Exactly(2));
+        logger.VerifyLogContains(LogLevel.Warning, string.Empty, Times.Exactly(2));
+        logger.VerifyLogContains(LogLevel.Error, string.Empty, Times.Exactly(0));
         logger.VerifyLogContains(LogLevel.Warning, "Parsing error at line 4");
         logger.VerifyLogContains(LogLevel.Warning, "Duplicate Id skipped");
     }
