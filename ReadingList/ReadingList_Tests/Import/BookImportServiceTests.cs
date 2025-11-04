@@ -140,9 +140,7 @@ public class BookImportServiceTests
         repo.Contains(2).Should().BeTrue();
         repo.Contains(3).Should().BeTrue();
 
-        //logger.VerifyLogContains(LogLevel.Warning, "Parsing error at line 4");
-        //logger.VerifyLogContains(LogLevel.Warning, "Duplicate Id skipped at line 2");
-        //logger.VerifyLogContains(LogLevel.Information, "[file1.csv] imported: 2, duplicates: 0, malformed: 1");
-        //logger.VerifyLogContains(LogLevel.Information, "[file2.csv] imported: 1, duplicates: 1, malformed: 0");
+        logger.VerifyLogContains(LogLevel.Warning, "Parsing error at line 4");
+        logger.VerifyLogContains(LogLevel.Warning, "Duplicate Id skipped");
     }
 }
