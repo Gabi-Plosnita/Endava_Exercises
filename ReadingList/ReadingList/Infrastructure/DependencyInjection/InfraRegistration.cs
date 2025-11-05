@@ -10,9 +10,9 @@ public static class InfraRegistration
     public static IServiceCollection AddInfrastructure(this IServiceCollection services)
     {
         services.AddSingleton<IFileSystem, FileSystem>();
-        services.AddScoped<IImportService, BookImportService>();
-        services.AddScoped<IBookParser, CsvBookParser>();
-        services.AddScoped<IRepository<Book, int>>(sp => new InMemoryRepository<Book, int>(book => book.Id));
+        services.AddSingleton<IImportService, BookImportService>();
+        services.AddSingleton<IBookParser, CsvBookParser>();
+        services.AddSingleton<IRepository<Book, int>>(sp => new InMemoryRepository<Book, int>(book => book.Id));
 
         services.AddSingleton<IExportService<Book>, ExportService<Book>>();
         services.AddSingleton<IExportStrategy<Book>, ExportCsvStrategy<Book>>();

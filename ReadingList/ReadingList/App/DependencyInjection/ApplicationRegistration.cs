@@ -6,20 +6,20 @@ public static class ApplicationRegistration
 {
     public static IServiceCollection AddApplication(this IServiceCollection services)
     {
-        services.AddScoped<IBookService, BookService>();
+        services.AddSingleton<IBookService, BookService>();
 
-        services.AddScoped<CommandDispatcher>();
-        services.AddScoped<CommandApp>();
+        services.AddSingleton<CommandDispatcher>();
+        services.AddSingleton<CommandApp>();
 
-        services.AddScoped<ICommand, ImportCommand>();
-        services.AddScoped<ICommand, ListAllCommand>();
-        services.AddScoped<ICommand, FilterFinishedCommand>();
-        services.AddScoped<ICommand, TopRatedCommand>();
-        services.AddScoped<ICommand, ByAuthorCommand>();
-        services.AddScoped<ICommand, StatsCommand>();
-        services.AddScoped<ICommand, MarkFinishedCommand>();
-        services.AddScoped<ICommand, RateCommand>();
-        services.AddScoped<ICommand, ExportCommand>();
+        services.AddSingleton<ICommand, ImportCommand>();
+        services.AddSingleton<ICommand, ListAllCommand>();
+        services.AddSingleton<ICommand, FilterFinishedCommand>();
+        services.AddSingleton<ICommand, TopRatedCommand>();
+        services.AddSingleton<ICommand, ByAuthorCommand>();
+        services.AddSingleton<ICommand, StatsCommand>();
+        services.AddSingleton<ICommand, MarkFinishedCommand>();
+        services.AddSingleton<ICommand, RateCommand>();
+        services.AddSingleton<ICommand, ExportCommand>();
         return services;
     }
 }
