@@ -4,9 +4,9 @@ namespace ReadingList.App;
 
 public class ByAuthorCommand(IBookService _bookService) : ICommand
 {
-    public string Keyword => Resources.ByAuthorCommandKeyword;
+    public string Keyword => Constants.ByAuthorCommandKeyword;
 
-    public string Summary => Resources.ByAuthorCommandSummary;
+    public string Summary => Constants.ByAuthorCommandSummary;
 
     public Task ExecuteAsync(string[] args, CancellationToken ct)
     {

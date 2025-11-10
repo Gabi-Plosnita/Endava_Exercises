@@ -4,9 +4,9 @@ namespace ReadingList.App;
 
 public class MarkFinishedCommand(IBookService _bookService) : ICommand
 {
-    public string Keyword => Resources.MarkFinishedCommandKeyword;
+    public string Keyword => Constants.MarkFinishedCommandKeyword;
 
-    public string Summary => Resources.MarkFinishedCommandSummary;
+    public string Summary => Constants.MarkFinishedCommandSummary;
 
     public Task ExecuteAsync(string[] args, CancellationToken ct)
     {

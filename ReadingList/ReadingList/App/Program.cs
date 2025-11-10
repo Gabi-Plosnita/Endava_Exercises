@@ -6,7 +6,7 @@ using Serilog;
 // DI Container Setup //
 var services = new ServiceCollection();
 
-services.AddAppFileLogging(Resources.LoggingFilePath) 
+services.AddAppFileLogging(Constants.LoggingFilePath) 
         .AddApplication()           
         .AddInfrastructure();
 

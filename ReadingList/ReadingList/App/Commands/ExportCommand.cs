@@ -5,9 +5,9 @@ namespace ReadingList.App;
 
 public class ExportCommand(IBookService _bookService, IExportService<Book> _exportService) : ICommand
 {
-    public string Keyword => Resources.ExportCommandKeyword;
+    public string Keyword => Constants.ExportCommandKeyword;
 
-    public string Summary => Resources.ExportCommandSummary;
+    public string Summary => Constants.ExportCommandSummary;
 
     public async Task ExecuteAsync(string[] args, CancellationToken ct)
     {

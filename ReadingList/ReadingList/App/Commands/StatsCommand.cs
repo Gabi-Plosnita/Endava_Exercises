@@ -4,9 +4,9 @@ namespace ReadingList.App;
 
 public class StatsCommand(IBookService _bookService) : ICommand
 {
-    public string Keyword => Resources.StatsCommandKeyword;
+    public string Keyword => Constants.StatsCommandKeyword;
 
-    public string Summary => Resources.StatsCommandSummary;
+    public string Summary => Constants.StatsCommandSummary;
 
     public Task ExecuteAsync(string[] args, CancellationToken ct)
     {

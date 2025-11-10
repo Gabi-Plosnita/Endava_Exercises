@@ -2,9 +2,9 @@
 
 public class ListAllCommand(IBookService _bookService) : ICommand
 {
-    public string Keyword => Resources.ListAllCommandKeyword;
+    public string Keyword => Constants.ListAllCommandKeyword;
 
-    public string Summary => Resources.ListAllCommandSummary;
+    public string Summary => Constants.ListAllCommandSummary;
 
     public Task ExecuteAsync(string[] args, CancellationToken ct)
     {

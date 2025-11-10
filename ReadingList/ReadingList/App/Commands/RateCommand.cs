@@ -4,9 +4,9 @@ namespace ReadingList.App;
 
 public class RateCommand(IBookService _bookService) : ICommand
 {
-    public string Keyword => Resources.RateCommandKeyword;
+    public string Keyword => Constants.RateCommandKeyword;
 
-    public string Summary => Resources.RateCommandSummary;
+    public string Summary => Constants.RateCommandSummary;
 
     public Task ExecuteAsync(string[] args, CancellationToken ct)
     {

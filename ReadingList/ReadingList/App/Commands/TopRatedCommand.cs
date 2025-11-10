@@ -4,9 +4,9 @@ namespace ReadingList.App;
 
 public class TopRatedCommand(IBookService _bookService) : ICommand
 {
-    public string Keyword => Resources.TopRatedCommandKeyword;
+    public string Keyword => Constants.TopRatedCommandKeyword;
 
-    public string Summary => Resources.TopRatedCommandSummary;
+    public string Summary => Constants.TopRatedCommandSummary;
 
     public Task ExecuteAsync(string[] args, CancellationToken ct)
     {

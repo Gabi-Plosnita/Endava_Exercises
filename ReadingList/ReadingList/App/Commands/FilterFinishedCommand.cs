@@ -2,9 +2,9 @@
 
 public class FilterFinishedCommand(IBookService _bookService) : ICommand
 {
-    public string Keyword => Resources.FilterFinishedCommandKeyword;
+    public string Keyword => Constants.FilterFinishedCommandKeyword;
 
-    public string Summary => Resources.FilterFinishedCommandSummary;
+    public string Summary => Constants.FilterFinishedCommandSummary;
 
     public Task ExecuteAsync(string[] args, CancellationToken ct)
     {
