@@ -17,5 +17,5 @@ public class ExtraShotDecorator : IBeverage
 
     public decimal Cost() => _inner.Cost() + _baseCost;
 
-    public string Describe() => $"{_inner.Describe()}, Extra Shot: {Name}";
+    public string Describe() => $"{_inner.Describe()}, {Name}";
 }
