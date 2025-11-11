@@ -2,8 +2,8 @@
 
 public class Tea : IBeverage
 {
-    private string _name;
-    private decimal _baseCost;
+    private readonly string _name;
+    private readonly decimal _baseCost;
 
     public Tea(string name, decimal cost)
     {

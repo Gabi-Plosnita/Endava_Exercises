@@ -2,9 +2,9 @@
 
 public class ExtraShotDecorator : IBeverage
 {
-    private IBeverage _inner;
-    private string _name;
-    private decimal _baseCost;
+    private readonly IBeverage _inner;
+    private readonly string _name;
+    private readonly decimal _baseCost;
 
     public ExtraShotDecorator(IBeverage inner, string name, decimal baseCost)
     {

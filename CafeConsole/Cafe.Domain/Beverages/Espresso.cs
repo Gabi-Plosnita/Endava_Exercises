@@ -2,8 +2,8 @@
 
 public class Espresso : IBeverage
 {
-    private string _name;
-    private decimal _baseCost;
+    private readonly string _name;
+    private readonly decimal _baseCost;
 
     public Espresso(string name, decimal cost)
     {

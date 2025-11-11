@@ -2,8 +2,8 @@
 
 public class HotChocolate : IBeverage
 {
-    private string _name;
-    private decimal _baseCost;
+    private readonly string _name;
+    private readonly decimal _baseCost;
 
     public HotChocolate(string name, decimal cost)
     {

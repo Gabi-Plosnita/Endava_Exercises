@@ -2,10 +2,10 @@
 
 public class SyrupDecorator : IBeverage
 {
-    private IBeverage _inner;
-    private string _name;
-    private decimal _baseCost;
-    private string _flavor;
+    private readonly IBeverage _inner;
+    private readonly string _name;
+    private readonly decimal _baseCost;
+    private readonly string _flavor;
 
     public SyrupDecorator(IBeverage inner, string name, decimal cost, string flavor)
     {

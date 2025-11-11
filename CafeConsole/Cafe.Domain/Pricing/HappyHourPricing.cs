@@ -2,7 +2,7 @@
 
 public class HappyHourPricing : IPricingStrategy
 {
-    private decimal _discountPercentage;
+    private readonly decimal _discountPercentage;
 
     public HappyHourPricing(decimal discountPercentage)
     {
