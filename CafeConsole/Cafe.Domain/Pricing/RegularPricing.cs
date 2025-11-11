@@ -2,5 +2,5 @@
 
 public class RegularPricing : IPricingStrategy
 {
-    public decimal GetPrice(IBeverage beverage) => beverage.Cost();
+    public decimal Apply(decimal cost) => cost;
 }
