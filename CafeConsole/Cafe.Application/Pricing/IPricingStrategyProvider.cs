@@ -6,5 +6,5 @@ public interface IPricingStrategyProvider
 {
     IPricingStrategy Get(StrategyType type);
 
-    IEnumerable<StrategyType> Strategies { get; }
+    IEnumerable<StrategyType> StrategyTypes { get; }
 }
