@@ -3,5 +3,5 @@
 public record OrderRequest(
     BeverageType BeverageType,
     IReadOnlyList<AddOnSelection> AddOns,
-    StrategyType Strategy
+    PricingStrategyType PricingStrategyType
 );

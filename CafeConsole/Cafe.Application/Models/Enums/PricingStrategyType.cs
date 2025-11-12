@@ -1,6 +1,6 @@
 ﻿namespace Cafe.Application;
 
-public enum StrategyType
+public enum PricingStrategyType
 {
     Regular,
     HappyHour
