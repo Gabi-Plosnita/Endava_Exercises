@@ -2,6 +2,6 @@
 
 public record AddOnSelection(
     AddOnType AddOnType,
-    IReadOnlyDictionary<string, string>? Parameters = null
+    string? Flavour
 );
 
