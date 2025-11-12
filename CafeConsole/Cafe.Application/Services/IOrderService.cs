@@ -1,6 +1,8 @@
-﻿namespace Cafe.Application;
+﻿using Cafe.Domain;
+
+namespace Cafe.Application;
 
 public interface IOrderService
 {
-    void PlaceOrder(OrderRequest orderRequest);
+    Result PlaceOrder(OrderRequest orderRequest);
 }
