@@ -5,4 +5,3 @@ public record OrderRequest(
     IReadOnlyList<AddOnSelection> AddOns,
     StrategyType Strategy
 );
-
