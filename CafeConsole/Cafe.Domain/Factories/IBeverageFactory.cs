@@ -2,7 +2,7 @@
 
 public interface IBeverageFactory
 {
-    IBeverage Create(string key);
+    Result<IBeverage> Create(string key);
 
     IEnumerable<string> Keys { get; }
 }

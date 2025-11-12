@@ -13,14 +13,17 @@ public class BeverageFactory : IBeverageFactory
 
     public IEnumerable<string> Keys => _registry.Keys;
 
-    public IBeverage Create(string key)
+    public Result<IBeverage> Create(string key)
     {
+        var result = new Result<IBeverage>();
         if (!_registry.TryGetValue(key, out var ctor))
         {
-            throw new ArgumentException($"Unknown beverage '{key}'");
+            result.AddError($"Unknown beverage '{key}'");
+            return result;
         }
 
-        return ctor();
+        result.Value = ctor();
+        return result;
     }
 }
 
