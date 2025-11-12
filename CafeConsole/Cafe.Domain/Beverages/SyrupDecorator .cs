@@ -15,9 +15,9 @@ public class SyrupDecorator : IBeverage
         _flavor = flavor;
     }
 
-    public string Name => $"{_flavor} {_name}";
+    public string Name => $"{_name}";
 
     public decimal Cost() => _inner.Cost() + _baseCost;
 
-    public string Describe() => $"{_inner.Describe()}, {Name}";
+    public string Describe() => $"{_inner.Describe()}, {_flavor} {Name}";
 }
