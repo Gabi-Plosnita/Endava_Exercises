@@ -1,7 +1,7 @@
 ﻿namespace Cafe.Application;
 
 public record OrderRequest(
-    BeverageType BeverageType,
+    string BeverageType,
     IReadOnlyList<AddOnSelection> AddOns,
     PricingStrategyType PricingStrategyType
 );
