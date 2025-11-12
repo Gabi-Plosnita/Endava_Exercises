@@ -1,6 +1,6 @@
 ﻿namespace Cafe.Application;
 
-public sealed record OrderRequest(
+public record OrderRequest(
     BeverageType BeverageType,
     IReadOnlyList<AddOnSelection> AddOns,
     StrategyType Strategy
