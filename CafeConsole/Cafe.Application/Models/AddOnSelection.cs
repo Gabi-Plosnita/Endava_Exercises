@@ -1,6 +1,6 @@
 ﻿namespace Cafe.Application;
 
-public sealed record AddOnSelection(
+public record AddOnSelection(
     AddOnType AddOnType,
     IReadOnlyDictionary<string, string>? Parameters = null
 );
