@@ -4,7 +4,7 @@ namespace Cafe.Application;
 
 public interface IPricingStrategyProvider
 {
-    IPricingStrategy Get(StrategyType type);
+    Result<IPricingStrategy> Get(StrategyType type);
 
     IEnumerable<StrategyType> StrategyTypes { get; }
 }

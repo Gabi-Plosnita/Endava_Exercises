@@ -13,13 +13,16 @@ public class InMemoryPricingStrategyProvider : IPricingStrategyProvider
 
     public IEnumerable<StrategyType> StrategyTypes => _strategyDictionary.Keys;
 
-    public IPricingStrategy Get(StrategyType type)
+    public Result<IPricingStrategy> Get(StrategyType type)
     {
+        var result = new Result<IPricingStrategy>();
         if (!_strategyDictionary.TryGetValue(type, out var strategy))
         {
-            throw new ArgumentException($"Unknown pricing strategy '{type}'.", nameof(type));
+            result.AddError($"Pricing strategy for type '{type}' not found.");
+            return result;
         }
 
-        return strategy;
+        result.Value = strategy;
+        return result;
     }
 }
