@@ -16,20 +16,20 @@ public class DecoratorFactory : IDecoratorFactory
     public Result<IBeverage> Create(string key, IBeverage inner, params object[] args)
     {
         var result = new Result<IBeverage>();
-        if (!_registry.TryGetValue(key, out var reg))
+        if (!_registry.TryGetValue(key, out var registration))
         {
             result.AddError($"Unknown decorator '{key}'");
             return result;
         }
 
-        try
+        var createDecoratorResult = registration.Create(inner, args);
+        if(createDecoratorResult.IsFailure)
         {
-            result.Value = reg.Create(inner, args);
+            result.AddErrors(createDecoratorResult.Errors);
+            return result;
         }
-        catch (Exception ex)
-        {
-            result.AddError($"Failed to apply '{key}': {ex.Message}");
-        }
+        
+        result.Value = createDecoratorResult.Value;
         return result;
     }
 }
