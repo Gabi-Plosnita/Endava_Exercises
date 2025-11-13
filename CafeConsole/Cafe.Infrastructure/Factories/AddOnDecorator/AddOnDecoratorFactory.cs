@@ -6,9 +6,9 @@ public class AddOnDecoratorFactory : IAddOnDecoratorFactory
 {
     private readonly Dictionary<string, IAddOnDecoratorRegistration> _registry;
 
-    public AddOnDecoratorFactory(IEnumerable<IAddOnDecoratorRegistration> regs)
+    public AddOnDecoratorFactory(IEnumerable<IAddOnDecoratorRegistration> registrations)
     {
-        _registry = regs.ToDictionary(r => r.Key, StringComparer.OrdinalIgnoreCase);
+        _registry = registrations.ToDictionary(r => r.Key, StringComparer.OrdinalIgnoreCase);
     }
 
     public IEnumerable<string> Keys => _registry.Keys;
