@@ -7,4 +7,8 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Cafe.Application\Cafe.Application.csproj" />
+  </ItemGroup>
+
 </Project>
