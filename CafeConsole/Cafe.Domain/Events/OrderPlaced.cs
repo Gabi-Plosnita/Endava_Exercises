@@ -8,15 +8,23 @@ public class OrderPlaced
 
     public string BeverageDescription { get; }
 
+    public string StrategyDescription { get; }
+
     public decimal Subtotal { get; }
 
     public decimal Total { get; }
 
-    public OrderPlaced(Guid id, DateTime timestamp, string beverageDescription, decimal subtotal, decimal total)
+    public OrderPlaced(Guid id, 
+                       DateTime timestamp, 
+                       string beverageDescription, 
+                       string strategyDescription, 
+                       decimal subtotal, 
+                       decimal total)
     {
         Id = id;
         Timestamp = timestamp;
         BeverageDescription = beverageDescription;
+        StrategyDescription = strategyDescription;
         Subtotal = subtotal;
         Total = total;
     }
@@ -26,6 +34,7 @@ public class OrderPlaced
             Guid.NewGuid(),
             DateTime.UtcNow,
             beverage.Describe(),
+            pricingStrategy.Description,
             beverage.Cost(),
             pricingStrategy.Apply(beverage.Cost()))
     {
