@@ -2,7 +2,7 @@
 
 namespace Cafe.Application;
 
-public interface IAddOnFactory
+public interface IAddOnDecoratorFactory
 {
     Result<IBeverage> Create(IBeverage baseBeverage, AddOnSelection selection);
 }

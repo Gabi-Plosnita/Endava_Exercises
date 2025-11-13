@@ -2,7 +2,7 @@
 
 namespace Cafe.Application;
 
-public class AddOnFactory : IAddOnFactory
+public class AddOnFactory : IAddOnDecoratorFactory
 {
     private const decimal MilkPrice = 0.40m;
     private const decimal SyrupPrice = 0.50m;
