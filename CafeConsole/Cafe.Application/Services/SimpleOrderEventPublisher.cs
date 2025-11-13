@@ -4,7 +4,12 @@ namespace Cafe.Application;
 
 public class SimpleOrderEventPublisher : IOrderEventPublisher
 {
-    private readonly List<IOrderEventSubscriber> _subscribers = new();
+    private readonly IReadOnlyList<IOrderEventSubscriber> _subscribers;
+
+    public SimpleOrderEventPublisher(IEnumerable<IOrderEventSubscriber> subscribers)
+    {
+        _subscribers = subscribers.ToList().AsReadOnly();
+    }
 
     public void PublishOrderPlaced(OrderPlaced orderPlaced)
     {
@@ -12,15 +17,5 @@ public class SimpleOrderEventPublisher : IOrderEventPublisher
         {
             subscriber.OnOrderPlaced(orderPlaced);
         }
-    }
-
-    public void Subscribe(IOrderEventSubscriber subscriber)
-    {
-        _subscribers.Add(subscriber);
-    }
-
-    public void Unsubscribe(IOrderEventSubscriber subscriber)
-    {
-        _subscribers.Remove(subscriber);
     }
 }
