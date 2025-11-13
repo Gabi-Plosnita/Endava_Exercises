@@ -66,6 +66,7 @@ public class Menu
         var addOns = new List<AddOnSelection>();
         while (true)
         {
+            var validOptionSelected = true;
             string addOnKey = null;
             var args = new List<object>();
 
@@ -74,6 +75,10 @@ public class Menu
             
             switch(input)
             {
+                case "0":
+                    {
+                        break;
+                    }
                 case "1":
                     {
                         addOnKey = "milk";
@@ -94,8 +99,14 @@ public class Menu
                     }
                 default:
                     {
+                        validOptionSelected = false;
                         break;
                     }
+            }
+
+            if(validOptionSelected == false)
+            {
+                continue;
             }
 
             if(addOnKey == null)
