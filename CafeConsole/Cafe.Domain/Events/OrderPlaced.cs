@@ -20,4 +20,14 @@ public class OrderPlaced
         Subtotal = subtotal;
         Total = total;
     }
+
+    public OrderPlaced(IBeverage beverage, IPricingStrategy pricingStrategy)
+        : this(
+            Guid.NewGuid(),
+            DateTime.UtcNow,
+            beverage.Describe(),
+            beverage.Cost(),
+            pricingStrategy.Apply(beverage.Cost()))
+    {
+    }
 }
