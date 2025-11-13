@@ -13,7 +13,7 @@ public class SyrupDecoratorRegistration : IDecoratorRegistration
         _baseCost = baseCost;
     }
 
-    public string Key => "syrup";
+    public string Key => _name.ToLower();
 
     public Result<IBeverage> Create(IBeverage inner, params object[] args)
     {

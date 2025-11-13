@@ -13,7 +13,7 @@ public class MilkDecoratorRegistration : IDecoratorRegistration
         _baseCost = baseCost;
     }
 
-    public string Key => "milk";
+    public string Key => _name.ToLower();
 
     public Result<IBeverage> Create(IBeverage inner, params object[] args)
     {

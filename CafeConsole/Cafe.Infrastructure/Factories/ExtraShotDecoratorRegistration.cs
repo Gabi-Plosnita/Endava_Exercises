@@ -13,7 +13,7 @@ public sealed class ExtraShotDecoratorRegistration : IDecoratorRegistration
         _baseCost = baseCost;
     }
 
-    public string Key => "extrashot";
+    public string Key => _name.ToLower();
 
     public Result<IBeverage> Create(IBeverage inner, params object[] args)
     {
