@@ -2,6 +2,8 @@
 
 public class RegularPricing : IPricingStrategy
 {
+    public string Key => "Regular";
+
     public string Description => "Regular Pricing";
 
     public decimal Apply(decimal cost) => cost;

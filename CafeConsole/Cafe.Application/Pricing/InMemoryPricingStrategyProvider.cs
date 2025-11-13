@@ -4,11 +4,11 @@ namespace Cafe.Application;
 
 public class InMemoryPricingStrategyProvider : IPricingStrategyProvider
 {
-    private readonly IReadOnlyDictionary<string, IPricingStrategy> _strategyDictionary;
+    private readonly Dictionary<string, IPricingStrategy> _strategyDictionary;
 
-    public InMemoryPricingStrategyProvider(IReadOnlyDictionary<string, IPricingStrategy> strategyDictionary)
+    public InMemoryPricingStrategyProvider(IEnumerable<IPricingStrategy> strategies)
     {
-        _strategyDictionary = strategyDictionary;
+        _strategyDictionary = strategies.ToDictionary(s => s.Key, StringComparer.OrdinalIgnoreCase);
     }
 
     public IEnumerable<string> StrategyTypes => _strategyDictionary.Keys;
