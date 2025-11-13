@@ -13,12 +13,12 @@ public class ConsoleOrderLogger : IOrderEventSubscriber
 
     public void OnOrderPlaced(OrderPlaced orderPlaced)
     {
-        string message = $$"""
-            Time:{{orderPlaced.Timestamp:yyyy-MM-dd HH:mm:ss}}
-            Description: {{orderPlaced.BeverageDescription}}
-            Subtotal: {{orderPlaced.Subtotal:0.00}} {{_currency}}
-            Pricing: {{orderPlaced.StrategyDescription}}
-            Total: {{orderPlaced.Total:0.00}} {{_currency}}
+        string message = $"""
+            Time:{orderPlaced.Timestamp:yyyy-MM-dd HH:mm:ss}
+            Description: {orderPlaced.BeverageDescription}
+            Subtotal: {orderPlaced.Subtotal:0.00} {_currency}
+            Pricing: {orderPlaced.StrategyDescription}
+            Total: {orderPlaced.Total:0.00} {_currency}
             ----------------------------------------
             """;
 
