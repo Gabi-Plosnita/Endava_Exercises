@@ -22,7 +22,7 @@ public class Menu
             var pricingStrategy = ChoosePricingStrategy();
 
             var orderRequest = new OrderRequest(
-                BeverageType: beverage,
+                BeverageKey: beverage,
                 AddOns: addOns,
                 PricingStrategyKey: pricingStrategy
             );

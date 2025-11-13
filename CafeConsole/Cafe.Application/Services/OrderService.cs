@@ -28,7 +28,7 @@ public class OrderService : IOrderService
         var pricingStrategyResult = _pricingStrategyProvider.Get(orderRequest.PricingStrategyKey);
         result.AddErrors(pricingStrategyResult.Errors);
 
-        var beverageResult = _beverageFactory.Create(orderRequest.BeverageType);
+        var beverageResult = _beverageFactory.Create(orderRequest.BeverageKey);
         result.AddErrors(beverageResult.Errors);
 
         if (result.IsFailure)
