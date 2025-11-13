@@ -57,4 +57,21 @@ public class AddOnFactory : IAddOnDecoratorFactory
         result.Value = decorator;
         return result;
     }
+
+    public Result<IBeverage> Create(IBeverage baseBeverage, IReadOnlyList<AddOnSelection> addOns)
+    {
+        var result = new Result<IBeverage>();
+        foreach(var addOn in addOns)
+        {
+            var addOnResult = Create(baseBeverage, addOn);
+            if (addOnResult.IsFailure)
+            {
+                result.AddErrors(addOnResult.Errors);
+                return result;
+            }
+            baseBeverage = addOnResult.Value!;
+        }
+        result.Value = baseBeverage;
+        return result;
+    }
 };
