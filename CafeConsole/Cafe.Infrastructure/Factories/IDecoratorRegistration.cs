@@ -5,5 +5,5 @@ namespace Cafe.Infrastructure;
 public interface IDecoratorRegistration
 {
     string Key { get; }
-    IBeverage Create(IBeverage inner, params object[] args);
+    Result<IBeverage> Create(IBeverage inner, params object[] args);
 }
