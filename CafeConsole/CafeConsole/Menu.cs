@@ -94,7 +94,7 @@ public class Menu
                     }
                 case "3":
                     {
-                        addOnKey = "extra_shot";
+                        addOnKey = "extra shot";
                         break;
                     }
                 default:
@@ -129,7 +129,7 @@ public class Menu
             var strategy = input switch
             {
                 "1" => "regular",
-                "2" => "happy_hour",
+                "2" => "happy hour",
                 _ => null
             };
             if (strategy != null)
