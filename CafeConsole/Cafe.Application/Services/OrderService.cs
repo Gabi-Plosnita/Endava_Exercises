@@ -39,7 +39,7 @@ public class OrderService : IOrderService
         var baseBeverage = beverageResult.Value!;
         var pricingStrategy = pricingStrategyResult.Value!;
         
-        var decoratedBeverageResult = _addOnDecoratorFactory.Create(baseBeverage, orderRequest.AddOns);
+        var decoratedBeverageResult = ApplyAddOns(baseBeverage, orderRequest.AddOns);
         result.AddErrors(decoratedBeverageResult.Errors);
         if (result.IsFailure)
         {
@@ -50,6 +50,24 @@ public class OrderService : IOrderService
         var orderPlaced = new OrderPlaced(finalBeverage, pricingStrategy);
         _orderEventPublisher.PublishOrderPlaced(orderPlaced);
 
+        return result;
+    }
+
+    private Result<IBeverage> ApplyAddOns(IBeverage baseBeverage, IEnumerable<AddOnSelection> addOns)
+    {
+        var result = new Result<IBeverage>();
+        IBeverage currentBeverage = baseBeverage;
+        foreach (var addOn in addOns)
+        {
+            var addOnResult = _addOnDecoratorFactory.Create(addOn.AddOnKey, currentBeverage, addOn.Args);
+            result.AddErrors(addOnResult.Errors);
+            if (result.IsFailure)
+            {
+                return result;
+            }
+            currentBeverage = addOnResult.Value!;
+        }
+        result.Value = currentBeverage;
         return result;
     }
 }
