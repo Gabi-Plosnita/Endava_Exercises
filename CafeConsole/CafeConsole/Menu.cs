@@ -89,7 +89,7 @@ public class Menu
                     }
                 case "3":
                     {
-                        addOnKey = "extrashot";
+                        addOnKey = "extra_shot";
                         break;
                     }
                 default:
@@ -117,8 +117,8 @@ public class Menu
             var input = Console.ReadLine();
             var strategy = input switch
             {
-                "1" => "Regular",
-                "2" => "Happy Hour",
+                "1" => "regular",
+                "2" => "happy_hour",
                 _ => null
             };
             if (strategy != null)
