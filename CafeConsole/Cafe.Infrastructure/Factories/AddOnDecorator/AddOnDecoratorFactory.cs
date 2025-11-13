@@ -4,9 +4,9 @@ namespace Cafe.Infrastructure;
 
 public class AddOnDecoratorFactory : IAddOnDecoratorFactory
 {
-    private readonly Dictionary<string, IDecoratorRegistration> _registry;
+    private readonly Dictionary<string, IAddOnDecoratorRegistration> _registry;
 
-    public AddOnDecoratorFactory(IEnumerable<IDecoratorRegistration> regs)
+    public AddOnDecoratorFactory(IEnumerable<IAddOnDecoratorRegistration> regs)
     {
         _registry = regs.ToDictionary(r => r.Key, StringComparer.OrdinalIgnoreCase);
     }

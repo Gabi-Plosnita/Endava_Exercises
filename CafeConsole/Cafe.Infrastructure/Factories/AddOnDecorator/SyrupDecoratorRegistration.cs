@@ -2,7 +2,7 @@
 
 namespace Cafe.Infrastructure;
 
-public class SyrupDecoratorRegistration : IDecoratorRegistration
+public class SyrupDecoratorRegistration : IAddOnDecoratorRegistration
 {
     private readonly string _name;
     private readonly decimal _baseCost;

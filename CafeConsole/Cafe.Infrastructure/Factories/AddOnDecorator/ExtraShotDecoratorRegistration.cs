@@ -2,7 +2,7 @@
 
 namespace Cafe.Infrastructure;
 
-public sealed class ExtraShotDecoratorRegistration : IDecoratorRegistration
+public sealed class ExtraShotDecoratorRegistration : IAddOnDecoratorRegistration
 {
     private readonly string _name;
     private readonly decimal _baseCost;
