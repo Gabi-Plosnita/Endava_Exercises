@@ -2,6 +2,6 @@
 
 public record AddOnSelection(
     AddOnType AddOnType,
-    string? Flavour
+    object[] Args
 );
 
