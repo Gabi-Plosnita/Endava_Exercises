@@ -1,21 +1,15 @@
 ﻿namespace Cafe.Domain;
 
-public class MilkDecorator : IBeverage
+public class MilkDecorator : BaseBeverage
 {
     private readonly IBeverage _inner;
-    private readonly string _name;
-    private readonly decimal _baseCost;
 
-    public MilkDecorator(IBeverage inner, string name, decimal cost)
+    public MilkDecorator(IBeverage inner, string name, decimal cost) : base(name, cost)
     {
         _inner = inner;
-        _name = name;
-        _baseCost = cost;
     }
 
-    public string Name => _name;
+    public override decimal Cost() => _inner.Cost() + _baseCost;
 
-    public decimal Cost() => _inner.Cost() + _baseCost;
-
-    public string Describe() => $"{_inner.Describe()}, {Name}";
+    public override string Describe() => $"{_inner.Describe()}, {Name}";
 }

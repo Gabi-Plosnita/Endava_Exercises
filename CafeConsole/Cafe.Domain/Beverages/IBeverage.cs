@@ -7,4 +7,6 @@ public interface IBeverage
     decimal Cost();
 
     string Describe();
+
+    Result Validate();
 }
