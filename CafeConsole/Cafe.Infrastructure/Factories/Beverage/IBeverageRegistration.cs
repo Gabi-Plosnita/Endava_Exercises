@@ -1,6 +1,6 @@
 ﻿using Cafe.Domain;
 
-namespace Cafe.Infrastructure.Factories;
+namespace Cafe.Infrastructure;
 
 public interface IBeverageRegistration
 {
