@@ -36,19 +36,17 @@ public class OrderService : IOrderService
             return result;
         }
 
-        var finalBeverage = beverageResult.Value!;
+        var baseBeverage = beverageResult.Value!;
         var pricingStrategy = pricingStrategyResult.Value!;
-        foreach (var addOnSelection in orderRequest.AddOns)
+        
+        var decoratedBeverageResult = _addOnDecoratorFactory.Create(baseBeverage, orderRequest.AddOns);
+        result.AddErrors(decoratedBeverageResult.Errors);
+        if (result.IsFailure)
         {
-            var decoratedBeverageResult = _addOnDecoratorFactory.Create(finalBeverage, addOnSelection);
-            result.AddErrors(decoratedBeverageResult.Errors);
-            if (result.IsFailure)
-            {
-                return result;
-            }
-            finalBeverage = decoratedBeverageResult.Value!;
+            return result;
         }
 
+        var finalBeverage = decoratedBeverageResult.Value!;
         var orderPlaced = new OrderPlaced(finalBeverage, pricingStrategy);
         _orderEventPublisher.PublishOrderPlaced(orderPlaced);
 
