@@ -1,5 +1,4 @@
 ﻿using Cafe.Domain;
-using Cafe.Infrastructure.Factories;
 
 namespace Cafe.Infrastructure;
 
