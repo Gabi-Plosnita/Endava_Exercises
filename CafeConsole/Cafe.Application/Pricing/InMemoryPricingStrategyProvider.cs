@@ -4,21 +4,21 @@ namespace Cafe.Application;
 
 public class InMemoryPricingStrategyProvider : IPricingStrategyProvider
 {
-    private readonly IReadOnlyDictionary<PricingStrategyType, IPricingStrategy> _strategyDictionary;
+    private readonly IReadOnlyDictionary<string, IPricingStrategy> _strategyDictionary;
 
-    public InMemoryPricingStrategyProvider(IReadOnlyDictionary<PricingStrategyType, IPricingStrategy> strategyDictionary)
+    public InMemoryPricingStrategyProvider(IReadOnlyDictionary<string, IPricingStrategy> strategyDictionary)
     {
         _strategyDictionary = strategyDictionary;
     }
 
-    public IEnumerable<PricingStrategyType> StrategyTypes => _strategyDictionary.Keys;
+    public IEnumerable<string> StrategyTypes => _strategyDictionary.Keys;
 
-    public Result<IPricingStrategy> Get(PricingStrategyType type)
+    public Result<IPricingStrategy> Get(string key)
     {
         var result = new Result<IPricingStrategy>();
-        if (!_strategyDictionary.TryGetValue(type, out var strategy))
+        if (!_strategyDictionary.TryGetValue(key, out var strategy))
         {
-            result.AddError($"Pricing strategy for type '{type}' not found.");
+            result.AddError($"Pricing strategy for type '{key}' not found.");
             return result;
         }
 
