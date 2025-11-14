@@ -13,7 +13,7 @@ public class HappyHourPricingStrategy : IPricingStrategy
 
     public string Description => DomainConstants.HappyHourPricingDescription(_discountPercentage);
 
-    public decimal Apply(decimal cost)
+    public decimal Calculate(decimal cost)
     {
         return cost - cost * _discountPercentage;
     }

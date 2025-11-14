@@ -6,5 +6,5 @@ public class RegularPricingStrategy : IPricingStrategy
 
     public string Description => DomainConstants.RegularPricingDescription;
 
-    public decimal Apply(decimal cost) => cost;
+    public decimal Calculate(decimal cost) => cost;
 }

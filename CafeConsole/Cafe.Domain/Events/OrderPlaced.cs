@@ -36,7 +36,7 @@ public class OrderPlaced
             beverage.Describe(),
             pricingStrategy.Description,
             beverage.Cost(),
-            pricingStrategy.Apply(beverage.Cost()))
+            pricingStrategy.Calculate(beverage.Cost()))
     {
     }
 }
