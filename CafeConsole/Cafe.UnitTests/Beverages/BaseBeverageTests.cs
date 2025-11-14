@@ -4,48 +4,60 @@ namespace Cafe.UnitTests;
 
 public class BaseBeverageTests
 {
-    public static IEnumerable<object[]> BeverageFactories()
+    public static IEnumerable<object[]> NameTestsData()
     {
         return new List<object[]>
         {
-            new object[] { (Func<string, decimal, IBeverage>) ((name, cost) => new Espresso(name, cost))},
-            new object[] { (Func<string, decimal, IBeverage>) ((name, cost) => new HotChocolate(name, cost))},
-            new object[] { (Func<string, decimal, IBeverage>) ((name, cost) => new Tea(name, cost))}
+            new object[] { new Espresso("Espresso", 2.00m), "Espresso" },
+            new object[] { new HotChocolate("Hot Chocolate", 3.00m), "Hot Chocolate" },
+            new object[] { new Tea("Green Tea", 1.50m), "Green Tea" }
         };
     }
-        
 
-    [Theory]
-    [MemberData(nameof(BeverageFactories))]
-    public void Name_ReturnsGivenName_WhenCalled(Func<string, decimal, IBeverage> createBeverage)
+    public static IEnumerable<object[]> CostTestsData()
     {
-        var beverage = createBeverage("House Special", 2.50m);
+        return new List<object[]>
+        {
+            new object[] { new Espresso("Espresso", 2.00m), 2.00m },
+            new object[] { new HotChocolate("Hot Chocolate", 3.00m), 3.00m },
+            new object[] { new Tea("Green Tea", 1.50m), 1.50m }
+        };
+    }
 
-        var name = beverage.Name;
-
-        Assert.Equal("House Special", name);
+    public static IEnumerable<object[]> DescribeTestsData()
+    {
+        return new List<object[]>
+        {
+            new object[] { new Espresso("Espresso", 2.00m), "Espresso" },
+            new object[] { new HotChocolate("Hot Chocolate", 3.00m), "Hot Chocolate" },
+            new object[] { new Tea("Green Tea", 1.50m), "Green Tea" }
+        };
     }
 
     [Theory]
-    [MemberData(nameof(BeverageFactories))]
-    public void Cost_ReturnsBaseCost_WhenCalled(Func<string, decimal, IBeverage> createBeverage)
+    [MemberData(nameof(NameTestsData))]
+    public void Name_ReturnsGivenName_WhenCalled(IBeverage beverage, string expectedName)
     {
-        var beverage = createBeverage("Whatever", 3.75m);
+        var beverageName = beverage.Name;
 
+        Assert.Equal(beverageName, expectedName);
+    }
+
+    [Theory]
+    [MemberData(nameof(CostTestsData))]
+    public void Cost_ReturnsBaseCost_WhenCalled(IBeverage beverage, decimal expectedCost)
+    {
         var cost = beverage.Cost();
 
-        Assert.Equal(3.75m, cost);
+        Assert.Equal(cost, expectedCost);
     }
 
     [Theory]
-    [MemberData(nameof(BeverageFactories))]
-    public void Describe_ReturnsName_WhenCalled(Func<string, decimal, IBeverage> createBeverage)
+    [MemberData(nameof(DescribeTestsData))]
+    public void Describe_ReturnsName_WhenCalled(IBeverage beverage, string expectedDescription)
     {
-        var beverage = createBeverage("Classic Earl Grey", 4.10m);
-
         var description = beverage.Describe();
 
-        Assert.Equal("Classic Earl Grey", description);
+        Assert.Equal(description, expectedDescription);
     }
-}
 }
