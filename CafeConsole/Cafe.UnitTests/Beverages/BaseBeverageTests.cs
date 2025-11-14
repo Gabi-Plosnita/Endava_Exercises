@@ -4,7 +4,7 @@ namespace Cafe.UnitTests;
 
 public class BaseBeverageTests
 {
-    public static IEnumerable<object[]> NameTestsData()
+    public static IEnumerable<object[]> Name_TestsData()
     {
         return new List<object[]>
         {
@@ -14,7 +14,7 @@ public class BaseBeverageTests
         };
     }
 
-    public static IEnumerable<object[]> CostTestsData()
+    public static IEnumerable<object[]> Cost_TestsData()
     {
         return new List<object[]>
         {
@@ -24,7 +24,7 @@ public class BaseBeverageTests
         };
     }
 
-    public static IEnumerable<object[]> DescribeTestsData()
+    public static IEnumerable<object[]> Describe_TestsData()
     {
         return new List<object[]>
         {
@@ -35,7 +35,7 @@ public class BaseBeverageTests
     }
 
     [Theory]
-    [MemberData(nameof(NameTestsData))]
+    [MemberData(nameof(Name_TestsData))]
     public void Name_ReturnsGivenName_WhenCalled(IBeverage beverage, string expectedName)
     {
         var beverageName = beverage.Name;
@@ -44,7 +44,7 @@ public class BaseBeverageTests
     }
 
     [Theory]
-    [MemberData(nameof(CostTestsData))]
+    [MemberData(nameof(Cost_TestsData))]
     public void Cost_ReturnsBaseCost_WhenCalled(IBeverage beverage, decimal expectedCost)
     {
         var cost = beverage.Cost();
@@ -53,7 +53,7 @@ public class BaseBeverageTests
     }
 
     [Theory]
-    [MemberData(nameof(DescribeTestsData))]
+    [MemberData(nameof(Describe_TestsData))]
     public void Describe_ReturnsName_WhenCalled(IBeverage beverage, string expectedDescription)
     {
         var description = beverage.Describe();
