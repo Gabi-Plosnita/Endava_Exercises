@@ -1,4 +1,5 @@
 ﻿using Cafe.Application;
+using Cafe.Domain;
 
 namespace Cafe.ConsoleUI;
 
@@ -30,11 +31,12 @@ public class Menu
             var orderResult = _orderService.PlaceOrder(orderRequest);
             if (orderResult.IsSuccessful)
             {
-                Console.WriteLine("Order placed successfully!");
+                Console.WriteLine(ConsoleUIConstants.OrderPlacedSuccessfullyMessage);
             }
             else
             {
-                Console.WriteLine($"Failed to place order. {orderResult}");
+                Console.WriteLine(ConsoleUIConstants.FailedToPlaceOrderMessage);
+                Console.WriteLine(orderResult);
             }
 
             shouldAskForOrder = ShouldAskForOrder();
@@ -49,9 +51,9 @@ public class Menu
             var input = Console.ReadLine();
             var beverage = input switch
             {
-                "1" => "Espresso",
-                "2" => "Tea",
-                "3" => "Hot Chocolate",
+                "1" => DomainConstants.Espresso,
+                "2" => DomainConstants.Tea,
+                "3" => DomainConstants.HotChocolate,
                 _ => null
             };
             if (beverage != null)
@@ -70,7 +72,7 @@ public class Menu
             string addOnKey = null;
             var args = new List<object>();
 
-            Console.WriteLine("1) Milk 2) Syrup 3) Extra shot 0) Done");
+            Console.WriteLine("Choose addons: 1) Milk 2) Syrup 3) Extra shot 0) Done");
             var input = Console.ReadLine();
             
             switch(input)
@@ -81,20 +83,20 @@ public class Menu
                     }
                 case "1":
                     {
-                        addOnKey = "milk";
+                        addOnKey = DomainConstants.Milk;
                         break;
                     }
                 case "2":
                     {
-                        addOnKey = "syrup";
-                        Console.WriteLine("Choose flavour:");
+                        addOnKey = DomainConstants.Syrup;
+                        Console.WriteLine(ConsoleUIConstants.ChooseFlavourPrompt);
                         var flavour = Console.ReadLine();
                         args.Add(flavour);
                         break;
                     }
                 case "3":
                     {
-                        addOnKey = "extra shot";
+                        addOnKey = DomainConstants.ExtraShot;
                         break;
                     }
                 default:
@@ -128,8 +130,8 @@ public class Menu
             var input = Console.ReadLine();
             var strategy = input switch
             {
-                "1" => "regular",
-                "2" => "happy hour",
+                "1" => DomainConstants.RegularPricing,
+                "2" => DomainConstants.HappyHourPricing,
                 _ => null
             };
             if (strategy != null)
