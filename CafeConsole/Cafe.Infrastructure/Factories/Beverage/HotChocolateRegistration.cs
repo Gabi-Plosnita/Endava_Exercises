@@ -13,7 +13,7 @@ public class HotChocolateRegistration : IBeverageRegistration
         _baseCost = baseCost;
     }
 
-    public string Key => _name.ToLower();
+    public string Key => _name;
 
     public Result<IBeverage> Create()
     {
