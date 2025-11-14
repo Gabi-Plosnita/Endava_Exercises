@@ -30,7 +30,7 @@ public abstract class BaseBeverage : IBeverage
         var result = new Result();
         if (string.IsNullOrWhiteSpace(_name))
         {
-            result.AddError("Beverage name cannot be null or empty.");
+            result.AddError(DomainConstants.BeverageNameCannotBeEmpty);
         }
         return result;
     }
@@ -40,7 +40,7 @@ public abstract class BaseBeverage : IBeverage
         var result = new Result();
         if (_baseCost <= 0)
         {
-            result.AddError("Beverage cost must be greater than 0.");
+            result.AddError(DomainConstants.BeverageCostMustBeGreaterThanZero);
         }
         return result;
     }

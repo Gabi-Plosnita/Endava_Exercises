@@ -2,9 +2,9 @@
 
 public class RegularPricing : IPricingStrategy
 {
-    public string Key => "Regular";
+    public string Key => DomainConstants.RegularPricing;
 
-    public string Description => "Regular Pricing";
+    public string Description => DomainConstants.RegularPricingDescription;
 
     public decimal Apply(decimal cost) => cost;
 }

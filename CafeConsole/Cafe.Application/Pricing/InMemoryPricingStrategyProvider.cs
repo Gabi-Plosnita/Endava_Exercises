@@ -18,7 +18,8 @@ public class InMemoryPricingStrategyProvider : IPricingStrategyProvider
         var result = new Result<IPricingStrategy>();
         if (!_strategyDictionary.TryGetValue(key, out var strategy))
         {
-            result.AddError($"Pricing strategy for type '{key}' not found.");
+            var message = ApplicationConstants.PricingStrategyNotFound(key);
+            result.AddError(message);
             return result;
         }
 

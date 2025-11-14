@@ -9,9 +9,9 @@ public class HappyHourPricing : IPricingStrategy
         _discountPercentage = discountPercentage;
     }
 
-    public string Key => "Happy Hour";
+    public string Key => DomainConstants.HappyHourPricing;
 
-    public string Description => $"Happy Hour ({_discountPercentage:P0})";
+    public string Description => DomainConstants.HappyHourPricingDescription(_discountPercentage);
 
     public decimal Apply(decimal cost)
     {

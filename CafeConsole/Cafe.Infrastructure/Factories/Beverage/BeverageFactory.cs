@@ -18,7 +18,8 @@ public class BeverageFactory : IBeverageFactory
         var result = new Result<IBeverage>();
         if (!_registry.TryGetValue(key, out var registration))
         {
-            result.AddError($"Unknown beverage '{key}'");
+            var message = InfrastructureConstants.UnknownBeverage(key);
+            result.AddError(message);
             return result;
         }
 

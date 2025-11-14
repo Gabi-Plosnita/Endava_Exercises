@@ -20,7 +20,7 @@ public class SyrupDecorator : BaseBeverage
         var result = base.Validate();
         if (string.IsNullOrWhiteSpace(_flavor))
         {
-            result.AddError("Syrup flavor cannot be null or empty.");
+            result.AddError(DomainConstants.SyrupFlavorRequired);
         }
         return result;
     }   

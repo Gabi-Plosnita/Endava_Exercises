@@ -21,7 +21,7 @@ public class SyrupDecoratorRegistration : IAddOnDecoratorRegistration
 
         if (args.Length == 0 || args[0] is not string flavor || string.IsNullOrWhiteSpace(flavor))
         {
-            result.AddError("Flavor (string) is required for 'syrup' at args[0].");
+            result.AddError(DomainConstants.SyrupFlavorRequired);
             return result;
         }
 

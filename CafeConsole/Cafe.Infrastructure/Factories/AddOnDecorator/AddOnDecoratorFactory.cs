@@ -18,7 +18,8 @@ public class AddOnDecoratorFactory : IAddOnDecoratorFactory
         var result = new Result<IBeverage>();
         if (!_registry.TryGetValue(key, out var registration))
         {
-            result.AddError($"Unknown decorator '{key}'");
+            var message = InfrastructureConstants.UnknownDecorator(key);
+            result.AddError(message);
             return result;
         }
 
