@@ -1,10 +1,10 @@
 ﻿namespace Cafe.Domain;
 
-public class HappyHourPricing : IPricingStrategy
+public class HappyHourPricingStrategy : IPricingStrategy
 {
     private readonly decimal _discountPercentage;
 
-    public HappyHourPricing(decimal discountPercentage)
+    public HappyHourPricingStrategy(decimal discountPercentage)
     {
         _discountPercentage = discountPercentage;
     }

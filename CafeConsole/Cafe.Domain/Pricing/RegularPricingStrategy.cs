@@ -1,6 +1,6 @@
 ﻿namespace Cafe.Domain;
 
-public class RegularPricing : IPricingStrategy
+public class RegularPricingStrategy : IPricingStrategy
 {
     public string Key => DomainConstants.RegularPricing;
 

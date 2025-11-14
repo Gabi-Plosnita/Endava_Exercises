@@ -8,8 +8,8 @@ public static class DependencyInjectionApplication
 {
     public static IServiceCollection RegisterApplication(this IServiceCollection services)
     {
-        services.AddSingleton<IPricingStrategy, RegularPricing>();
-        services.AddSingleton<IPricingStrategy>(sp => new HappyHourPricing(0.2m));
+        services.AddSingleton<IPricingStrategy, RegularPricingStrategy>();
+        services.AddSingleton<IPricingStrategy>(sp => new HappyHourPricingStrategy(0.2m));
         services.AddSingleton<IPricingStrategyProvider, InMemoryPricingStrategyProvider>();
         services.AddSingleton<IOrderEventPublisher, SimpleOrderEventPublisher>();
 
