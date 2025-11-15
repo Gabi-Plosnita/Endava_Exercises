@@ -1,0 +1,11 @@
+Id,Title,Author,Year,Pages,Genre,Finished,Rating
+1,"The Mythical Man-Month","Frederick P. Brooks Jr.",1975,322,"Software","yes",4.4
+12,"Neuromancer","William Gibson",1984,271,"ScienceFiction","no",4.3
+12,"A Game of Thrones","George R.R. Martin",1996,694,"Fantasy","y",4.9
+14,"The Raven","Edgar Allan Poe",1845,64,"Poetry","no",4.5
+15,"Guns, Germs, and Steel","Jared Diamond",1997,480,"History","yes",4.6
+16,"Long Walk to Freedom","Nelson Mandela",1994,656,"Biography","y",4.8
+17,"The 7 Habits of Highly Effective People","Stephen R. Covey",1989,381,"SelfHelp","yes",4.7
+18,"Critique of Pure Reason","Immanuel Kant",1781,856,"Philosophy","no",4.2
+19,"The Clean Coder","Robert C. Martin",2011,256,"Software","y",4.9
+20,"Foundation","Isaac Asimov",1951,255,"ScienceFiction","yes",4.8

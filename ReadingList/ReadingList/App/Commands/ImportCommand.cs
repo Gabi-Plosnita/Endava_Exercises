@@ -1,0 +1,45 @@
+﻿using ReadingList.Domain;
+
+namespace ReadingList.App;
+
+public class ImportCommand(IImportService _importService) : ICommand
+{
+    public string Keyword => Constants.ImportCommandKeyword;
+
+    public string Summary => Constants.ImportCommandSummary;
+
+    public async Task ExecuteAsync(string[] args, CancellationToken ct)
+    {
+        var argumentsValidation = ValidateArgs(args);
+        if (argumentsValidation.IsFailure)
+        {
+            Console.WriteLine(argumentsValidation);
+            return;
+        }
+
+        var result = await _importService.ImportAsync(args, ct);
+
+        if (result.Value != null)
+        {
+            Console.WriteLine(result.Value);
+        }
+
+        if (result.IsFailure)
+        {
+            Console.WriteLine(result);
+            return;
+        }
+
+        Console.WriteLine("Import completed successfully.");
+    }
+
+    private Result ValidateArgs(string[] args)
+    {
+        var result = new Result();
+        if (args.Length == 0)
+        {
+            result.AddError("No import file specified.");
+        }
+        return result;
+    }
+}
