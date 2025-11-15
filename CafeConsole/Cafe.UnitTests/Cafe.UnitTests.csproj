@@ -19,6 +19,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Cafe.Domain\Cafe.Domain.csproj" />
+    <ProjectReference Include="..\Cafe.Infrastructure\Cafe.Infrastructure.csproj" />
   </ItemGroup>
 
   <ItemGroup>
