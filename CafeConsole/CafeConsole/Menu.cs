@@ -56,7 +56,11 @@ public class Menu
                 "3" => DomainConstants.HotChocolate,
                 _ => null
             };
-            if (beverage != null)
+            if(beverage == null)
+            {
+                Console.WriteLine(ConsoleUIConstants.InvalidOptionMessage);
+            }
+            else
             {
                 return beverage;
             }
@@ -106,8 +110,9 @@ public class Menu
                     }
             }
 
-            if(validOptionSelected == false)
+            if (!validOptionSelected)
             {
+                Console.WriteLine(ConsoleUIConstants.InvalidOptionMessage);
                 continue;
             }
 
@@ -134,7 +139,11 @@ public class Menu
                 "2" => DomainConstants.HappyHourPricing,
                 _ => null
             };
-            if (strategy != null)
+            if(strategy == null)
+            {
+                Console.WriteLine(ConsoleUIConstants.InvalidOptionMessage);
+            }
+            else
             {
                 return strategy;
             }
@@ -153,7 +162,11 @@ public class Menu
                 "1" => true,
                 _ => null
             };
-            if(shouldAskForNewOrder != null)
+            if(shouldAskForNewOrder == null)
+            {
+               Console.WriteLine(ConsoleUIConstants.InvalidOptionMessage);
+            }
+            else
             {
                 return shouldAskForNewOrder.Value;
             }
