@@ -47,13 +47,13 @@ public class Menu
     {
         while (true)
         {
-            Console.WriteLine("Choose base: 1) Espresso, 2) Tea, 3) Hot Chocolate");
+            Console.WriteLine(ConsoleUIConstants.ChooseBaseBeverageMessage);
             var input = Console.ReadLine();
             var beverage = input switch
             {
-                "1" => DomainConstants.Espresso,
-                "2" => DomainConstants.Tea,
-                "3" => DomainConstants.HotChocolate,
+                ConsoleUIConstants.EspressoOption => DomainConstants.Espresso,
+                ConsoleUIConstants.TeaOption => DomainConstants.Tea,
+                ConsoleUIConstants.HotChocolateOption => DomainConstants.HotChocolate,
                 _ => null
             };
             if(beverage == null)
@@ -76,21 +76,21 @@ public class Menu
             string addOnKey = null;
             var args = new List<object>();
 
-            Console.WriteLine("Choose addons: 1) Milk 2) Syrup 3) Extra shot 0) Done");
+            Console.WriteLine(ConsoleUIConstants.ChooseAddOnsMessage);
             var input = Console.ReadLine();
             
             switch(input)
             {
-                case "0":
+                case ConsoleUIConstants.DoneOption:
                     {
                         break;
                     }
-                case "1":
+                case ConsoleUIConstants.MilkOption:
                     {
                         addOnKey = DomainConstants.Milk;
                         break;
                     }
-                case "2":
+                case ConsoleUIConstants.SyrupOption:
                     {
                         addOnKey = DomainConstants.Syrup;
                         Console.WriteLine(ConsoleUIConstants.ChooseFlavourPrompt);
@@ -98,7 +98,7 @@ public class Menu
                         args.Add(flavour);
                         break;
                     }
-                case "3":
+                case ConsoleUIConstants.ExtraShotOption:
                     {
                         addOnKey = DomainConstants.ExtraShot;
                         break;
@@ -131,12 +131,12 @@ public class Menu
     {
         while (true)
         {
-            Console.WriteLine("Choose pricing strategy: 1) Regular, 2) Happy Hour");
+            Console.WriteLine(ConsoleUIConstants.ChoosePricingStrategyMessage);
             var input = Console.ReadLine();
             var strategy = input switch
             {
-                "1" => DomainConstants.RegularPricing,
-                "2" => DomainConstants.HappyHourPricing,
+                ConsoleUIConstants.RegularPricingOption => DomainConstants.RegularPricing,
+                ConsoleUIConstants.HappyHourPricingOption => DomainConstants.HappyHourPricing,
                 _ => null
             };
             if(strategy == null)
@@ -154,12 +154,12 @@ public class Menu
     {
         while(true)
         {
-            Console.WriteLine("Choose action: 1) New order 0) Exit");
+            Console.WriteLine(ConsoleUIConstants.AskForAnotherOrderMessage);
             var input = Console.ReadLine();
             bool? shouldAskForNewOrder = input switch
             {
-                "0" => false,
-                "1" => true,
+                ConsoleUIConstants.NoOption => false,
+                ConsoleUIConstants.YesOption => true,
                 _ => null
             };
             if(shouldAskForNewOrder == null)
