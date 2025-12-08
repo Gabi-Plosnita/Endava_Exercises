@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.14.36705.20 d17.14
+VisualStudioVersion = 17.14.36705.20
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AirportTool.WebApi", "AirportTool.WebApi\AirportTool.WebApi.csproj", "{41FF80D0-B2F3-418D-9F81-14273F8F3A23}"
 EndProject
@@ -10,6 +10,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AirportTool.Application", "AirportTool.Application\AirportTool.Application.csproj", "{B3CB8B47-C76E-4414-8F4A-8EEB1EC89E53}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AirportTool.Infrastructure", "AirportTool.Infrastructure\AirportTool.Infrastructure.csproj", "{3671BE16-1345-49B6-A109-39ADB7398410}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "sql", "sql", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
