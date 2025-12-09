@@ -55,7 +55,7 @@ CREATE TABLE dbo.FlightSchedule(
 
 CREATE TABLE dbo.Ticket(
     TicketId BIGINT IDENTITY PRIMARY KEY,
-    FlightId INT NOT NULL REFERENCES dbo.Flight(FlightId),
+    FlightScheduleId INT NOT NULL REFERENCES dbo.FlightSchedule(FlightScheduleId),
     FareClass NVARCHAR(2) NOT NULL,
     BasePrice DECIMAL(10,2) NOT NULL,
     Taxes DECIMAL(10,2) NOT NULL,
@@ -63,15 +63,16 @@ CREATE TABLE dbo.Ticket(
     Currency NCHAR(3) NOT NULL,
     IsRefundable BIT NOT NULL DEFAULT 0,
     SeatInventory INT NOT NULL,
+    RowVersion ROWVERSION NOT NULL,
     CHECK(BasePrice >= 0),
     CHECK(Taxes >= 0),
     CHECK(SeatInventory >= 0),
-    CHECK(FareClass IN ('Y','M','J','F'))
+    CHECK(FareClass IN ('Y','M','J','F')),
+    CONSTRAINT Unique_Ticket_Schedule_FareClass UNIQUE (FlightScheduleId, FareClass)
 );
 
 CREATE TABLE dbo.Booking(
     BookingId BIGINT IDENTITY PRIMARY KEY,
-    FlightScheduleId INT NOT NULL REFERENCES dbo.FlightSchedule(FlightScheduleId),
     TicketId BIGINT NOT NULL REFERENCES dbo.Ticket(TicketId),
     PassengerFullName NVARCHAR(120) NOT NULL,
     PassengerEmail NVARCHAR(120) NOT NULL,
@@ -79,6 +80,7 @@ CREATE TABLE dbo.Booking(
     Quantity INT NOT NULL,
     Status TINYINT NOT NULL,
     CreatedUtc DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
+    RowVersion ROWVERSION NOT NULL,
     CHECK(Quantity > 0),
     CHECK(Status BETWEEN 0 AND 1),
     CHECK(LEN(ConfirmationCode) BETWEEN 6 AND 8
@@ -98,5 +100,8 @@ ON dbo.Flight(OriginAirportId, DestinationAirportId);
 CREATE INDEX IX_FlightSchedule_Flight_Departure
 ON dbo.FlightSchedule(FlightId, ScheduledDepartureUtc);
 
-CREATE INDEX IX_Ticket_Flight_FareClass
-ON dbo.Ticket(FlightId, FareClass);
+CREATE INDEX IX_Ticket_FlightSchedule_FareClass
+ON dbo.Ticket(FlightScheduleId, FareClass);
+
+CREATE INDEX IX_Booking_TicketId
+ON dbo.Booking(TicketId);
