@@ -42,7 +42,7 @@ VALUES
     (2, '2025-01-01T12:00:00', '2025-01-01T14:00:00', 4, 1, 0);  
 
 INSERT INTO dbo.Ticket(
-    FlightId, FareClass, BasePrice, Taxes, Currency,
+    FlightScheduleId, FareClass, BasePrice, Taxes, Currency,
     IsRefundable, SeatInventory
 )
 VALUES
@@ -50,7 +50,7 @@ VALUES
     (1, 'J', 300.00, 40.00, 'USD', 1, 10);   
 
 INSERT INTO dbo.Ticket(
-    FlightId, FareClass, BasePrice, Taxes, Currency,
+    FlightScheduleId, FareClass, BasePrice, Taxes, Currency,
     IsRefundable, SeatInventory
 )
 VALUES
