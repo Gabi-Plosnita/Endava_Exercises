@@ -8,7 +8,7 @@ namespace AirportTool.Infrastructure;
 [Table("Ticket")]
 [Index("FlightScheduleId", "FareClass", Name = "IX_Ticket_FlightSchedule_FareClass")]
 [Index("FlightScheduleId", "FareClass", Name = "Unique_Ticket_Schedule_FareClass", IsUnique = true)]
-public partial class Ticket
+public partial class TicketDb
 {
     [Key]
     public long TicketId { get; set; }
@@ -37,9 +37,9 @@ public partial class Ticket
     public byte[] RowVersion { get; set; } = null!;
 
     [InverseProperty("Ticket")]
-    public virtual ICollection<Booking> Bookings { get; set; } = new List<Booking>();
+    public virtual ICollection<BookingDb> Bookings { get; set; } = new List<BookingDb>();
 
     [ForeignKey("FlightScheduleId")]
     [InverseProperty("Tickets")]
-    public virtual FlightSchedule FlightSchedule { get; set; } = null!;
+    public virtual FlightScheduleDb FlightSchedule { get; set; } = null!;
 }

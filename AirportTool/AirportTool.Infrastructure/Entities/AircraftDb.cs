@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace AirportTool.Infrastructure;
 
 [Index("TailNumber", Name = "UQ__Aircraft__3F41D11BCE3D7A41", IsUnique = true)]
-public partial class Aircraft
+public partial class AircraftDb
 {
     [Key]
     public int AircraftId { get; set; }
@@ -21,12 +21,12 @@ public partial class Aircraft
     public int? OwnedByAirlineId { get; set; }
 
     [InverseProperty("AssignedAircraft")]
-    public virtual ICollection<FlightSchedule> FlightSchedules { get; set; } = new List<FlightSchedule>();
+    public virtual ICollection<FlightScheduleDb> FlightSchedules { get; set; } = new List<FlightScheduleDb>();
 
     [InverseProperty("DefaultAircraft")]
-    public virtual ICollection<Flight> Flights { get; set; } = new List<Flight>();
+    public virtual ICollection<FlightDb> Flights { get; set; } = new List<FlightDb>();
 
     [ForeignKey("OwnedByAirlineId")]
     [InverseProperty("Aircraft")]
-    public virtual Airline? OwnedByAirline { get; set; }
+    public virtual AirlineDb? OwnedByAirline { get; set; }
 }

@@ -6,7 +6,7 @@ namespace AirportTool.Infrastructure;
 
 [Table("Airline")]
 [Index("Iatacode", Name = "UQ__Airline__EFD6F5BEE63D3A0C", IsUnique = true)]
-public partial class Airline
+public partial class AirlineDb
 {
     [Key]
     public int AirlineId { get; set; }
@@ -19,8 +19,8 @@ public partial class Airline
     public string Name { get; set; } = null!;
 
     [InverseProperty("OwnedByAirline")]
-    public virtual ICollection<Aircraft> Aircraft { get; set; } = new List<Aircraft>();
+    public virtual ICollection<AircraftDb> Aircraft { get; set; } = new List<AircraftDb>();
 
     [InverseProperty("Airline")]
-    public virtual ICollection<Flight> Flights { get; set; } = new List<Flight>();
+    public virtual ICollection<FlightDb> Flights { get; set; } = new List<FlightDb>();
 }

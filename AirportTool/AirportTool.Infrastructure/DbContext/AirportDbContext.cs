@@ -14,21 +14,21 @@ public partial class AirportDbContext : DbContext
     {
     }
 
-    public virtual DbSet<Aircraft> Aircraft { get; set; }
+    public virtual DbSet<AircraftDb> Aircraft { get; set; }
 
-    public virtual DbSet<Airline> Airlines { get; set; }
+    public virtual DbSet<AirlineDb> Airlines { get; set; }
 
-    public virtual DbSet<Airport> Airports { get; set; }
+    public virtual DbSet<AirportDb> Airports { get; set; }
 
-    public virtual DbSet<Booking> Bookings { get; set; }
+    public virtual DbSet<BookingDb> Bookings { get; set; }
 
-    public virtual DbSet<Flight> Flights { get; set; }
+    public virtual DbSet<FlightDb> Flights { get; set; }
 
-    public virtual DbSet<FlightSchedule> FlightSchedules { get; set; }
+    public virtual DbSet<FlightScheduleDb> FlightSchedules { get; set; }
 
-    public virtual DbSet<Gate> Gates { get; set; }
+    public virtual DbSet<GateDb> Gates { get; set; }
 
-    public virtual DbSet<Ticket> Tickets { get; set; }
+    public virtual DbSet<TicketDb> Tickets { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
@@ -36,28 +36,28 @@ public partial class AirportDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<Aircraft>(entity =>
+        modelBuilder.Entity<AircraftDb>(entity =>
         {
             entity.HasKey(e => e.AircraftId).HasName("PK__Aircraft__F75CBC6B63B6EE99");
 
             entity.HasOne(d => d.OwnedByAirline).WithMany(p => p.Aircraft).HasConstraintName("FK__Aircraft__OwnedB__2F10007B");
         });
 
-        modelBuilder.Entity<Airline>(entity =>
+        modelBuilder.Entity<AirlineDb>(entity =>
         {
             entity.HasKey(e => e.AirlineId).HasName("PK__Airline__DC4582134EF48B3D");
 
             entity.Property(e => e.Iatacode).IsFixedLength();
         });
 
-        modelBuilder.Entity<Airport>(entity =>
+        modelBuilder.Entity<AirportDb>(entity =>
         {
             entity.HasKey(e => e.AirportId).HasName("PK__Airport__E3DBE0EAA277D700");
 
             entity.Property(e => e.Iatacode).IsFixedLength();
         });
 
-        modelBuilder.Entity<Booking>(entity =>
+        modelBuilder.Entity<BookingDb>(entity =>
         {
             entity.HasKey(e => e.BookingId).HasName("PK__Booking__73951AED7F59B4F5");
 
@@ -71,7 +71,7 @@ public partial class AirportDbContext : DbContext
                 .HasConstraintName("FK__Booking__TicketI__4BAC3F29");
         });
 
-        modelBuilder.Entity<Flight>(entity =>
+        modelBuilder.Entity<FlightDb>(entity =>
         {
             entity.HasKey(e => e.FlightId).HasName("PK__Flight__8A9E14EE588934E6");
 
@@ -94,7 +94,7 @@ public partial class AirportDbContext : DbContext
                 .HasConstraintName("FK__Flight__OriginAi__33D4B598");
         });
 
-        modelBuilder.Entity<FlightSchedule>(entity =>
+        modelBuilder.Entity<FlightScheduleDb>(entity =>
         {
             entity.HasKey(e => e.FlightScheduleId).HasName("PK__FlightSc__AD6AD87CDCDCAB3B");
 
@@ -107,7 +107,7 @@ public partial class AirportDbContext : DbContext
             entity.HasOne(d => d.Gate).WithMany(p => p.FlightSchedules).HasConstraintName("FK__FlightSch__GateI__3C69FB99");
         });
 
-        modelBuilder.Entity<Gate>(entity =>
+        modelBuilder.Entity<GateDb>(entity =>
         {
             entity.HasKey(e => e.GateId).HasName("PK__Gate__9582C65013E36BE3");
 
@@ -116,7 +116,7 @@ public partial class AirportDbContext : DbContext
                 .HasConstraintName("FK__Gate__AirportId__2B3F6F97");
         });
 
-        modelBuilder.Entity<Ticket>(entity =>
+        modelBuilder.Entity<TicketDb>(entity =>
         {
             entity.HasKey(e => e.TicketId).HasName("PK__Ticket__712CC607C4741B68");
 

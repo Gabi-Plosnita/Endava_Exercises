@@ -8,7 +8,7 @@ namespace AirportTool.Infrastructure;
 [Table("Booking")]
 [Index("TicketId", Name = "IX_Booking_TicketId")]
 [Index("ConfirmationCode", Name = "UQ__Booking__196830863801910F", IsUnique = true)]
-public partial class Booking
+public partial class BookingDb
 {
     [Key]
     public long BookingId { get; set; }
@@ -34,5 +34,5 @@ public partial class Booking
 
     [ForeignKey("TicketId")]
     [InverseProperty("Bookings")]
-    public virtual Ticket Ticket { get; set; } = null!;
+    public virtual TicketDb Ticket { get; set; } = null!;
 }
