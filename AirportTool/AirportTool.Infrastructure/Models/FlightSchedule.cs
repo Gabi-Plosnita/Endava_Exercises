@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using AirportTool.Domain;
+using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -21,7 +22,7 @@ public partial class FlightSchedule
 
     public int? AssignedAircraftId { get; set; }
 
-    public byte Status { get; set; }
+    public FlightScheduleStatus Status { get; set; } 
 
     [ForeignKey("AssignedAircraftId")]
     [InverseProperty("FlightSchedules")]

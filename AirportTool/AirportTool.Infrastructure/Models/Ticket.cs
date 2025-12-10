@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using AirportTool.Domain;
+using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -15,7 +16,7 @@ public partial class Ticket
     public int FlightScheduleId { get; set; }
 
     [StringLength(2)]
-    public string FareClass { get; set; } = null!;
+    public FareClass FareClass { get; set; } 
 
     [Column(TypeName = "decimal(10, 2)")]
     public decimal BasePrice { get; set; }

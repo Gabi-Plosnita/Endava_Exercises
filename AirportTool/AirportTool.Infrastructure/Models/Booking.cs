@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using AirportTool.Domain;
+using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -25,7 +26,7 @@ public partial class Booking
 
     public int Quantity { get; set; }
 
-    public byte Status { get; set; }
+    public BookingStatus Status { get; set; } 
 
     public DateTime CreatedUtc { get; set; }
 
