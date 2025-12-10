@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using AirportTool.Domain;
+using Microsoft.EntityFrameworkCore;
 
 namespace AirportTool.Infrastructure;
 
@@ -124,6 +125,13 @@ public partial class AirportDbContext : DbContext
                 .IsRowVersion()
                 .IsConcurrencyToken();
             entity.Property(e => e.TotalPrice).HasComputedColumnSql("([BasePrice]+[Taxes])", true);
+
+            entity.Property(e => e.FareClass)
+        .HasMaxLength(2)
+        .IsRequired()
+        .HasConversion(
+            v => FareClassConverter.FareClassToCode(v),   
+            v => FareClassConverter.CodeToFareClass(v));
 
             entity.HasOne(d => d.FlightSchedule).WithMany(p => p.Tickets)
                 .OnDelete(DeleteBehavior.ClientSetNull)
