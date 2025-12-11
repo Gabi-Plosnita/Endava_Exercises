@@ -2,7 +2,7 @@
 
 namespace AirportTool.Application;
 
-public class FlightReadDto
+public class FlightSearchDto
 {
     public int FlightScheduleId { get; set; }
     public int FlightId { get; set; }
