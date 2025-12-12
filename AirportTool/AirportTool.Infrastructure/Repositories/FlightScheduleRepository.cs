@@ -49,11 +49,6 @@ public class FlightScheduleRepository : EfRepositoryBase<FlightSchedule, FlightS
 
         var query = _context.FlightSchedules
                             .AsNoTracking()
-                            .Include(fs => fs.Flight).ThenInclude(f => f.Airline)
-                            .Include(fs => fs.Flight).ThenInclude(f => f.OriginAirport)
-                            .Include(fs => fs.Flight).ThenInclude(f => f.DestinationAirport)
-                            .Include(fs => fs.Flight).ThenInclude(f => f.DefaultAircraft)
-                            .Include(fs => fs.AssignedAircraft)
                             .Where(fs => fs.Flight.IsActive);
 
         if (!string.IsNullOrWhiteSpace(filter.OriginIata))
