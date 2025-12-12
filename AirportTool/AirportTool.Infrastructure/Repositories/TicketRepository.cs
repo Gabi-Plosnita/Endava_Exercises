@@ -15,11 +15,11 @@ public class TicketRepository : EfRepositoryBase<Ticket, TicketDb, long>, ITicke
         int flightScheduleId,
         CancellationToken cancellationToken = default)
     {
-        var tickets = await _context.Tickets
+        var ticketDbs = await _context.Tickets
                                     .AsNoTracking()
                                     .Where(t => t.FlightScheduleId == flightScheduleId)
                                     .ToListAsync(cancellationToken);
 
-        return _mapper.Map<IReadOnlyCollection<Ticket>>(tickets);
+        return _mapper.Map<IReadOnlyCollection<Ticket>>(ticketDbs);
     }
 }
