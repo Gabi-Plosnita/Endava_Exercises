@@ -22,5 +22,6 @@ public class FlightScheduleSearchDto
 
     public FlightScheduleStatus Status { get; set; }
 
-    public string? AircraftTail { get; set; }
+    public string? AssignedAircraftTail { get; set; }
+    public string? DefaultAircraftTail { get; set; }
 }

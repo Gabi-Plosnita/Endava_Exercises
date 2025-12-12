@@ -69,11 +69,13 @@ public class FlightScheduleRepository : EfRepositoryBase<FlightSchedule, FlightS
 
                                       Status = fs.Status,
 
-                                      AircraftTail = fs.AssignedAircraft != null
-                                                        ? fs.AssignedAircraft.TailNumber
-                                                        : fs.Flight.DefaultAircraft != null
-                                                            ? fs.Flight.DefaultAircraft.TailNumber
-                                                            : null
+                                      DefaultAircraftTail = fs.Flight.DefaultAircraft != null
+                                                                ? fs.Flight.DefaultAircraft.TailNumber
+                                                                : null,
+
+                                      AssignedAircraftTail = fs.AssignedAircraft != null
+                                                                ? fs.AssignedAircraft.TailNumber
+                                                                : null
                                   });
 
         var results = await projectedQuery.ToListAsync(cancellationToken);
