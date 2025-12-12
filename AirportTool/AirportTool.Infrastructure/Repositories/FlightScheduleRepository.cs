@@ -11,9 +11,39 @@ public class FlightScheduleRepository : EfRepositoryBase<FlightSchedule, FlightS
     {
     }
 
+    public Task<FlightScheduleDetailsDto?> GetFlightScheduleDetailsAsync(
+        int flightScheduleId, CancellationToken cancellationToken = default)
+    {
+        return _context.FlightSchedules
+                       .AsNoTracking()
+                       .Where(fs => fs.FlightScheduleId == flightScheduleId)
+                       .Select(fs => new FlightScheduleDetailsDto
+                       {
+                           FlightScheduleId = fs.FlightScheduleId,
+                           FlightId = fs.FlightId,
+                           FlightNumber = fs.Flight.FlightNumber,
+                           AirlineIata = fs.Flight.Airline.Iatacode,
+                           AirlineName = fs.Flight.Airline.Name,
+                           OriginIata = fs.Flight.OriginAirport.Iatacode,
+                           OriginName = fs.Flight.OriginAirport.Name,
+                           DestinationIata = fs.Flight.DestinationAirport.Iatacode,
+                           DestinationName = fs.Flight.DestinationAirport.Name,
+                           ScheduledDepartureUtc = fs.ScheduledDepartureUtc,
+                           ScheduledArrivalUtc = fs.ScheduledArrivalUtc,
+                           Status = fs.Status,
+                           AssignedAircraftTail = fs.AssignedAircraft != null
+                                                   ? fs.AssignedAircraft.TailNumber
+                                                   : null,
+                           DefaultAircraftTail = fs.Flight.DefaultAircraft != null
+                                                   ? fs.Flight.DefaultAircraft.TailNumber
+                                                   : null,
+                           GateCode = fs.Gate != null ? fs.Gate.Code : null
+                       })
+                       .FirstOrDefaultAsync(cancellationToken);
+    }
+
     public async Task<IReadOnlyCollection<FlightScheduleSearchDto>> GetFilteredFlightSchedulesAsync(
-        FlightFilterDto filter,
-        CancellationToken cancellationToken = default)
+        FlightFilterDto filter, CancellationToken cancellationToken = default)
     {
         var skip = (filter.PageIndex - 1) * filter.PageSize;
 
