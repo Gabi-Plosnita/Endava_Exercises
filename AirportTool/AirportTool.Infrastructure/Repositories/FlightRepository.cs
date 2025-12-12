@@ -10,6 +10,7 @@ public class FlightRepository : EfRepositoryBase<Flight, FlightDb, int>, IFlight
     public FlightRepository(AirportDbContext context, IMapper mapper) : base(context, mapper)
     {
     }
+
     public async Task<IReadOnlyCollection<FlightSearchDto>> GetFilteredFlightsAsync(
         FlightFilterDto filter,
         CancellationToken cancellationToken = default)
