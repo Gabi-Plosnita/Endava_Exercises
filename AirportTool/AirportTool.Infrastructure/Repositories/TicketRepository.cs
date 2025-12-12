@@ -12,8 +12,7 @@ public class TicketRepository : EfRepositoryBase<Ticket, TicketDb, long>, ITicke
     }
 
     public async Task<IReadOnlyCollection<Ticket>> GetTicketsByFlightScheduleIdAsync(
-        int flightScheduleId,
-        CancellationToken cancellationToken = default)
+        int flightScheduleId, CancellationToken cancellationToken = default)
     {
         var ticketDbs = await _context.Tickets
                                     .AsNoTracking()
