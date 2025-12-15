@@ -9,7 +9,10 @@ public class UnitOfWork : IUnitOfWork, IAsyncDisposable
     public IFlightScheduleRepository FlightSchedules { get; }
     public ITicketRepository Tickets { get; }
     public IBookingRepository Bookings { get; }
-    public IAirlineRepository Airline { get; }
+    public IAirlineRepository Airlines { get; }
+    public IAirportRepository Airports { get; }
+    public IAircraftRepository Aircrafts { get; }
+
 
     public UnitOfWork(
         AirportDbContext context,
@@ -17,14 +20,18 @@ public class UnitOfWork : IUnitOfWork, IAsyncDisposable
         IFlightScheduleRepository flightScheduleRepository,
         ITicketRepository ticketRepository,
         IBookingRepository bookingRepository,
-        IAirlineRepository airlineRepository)
+        IAirlineRepository airlineRepository,
+        IAirportRepository airportRepository,
+        IAircraftRepository aircraftRepository)
     {
         _context = context;
         Flights = flightRepository;
         FlightSchedules = flightScheduleRepository;
         Tickets = ticketRepository;
         Bookings = bookingRepository;
-        Airline = airlineRepository;
+        Airlines = airlineRepository;
+        Airports = airportRepository;
+        Aircrafts = aircraftRepository;
     }
 
     public Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
