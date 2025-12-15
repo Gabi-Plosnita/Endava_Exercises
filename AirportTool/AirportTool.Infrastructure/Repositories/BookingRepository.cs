@@ -11,13 +11,14 @@ public class BookingRepository : EfRepositoryBase<Booking, BookingDb, long>, IBo
     {
     }
 
-    public async Task<Booking?> GetByConfirmationCodeAsync(
-        string confirmationCode, CancellationToken cancellationToken = default)
+    public async Task<Flight?> GetFlightByAirlineAndFlightNumberAsync(
+        string airlineIataCode, string flightNumber, CancellationToken cancellationToken = default)
     {
-        var bookingDb = await _context.Bookings
-                                      .AsNoTracking()
-                                      .SingleOrDefaultAsync(b => b.ConfirmationCode == confirmationCode, cancellationToken);
-       
-        return _mapper.Map<Booking>(bookingDb);
+        var flightDb = await _context.Flights
+                                     .AsNoTracking()
+                                     .Where(f => f.FlightNumber == flightNumber && f.Airline.Iatacode == airlineIataCode)
+                                     .FirstOrDefaultAsync(cancellationToken);
+
+        return _mapper.Map<Flight>(flightDb);
     }
 }
