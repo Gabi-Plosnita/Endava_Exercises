@@ -2,7 +2,7 @@
 
 public interface IFlightService
 {
-    Task<Result<GetFlightDto?>> GetByIdAsync(int flightId, CancellationToken cancellationToken);
+    Task<GetFlightDto?> GetByIdAsync(int flightId, CancellationToken cancellationToken);
 
     Task<Result<GetFlightDto?>> CreateAsync(CreateFlightDto dto, CancellationToken cancellationToken);
 
