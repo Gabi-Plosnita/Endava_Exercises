@@ -2,7 +2,7 @@
 
 namespace AirportTool.Infrastructure;
 
-public sealed class UnitOfWork : IUnitOfWork, IAsyncDisposable
+public class UnitOfWork : IUnitOfWork, IAsyncDisposable
 {
     private readonly AirportDbContext _context;
     public IFlightRepository Flights { get; }
