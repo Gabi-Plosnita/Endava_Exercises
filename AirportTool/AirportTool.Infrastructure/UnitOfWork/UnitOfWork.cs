@@ -9,19 +9,22 @@ public sealed class UnitOfWork : IUnitOfWork, IAsyncDisposable
     public IFlightScheduleRepository FlightSchedules { get; }
     public ITicketRepository Tickets { get; }
     public IBookingRepository Bookings { get; }
+    public IAirlineRepository Airline { get; }
 
     public UnitOfWork(
         AirportDbContext context,
         IFlightRepository flightRepository,
         IFlightScheduleRepository flightScheduleRepository,
         ITicketRepository ticketRepository,
-        IBookingRepository bookingRepository)
+        IBookingRepository bookingRepository,
+        IAirlineRepository airlineRepository)
     {
         _context = context;
         Flights = flightRepository;
         FlightSchedules = flightScheduleRepository;
         Tickets = ticketRepository;
         Bookings = bookingRepository;
+        Airline = airlineRepository;
     }
 
     public Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
