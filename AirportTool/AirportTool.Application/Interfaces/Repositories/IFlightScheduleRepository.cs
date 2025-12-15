@@ -12,4 +12,7 @@ public interface IFlightScheduleRepository : IRepository<FlightSchedule, int>
 
     Task<IReadOnlyCollection<FlightScheduleSearchDto>> GetFilteredFlightSchedulesAsync(
         FlightFilterDto filter, CancellationToken cancellationToken = default);
+
+    Task<IReadOnlyList<DailyFlightStatsDto>> GetDailyStatsAsync(
+        DateTime startUtc, DateTime endUtc, CancellationToken cancellationToken = default);
 }
