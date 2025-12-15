@@ -21,4 +21,15 @@ public class FlightRepository : EfRepositoryBase<Flight, FlightDb, int>, IFlight
 
         return _mapper.Map<Flight>(flightDb);
     }
+
+    public async Task<Flight> GetByAirlineIdAndFlightNumberAsync(
+        int airlineId, string flightNumber, CancellationToken cancellationToken = default)
+    {
+        var flightDb = await _context.Flights
+                                     .AsNoTracking()
+                                     .Where(f => f.AirlineId == airlineId && f.FlightNumber == flightNumber)
+                                     .SingleOrDefaultAsync(cancellationToken);
+
+        return _mapper.Map<Flight>(flightDb);
+    }
 }
