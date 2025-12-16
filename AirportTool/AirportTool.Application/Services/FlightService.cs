@@ -72,51 +72,16 @@ public class FlightService : IFlightService
     {
         var result = new Result<Flight?>();
 
-        if (IsValidFlightNumber(dto.FlightNumber))
-        {
-            result.AddError($"FlightNumber '{dto.FlightNumber}' has invalid format. It must be letters followed by numbers.");
-        }
-
-        if (dto.OriginAirportIataCode == dto.DestinationAirportIataCode)
-        {
-            result.AddError("Origin and Destination airports must be different");
-        }
-
-        var airline = await _unitOfWork.Airlines.GetByIataCodeAsync(dto.AirlineIataCode, cancellationToken);
-        if (airline == null)
-        {
-            result.AddError($"Airline with IataCode {dto.AirlineIataCode} not found");
-        }
-        else
-        {
-            var existingFlight = await _unitOfWork.Flights.GetByAirlineIdAndFlightNumberAsync(airline.Id, dto.FlightNumber, cancellationToken);
-
-            if (existingFlight != null)
-            {
-                result.AddError($"Flight with FlightNumber {dto.FlightNumber} already exists for Airline {dto.AirlineIataCode}");
-            }
-        }
-
-        var originAirport = await _unitOfWork.Airports.GetByIataCodeAsync(dto.OriginAirportIataCode, cancellationToken);
-        if (originAirport == null)
-        {
-            result.AddError($"Airport with IataCode {dto.OriginAirportIataCode} not found");
-        }
-
-        var destinationAirport = await _unitOfWork.Airports.GetByIataCodeAsync(dto.DestinationAirportIataCode, cancellationToken);
-        if (destinationAirport == null)
-        {
-            result.AddError($"Airport with IataCode {dto.DestinationAirportIataCode} not found");
-        }
-
+        ValidateFlightNumber(dto.FlightNumber, result);
+        ValidateOriginAndDestinationAirports(dto.OriginAirportIataCode, dto.DestinationAirportIataCode, result);
+        var airline = await ValidateAirlineExistsAsync(dto.AirlineIataCode, result, cancellationToken);
+        await ValidateFlightDoesNotExistAsync(airline.Id, dto.FlightNumber, result, cancellationToken);
+        var originAirport = await ValidateAirportExistsAsync(dto.OriginAirportIataCode, result, cancellationToken);
+        var destinationAirport = await ValidateAirportExistsAsync(dto.DestinationAirportIataCode, result, cancellationToken);
         Aircraft? defaultAircraftTail = null;
         if (dto.DefaultAircraftTail != null)
         {
-            defaultAircraftTail = await _unitOfWork.Aircrafts.GetByTailNumberAsync(dto.DefaultAircraftTail, cancellationToken);
-            if (defaultAircraftTail == null)
-            {
-                result.AddError($"Aircraft with TailNumber {dto.DefaultAircraftTail} not found");
-            }
+            defaultAircraftTail = await ValidateAircraftExistsAsync(dto.DefaultAircraftTail, result, cancellationToken);
         }
 
         if (result.IsFailure)
@@ -137,12 +102,63 @@ public class FlightService : IFlightService
         return result;
     }
 
-    private bool IsValidFlightNumber(string flightNumber)
+    private void ValidateFlightNumber(string flightNumber, Result result)
     {
         if (string.IsNullOrWhiteSpace(flightNumber))
         {
-            return false;
+            result.AddError("FlightNumber is required.");
+            return;
         }
-        return Regex.IsMatch(flightNumber, @"^[A-Za-z]+[0-9]+$");
+        if (!Regex.IsMatch(flightNumber, @"^[A-Za-z]+[0-9]+$"))
+        {
+            result.AddError("FlightNumber must be letters followed by numbers.");
+        }
+    }
+
+    private void ValidateOriginAndDestinationAirports(string originIataCode, string destinationIataCode, Result result)
+    {
+        if (originIataCode == destinationIataCode)
+        {
+            result.AddError("Origin and Destination airports must be different.");
+        }
+    }
+
+    private async Task<Airline?> ValidateAirlineExistsAsync(string iataCode, Result result, CancellationToken cancellationToken)
+    {
+        var airline = await _unitOfWork.Airlines.GetByIataCodeAsync(iataCode, cancellationToken);
+        if (airline == null)
+        {
+            result.AddError($"Airline with IataCode {iataCode} not found.");
+        }
+        return airline;
+    }
+
+    private async Task ValidateFlightDoesNotExistAsync(int airlineId, string flightNumber, Result result, CancellationToken cancellationToken)
+    {
+        var flight = await _unitOfWork.Flights.GetByAirlineIdAndFlightNumberAsync(airlineId, flightNumber, cancellationToken);
+        if(flight != null)
+        {
+            result.AddError("Flight already exists");
+        }
+    }
+
+    private async Task<Airport?> ValidateAirportExistsAsync(string iataCode, Result result, CancellationToken cancellationToken)
+    {
+        var airport = await _unitOfWork.Airports.GetByIataCodeAsync(iataCode, cancellationToken);
+        if (airport == null)
+        {
+            result.AddError($"Airport with IataCode {iataCode} not found.");
+        }
+        return airport;
+    }
+
+    private async Task<Aircraft?> ValidateAircraftExistsAsync(string tailNumber, Result result, CancellationToken cancellationToken)
+    {
+        var aircraft = await _unitOfWork.Aircrafts.GetByTailNumberAsync(tailNumber, cancellationToken);
+        if(aircraft == null)
+        {
+            result.AddError($"Aircraft with TailNumber {tailNumber} not found");
+        }
+        return aircraft;
     }
 }
