@@ -37,7 +37,6 @@ public class FlightService : IFlightService
         await _unitOfWork.Flights.AddAsync(flight, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
         result.Value = _mapper.Map<GetFlightDto>(flight);
-
         return result;
     }
 
@@ -48,13 +47,19 @@ public class FlightService : IFlightService
 
     public async Task<Result> DeleteByIdAsync(int flightId, CancellationToken cancellationToken)
     {
-        // Verify no flight schedules exist for this flight before deletion
         var result = new Result();
 
         var flight = await _unitOfWork.Flights.GetByIdAsync(flightId, cancellationToken);
         if (flight == null)
         {
             result.AddError($"Flight with ID {flightId} not found.");
+            return result;
+        }
+
+        var hasAssociatedSchedules = await _unitOfWork.Flights.HasAnyFlightSchedulesAsync(flightId, cancellationToken);
+        if (hasAssociatedSchedules)
+        {
+            result.AddError($"Flight with ID {flightId} cannot be deleted because it has associated schedules.");
             return result;
         }
 
@@ -128,7 +133,6 @@ public class FlightService : IFlightService
             DefaultAircraftId = defaultAircraftTail?.Id,
             IsActive = dto.IsActive
         };
-
         result.Value = flight;
         return result;
     }
