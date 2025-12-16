@@ -67,7 +67,42 @@ public class FlightService : IFlightService
 
     public async Task<Result> UpdateAsync(int flightId, CreateFlightDto dto, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        var result = new Result();
+
+        var flight = await ValidateFlightExistsAsync(flightId, result, cancellationToken);
+        if (result.IsFailure || flight == null)
+        {
+            return result;
+        }
+
+        ValidateFlightNumber(dto.FlightNumber, result);
+        ValidateOriginAndDestinationAirportsAreDifferent(dto.OriginAirportIataCode, dto.DestinationAirportIataCode, result);
+
+        var airline = await ValidateAirlineExistsAsync(dto.AirlineIataCode, result, cancellationToken);
+        var originAirport = await ValidateAirportExistsAsync(dto.OriginAirportIataCode, result, cancellationToken);
+        var destinationAirport = await ValidateAirportExistsAsync(dto.DestinationAirportIataCode, result, cancellationToken);
+
+        Aircraft? defaultAircraftTail = null;
+        if (dto.DefaultAircraftTail != null)
+        {
+            defaultAircraftTail = await ValidateAircraftExistsAsync(dto.DefaultAircraftTail, result, cancellationToken);
+        }
+
+        if (result.IsFailure)
+        {
+            return result;
+        }
+
+        flight.FlightNumber = dto.FlightNumber;
+        flight.AirlineId = airline!.Id;
+        flight.OriginAirportId = originAirport!.Id;
+        flight.DestinationAirportId = destinationAirport!.Id;
+        flight.DefaultAircraftId = defaultAircraftTail?.Id;
+        flight.IsActive = dto.IsActive;
+
+        await _unitOfWork.Flights.UpdateAsync(flight, cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+        return result;
     }
 
     public async Task<Result> DeleteByIdAsync(int flightId, CancellationToken cancellationToken)
