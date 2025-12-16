@@ -26,13 +26,38 @@ public class FlightService : IFlightService
     {
         var result = new Result<GetFlightDto?>();
 
-        var flightValidationResult = await ValidateAndBuildFlightAsync(dto, cancellationToken);
-        var flight = flightValidationResult.Value;
-        if (flightValidationResult.IsFailure || flight == null)
+        ValidateFlightNumber(dto.FlightNumber, result);
+        ValidateOriginAndDestinationAirportsAreDifferent(dto.OriginAirportIataCode, dto.DestinationAirportIataCode, result);
+
+        var airline = await ValidateAirlineExistsAsync(dto.AirlineIataCode, result, cancellationToken);
+        if(airline != null)
         {
-            result.AddErrors(flightValidationResult.Errors);
+            await ValidateFlightDoesNotExistAsync(airline.Id, dto.FlightNumber, result, cancellationToken);
+        }
+
+        var originAirport = await ValidateAirportExistsAsync(dto.OriginAirportIataCode, result, cancellationToken);
+        var destinationAirport = await ValidateAirportExistsAsync(dto.DestinationAirportIataCode, result, cancellationToken);
+
+        Aircraft? defaultAircraftTail = null;
+        if (dto.DefaultAircraftTail != null)
+        {
+            defaultAircraftTail = await ValidateAircraftExistsAsync(dto.DefaultAircraftTail, result, cancellationToken);
+        }
+
+        if (result.IsFailure)
+        {
             return result;
         }
+
+        var flight = new Flight
+        {
+            FlightNumber = dto.FlightNumber,
+            AirlineId = airline!.Id,
+            OriginAirportId = originAirport!.Id,
+            DestinationAirportId = destinationAirport!.Id,
+            DefaultAircraftId = defaultAircraftTail?.Id,
+            IsActive = dto.IsActive
+        };
 
         await _unitOfWork.Flights.AddAsync(flight, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
@@ -68,40 +93,6 @@ public class FlightService : IFlightService
         return result;
     }
 
-    private async Task<Result<Flight?>> ValidateAndBuildFlightAsync(CreateFlightDto dto, CancellationToken cancellationToken)
-    {
-        var result = new Result<Flight?>();
-
-        ValidateFlightNumber(dto.FlightNumber, result);
-        ValidateOriginAndDestinationAirports(dto.OriginAirportIataCode, dto.DestinationAirportIataCode, result);
-        var airline = await ValidateAirlineExistsAsync(dto.AirlineIataCode, result, cancellationToken);
-        await ValidateFlightDoesNotExistAsync(airline.Id, dto.FlightNumber, result, cancellationToken);
-        var originAirport = await ValidateAirportExistsAsync(dto.OriginAirportIataCode, result, cancellationToken);
-        var destinationAirport = await ValidateAirportExistsAsync(dto.DestinationAirportIataCode, result, cancellationToken);
-        Aircraft? defaultAircraftTail = null;
-        if (dto.DefaultAircraftTail != null)
-        {
-            defaultAircraftTail = await ValidateAircraftExistsAsync(dto.DefaultAircraftTail, result, cancellationToken);
-        }
-
-        if (result.IsFailure)
-        {
-            return result;
-        }
-
-        var flight = new Flight
-        {
-            FlightNumber = dto.FlightNumber,
-            AirlineId = airline!.Id,
-            OriginAirportId = originAirport!.Id,
-            DestinationAirportId = destinationAirport!.Id,
-            DefaultAircraftId = defaultAircraftTail?.Id,
-            IsActive = dto.IsActive
-        };
-        result.Value = flight;
-        return result;
-    }
-
     private void ValidateFlightNumber(string flightNumber, Result result)
     {
         if (string.IsNullOrWhiteSpace(flightNumber))
@@ -115,7 +106,7 @@ public class FlightService : IFlightService
         }
     }
 
-    private void ValidateOriginAndDestinationAirports(string originIataCode, string destinationIataCode, Result result)
+    private void ValidateOriginAndDestinationAirportsAreDifferent(string originIataCode, string destinationIataCode, Result result)
     {
         if (originIataCode == destinationIataCode)
         {
