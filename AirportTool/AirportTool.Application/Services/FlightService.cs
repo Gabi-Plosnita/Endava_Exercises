@@ -32,7 +32,7 @@ public class FlightService : IFlightService
         var airline = await ValidateAirlineExistsAsync(dto.AirlineIataCode, result, cancellationToken);
         if (airline != null)
         {
-            await ValidateFlightDoesNotExistAsync(airline.Id, dto.FlightNumber, result, cancellationToken);
+            await ValidateFlightIsUniqueForAirlineAsync(null, airline.Id, dto.FlightNumber, result, cancellationToken);
         }
 
         var originAirport = await ValidateAirportExistsAsync(dto.OriginAirportIataCode, result, cancellationToken);
@@ -79,6 +79,11 @@ public class FlightService : IFlightService
         ValidateOriginAndDestinationAirportsAreDifferent(dto.OriginAirportIataCode, dto.DestinationAirportIataCode, result);
 
         var airline = await ValidateAirlineExistsAsync(dto.AirlineIataCode, result, cancellationToken);
+        if (airline != null)
+        {
+            await ValidateFlightIsUniqueForAirlineAsync(flightId, airline.Id, dto.FlightNumber, result, cancellationToken);
+        }
+
         var originAirport = await ValidateAirportExistsAsync(dto.OriginAirportIataCode, result, cancellationToken);
         var destinationAirport = await ValidateAirportExistsAsync(dto.DestinationAirportIataCode, result, cancellationToken);
 
@@ -157,14 +162,17 @@ public class FlightService : IFlightService
         return airline;
     }
 
-    private async Task ValidateFlightDoesNotExistAsync(int airlineId, string flightNumber, Result result, CancellationToken cancellationToken)
+    private async Task ValidateFlightIsUniqueForAirlineAsync(
+        int? currentFlightId, int airlineId, string flightNumber, Result result, CancellationToken cancellationToken)
     {
-        var flight = await _unitOfWork.Flights.GetByAirlineIdAndFlightNumberAsync(airlineId, flightNumber, cancellationToken);
-        if(flight != null)
+        var existingFlight = await _unitOfWork.Flights.GetByAirlineIdAndFlightNumberAsync(airlineId, flightNumber, cancellationToken);
+
+        if (existingFlight != null && existingFlight.Id != currentFlightId)
         {
-            result.AddError("Flight already exists");
+            result.AddError("Another flight with the same FlightNumber already exists for this airline.");
         }
     }
+
 
     private async Task<Flight?> ValidateFlightExistsAsync(int flightId, Result result, CancellationToken cancellationToken)
     {
