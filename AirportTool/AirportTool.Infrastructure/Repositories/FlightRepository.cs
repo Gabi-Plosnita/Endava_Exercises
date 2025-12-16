@@ -32,4 +32,11 @@ public class FlightRepository : EfRepositoryBase<Flight, FlightDb, int>, IFlight
 
         return _mapper.Map<Flight>(flightDb);
     }
+
+    public async Task<bool> HasAnyFlightSchedulesAsync(int flightId, CancellationToken cancellationToken = default)
+    {
+        return await _context.FlightSchedules
+                             .AsNoTracking()
+                             .AnyAsync(fs => fs.FlightId == flightId, cancellationToken);
+    }
 }
