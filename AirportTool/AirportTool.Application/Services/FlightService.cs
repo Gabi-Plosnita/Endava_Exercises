@@ -30,7 +30,7 @@ public class FlightService : IFlightService
         ValidateOriginAndDestinationAirportsAreDifferent(dto.OriginAirportIataCode, dto.DestinationAirportIataCode, result);
 
         var airline = await ValidateAirlineExistsAsync(dto.AirlineIataCode, result, cancellationToken);
-        if(airline != null)
+        if (airline != null)
         {
             await ValidateFlightDoesNotExistAsync(airline.Id, dto.FlightNumber, result, cancellationToken);
         }
@@ -74,17 +74,15 @@ public class FlightService : IFlightService
     {
         var result = new Result();
 
-        var flight = await _unitOfWork.Flights.GetByIdAsync(flightId, cancellationToken);
-        if (flight == null)
-        {
-            result.AddError($"Flight with ID {flightId} not found.");
-            return result;
+        var flight = await ValidateFlightExistsAsync(flightId, result, cancellationToken);
+        if (result.IsFailure || flight == null) 
+        { 
+            return result; 
         }
 
-        var hasAssociatedSchedules = await _unitOfWork.Flights.HasAnyFlightSchedulesAsync(flightId, cancellationToken);
-        if (hasAssociatedSchedules)
+        await ValidateFlightHasNoAssociatedFlightSchedulesAsync(flightId, result, cancellationToken);
+        if (result.IsFailure)
         {
-            result.AddError($"Flight with ID {flightId} cannot be deleted because it has associated schedules.");
             return result;
         }
 
@@ -133,6 +131,16 @@ public class FlightService : IFlightService
         }
     }
 
+    private async Task<Flight?> ValidateFlightExistsAsync(int flightId, Result result, CancellationToken cancellationToken)
+    {
+        var flight = await _unitOfWork.Flights.GetByIdAsync(flightId, cancellationToken);
+        if (flight == null)
+        {
+            result.AddError($"Flight with ID {flightId} not found.");
+        }
+        return flight;
+    }
+
     private async Task<Airport?> ValidateAirportExistsAsync(string iataCode, Result result, CancellationToken cancellationToken)
     {
         var airport = await _unitOfWork.Airports.GetByIataCodeAsync(iataCode, cancellationToken);
@@ -151,5 +159,14 @@ public class FlightService : IFlightService
             result.AddError($"Aircraft with TailNumber {tailNumber} not found");
         }
         return aircraft;
+    }
+
+    private async Task ValidateFlightHasNoAssociatedFlightSchedulesAsync(int flightId, Result result, CancellationToken cancellationToken)
+    {
+        var hasAssociatedSchedules = await _unitOfWork.Flights.HasAnyFlightSchedulesAsync(flightId, cancellationToken);
+        if (hasAssociatedSchedules)
+        {
+            result.AddError($"Flight with ID {flightId} cannot be deleted because it has associated schedules.");
+        }
     }
 }
