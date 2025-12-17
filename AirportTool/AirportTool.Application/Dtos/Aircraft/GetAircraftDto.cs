@@ -2,6 +2,8 @@
 
 public class GetAircraftDto
 {
+    public int AircraftId { get; set; }
+
     public string TailNumber { get; set; } = null!;
 
     public string Model { get; set; } = null!;
