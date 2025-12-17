@@ -20,8 +20,7 @@ public class FlightService : IFlightService
 
     public async Task<GetFlightDto?> GetByIdAsync(int flightId, CancellationToken cancellationToken)
     {
-        var flight = await _unitOfWork.Flights.GetByIdAsync(flightId, cancellationToken);
-        var getFlightDto = _mapper.Map<GetFlightDto>(flight);
+        var getFlightDto = await _unitOfWork.Flights.GetFlightDtoByIdAsync(flightId, cancellationToken);
         var found = getFlightDto != null;
         LogGetById(flightId, found);
         return getFlightDto;
