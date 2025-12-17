@@ -53,10 +53,11 @@ public class FlightScheduleRepository : EfRepositoryBase<FlightSchedule, FlightS
                        .FirstOrDefaultAsync(cancellationToken);
     }
 
-    public async Task<IReadOnlyList<FlightScheduleSearchDto>> GetFilteredFlightSchedulesAsync(
-        FlightFilterDto filter, CancellationToken cancellationToken)
+    public async Task<PagedResult<FlightScheduleSearchDto>> GetFilteredFlightSchedulesAsync(
+    FlightFilterDto filter,
+    CancellationToken cancellationToken)
     {
-        var skip = (filter.PageIndex - 1) * filter.PageSize;
+        var skip = filter.PageIndex * filter.PageSize;
 
         var query = _context.FlightSchedules
                             .AsNoTracking()
@@ -82,41 +83,49 @@ public class FlightScheduleRepository : EfRepositoryBase<FlightSchedule, FlightS
                 fs.ScheduledDepartureUtc < dateEnd);
         }
 
-        var projectedQuery = query.OrderBy(fs => fs.ScheduledDepartureUtc)
-                                  .Skip(skip)
-                                  .Take(filter.PageSize)
-                                  .Select(fs => new FlightScheduleSearchDto
-                                  {
-                                      FlightScheduleId = fs.FlightScheduleId,
-                                      FlightId = fs.FlightId,
-                                      FlightNumber = fs.Flight.FlightNumber,
+        var totalCount = await query.CountAsync(cancellationToken);
 
-                                      AirlineIata = fs.Flight.Airline.Iatacode,
-                                      AirlineName = fs.Flight.Airline.Name,
+        var items = await query
+            .OrderBy(fs => fs.ScheduledDepartureUtc)
+            .Skip(skip)
+            .Take(filter.PageSize)
+            .Select(fs => new FlightScheduleSearchDto
+            {
+                FlightScheduleId = fs.FlightScheduleId,
+                FlightId = fs.FlightId,
+                FlightNumber = fs.Flight.FlightNumber,
 
-                                      OriginIata = fs.Flight.OriginAirport.Iatacode,
-                                      OriginName = fs.Flight.OriginAirport.Name,
+                AirlineIata = fs.Flight.Airline.Iatacode,
+                AirlineName = fs.Flight.Airline.Name,
 
-                                      DestinationIata = fs.Flight.DestinationAirport.Iatacode,
-                                      DestinationName = fs.Flight.DestinationAirport.Name,
+                OriginIata = fs.Flight.OriginAirport.Iatacode,
+                OriginName = fs.Flight.OriginAirport.Name,
 
-                                      ScheduledDepartureUtc = fs.ScheduledDepartureUtc,
-                                      ScheduledArrivalUtc = fs.ScheduledArrivalUtc,
+                DestinationIata = fs.Flight.DestinationAirport.Iatacode,
+                DestinationName = fs.Flight.DestinationAirport.Name,
 
-                                      Status = fs.Status,
+                ScheduledDepartureUtc = fs.ScheduledDepartureUtc,
+                ScheduledArrivalUtc = fs.ScheduledArrivalUtc,
 
-                                      DefaultAircraftTail = fs.Flight.DefaultAircraft != null
-                                                                ? fs.Flight.DefaultAircraft.TailNumber
-                                                                : null,
+                Status = fs.Status,
 
-                                      AssignedAircraftTail = fs.AssignedAircraft != null
-                                                                ? fs.AssignedAircraft.TailNumber
-                                                                : null
-                                  });
+                DefaultAircraftTail = fs.Flight.DefaultAircraft != null
+                    ? fs.Flight.DefaultAircraft.TailNumber
+                    : null,
 
-        var results = await projectedQuery.ToListAsync(cancellationToken);
+                AssignedAircraftTail = fs.AssignedAircraft != null
+                    ? fs.AssignedAircraft.TailNumber
+                    : null
+            })
+            .ToListAsync(cancellationToken);
 
-        return results;
+        return new PagedResult<FlightScheduleSearchDto>
+        {
+            Items = items,
+            TotalCount = totalCount,
+            PageIndex = filter.PageIndex,
+            PageSize = filter.PageSize
+        };
     }
 
     public async Task<IReadOnlyList<DailyFlightStatsDto>> GetDailyStatsAsync(
@@ -124,7 +133,7 @@ public class FlightScheduleRepository : EfRepositoryBase<FlightSchedule, FlightS
     {
         var flightScheduleDbs = await _context.FlightSchedules
                                               .AsNoTracking()
-                                              .Where(fs => fs.ScheduledDepartureUtc >= startUtc 
+                                              .Where(fs => fs.ScheduledDepartureUtc >= startUtc
                                                            && fs.ScheduledDepartureUtc <= endUtc)
                                               .ToListAsync(cancellationToken);
 

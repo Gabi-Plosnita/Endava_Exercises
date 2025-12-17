@@ -10,7 +10,7 @@ public interface IFlightScheduleRepository : IRepository<FlightSchedule, int>
     Task<FlightScheduleDetailsDto?> GetFlightScheduleDetailsAsync(
         int flightScheduleId, CancellationToken cancellationToken);
 
-    Task<IReadOnlyList<FlightScheduleSearchDto>> GetFilteredFlightSchedulesAsync(
+    Task<PagedResult<FlightScheduleSearchDto>> GetFilteredFlightSchedulesAsync(
         FlightFilterDto filter, CancellationToken cancellationToken);
 
     Task<IReadOnlyList<DailyFlightStatsDto>> GetDailyStatsAsync(
