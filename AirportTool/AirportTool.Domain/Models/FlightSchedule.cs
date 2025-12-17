@@ -2,7 +2,7 @@
 
 public class FlightSchedule
 {
-    public int Id { get; set; }
+    public int FlightScheduleId { get; set; }
 
     public int FlightId { get; set; }
 

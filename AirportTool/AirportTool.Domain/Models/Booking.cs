@@ -2,7 +2,7 @@
 
 public class Booking
 {
-    public long Id { get; set; }
+    public long BookingId { get; set; }
 
     public long TicketId { get; set; }
 

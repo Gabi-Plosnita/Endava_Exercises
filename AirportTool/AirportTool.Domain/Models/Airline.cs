@@ -2,7 +2,7 @@
 
 public class Airline
 {
-    public int Id { get; set; }
+    public int AirlineId { get; set; }
 
     public string Iatacode { get; set; } = null!;
 

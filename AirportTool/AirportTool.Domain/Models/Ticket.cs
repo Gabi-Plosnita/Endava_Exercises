@@ -2,7 +2,7 @@
 
 public class Ticket
 {
-    public long Id { get; set; }
+    public long TicketId { get; set; }
 
     public int FlightScheduleId { get; set; }
 

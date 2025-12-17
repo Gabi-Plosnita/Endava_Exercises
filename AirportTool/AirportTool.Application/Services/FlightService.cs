@@ -37,7 +37,7 @@ public class FlightService : IFlightService
         var airline = await ValidateAirlineExistsAsync(dto.AirlineIataCode, result, cancellationToken);
         if (airline != null)
         {
-            await ValidateFlightIsUniqueForAirlineAsync(null, airline.Id, dto.FlightNumber, result, cancellationToken);
+            await ValidateFlightIsUniqueForAirlineAsync(null, airline.AirlineId, dto.FlightNumber, result, cancellationToken);
         }
 
         var originAirport = await ValidateAirportExistsAsync(dto.OriginAirportIataCode, result, cancellationToken);
@@ -58,15 +58,15 @@ public class FlightService : IFlightService
         var flight = new Flight
         {
             FlightNumber = dto.FlightNumber,
-            AirlineId = airline!.Id,
-            OriginAirportId = originAirport!.Id,
-            DestinationAirportId = destinationAirport!.Id,
-            DefaultAircraftId = defaultAircraft?.Id,
+            AirlineId = airline!.AirlineId,
+            OriginAirportId = originAirport!.AirportId,
+            DestinationAirportId = destinationAirport!.AirportId,
+            DefaultAircraftId = defaultAircraft?.AircraftId,
             IsActive = dto.IsActive
         };
 
         await _unitOfWork.Flights.AddAndSaveAsync(flight, cancellationToken);
-        var getFlightDto = await _unitOfWork.Flights.GetFlightDtoByIdAsync(flight.Id, cancellationToken);
+        var getFlightDto = await _unitOfWork.Flights.GetFlightDtoByIdAsync(flight.FlightId, cancellationToken);
         result.Value = getFlightDto;
 
         LogCreateSuccess(flight);
@@ -91,7 +91,7 @@ public class FlightService : IFlightService
         var airline = await ValidateAirlineExistsAsync(dto.AirlineIataCode, result, cancellationToken);
         if (airline != null)
         {
-            await ValidateFlightIsUniqueForAirlineAsync(flightId, airline.Id, dto.FlightNumber, result, cancellationToken);
+            await ValidateFlightIsUniqueForAirlineAsync(flightId, airline.AirlineId, dto.FlightNumber, result, cancellationToken);
         }
 
         var originAirport = await ValidateAirportExistsAsync(dto.OriginAirportIataCode, result, cancellationToken);
@@ -110,10 +110,10 @@ public class FlightService : IFlightService
         }
 
         flight.FlightNumber = dto.FlightNumber;
-        flight.AirlineId = airline!.Id;
-        flight.OriginAirportId = originAirport!.Id;
-        flight.DestinationAirportId = destinationAirport!.Id;
-        flight.DefaultAircraftId = defaultAircraft?.Id;
+        flight.AirlineId = airline!.AirlineId;
+        flight.OriginAirportId = originAirport!.AirportId;
+        flight.DestinationAirportId = destinationAirport!.AirportId;
+        flight.DefaultAircraftId = defaultAircraft?.AircraftId;
         flight.IsActive = dto.IsActive;
 
         await _unitOfWork.Flights.UpdateAsync(flight, cancellationToken);
@@ -205,7 +205,7 @@ public class FlightService : IFlightService
     {
         var existingFlight = await _unitOfWork.Flights.GetByAirlineIdAndFlightNumberAsync(airlineId, flightNumber, cancellationToken);
 
-        if (existingFlight != null && existingFlight.Id != currentFlightId)
+        if (existingFlight != null && existingFlight.FlightId != currentFlightId)
         {
             var error = new Error
             {
@@ -329,7 +329,7 @@ public class FlightService : IFlightService
                 DestinationId={DestinationId},
                 DefaultAircraftId={DefaultAircraftId},
                 IsActive={IsActive}",
-            flight.Id,
+            flight.FlightId,
             flight.AirlineId,
             flight.FlightNumber,
             flight.OriginAirportId,
@@ -377,7 +377,7 @@ public class FlightService : IFlightService
                 FlightId={FlightId},
                 AirlineId={AirlineId},
                 FlightNumber={FlightNumber}",
-            flight.Id,
+            flight.FlightId,
             flight.AirlineId,
             flight.FlightNumber);
     }

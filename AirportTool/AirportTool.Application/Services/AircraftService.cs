@@ -54,7 +54,7 @@ public class AircraftService : IAircraftService
             TailNumber = dto.TailNumber,
             Model = dto.Model,
             SeatCapacity = dto.SeatCapacity,
-            OwnedByAirlineId = airline?.Id
+            OwnedByAirlineId = airline?.AirlineId
         };
 
         await _unitOfWork.Aircrafts.AddAsync(aircraft, cancellationToken);

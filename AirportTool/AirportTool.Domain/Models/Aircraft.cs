@@ -2,7 +2,7 @@
 
 public class Aircraft
 {
-    public int Id { get; set; }
+    public int AircraftId { get; set; }
 
     public string TailNumber { get; set; } = null!;
 

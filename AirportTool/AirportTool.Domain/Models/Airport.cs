@@ -2,7 +2,7 @@
 
 public class Airport
 {
-    public int Id { get; set; }
+    public int AirportId { get; set; }
 
     public string Iatacode { get; set; } = null!;
 
