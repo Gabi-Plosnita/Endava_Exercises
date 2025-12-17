@@ -65,9 +65,9 @@ public class FlightService : IFlightService
             IsActive = dto.IsActive
         };
 
-        await _unitOfWork.Flights.AddAsync(flight, cancellationToken);
-        await _unitOfWork.SaveChangesAsync(cancellationToken);
-        result.Value = _mapper.Map<GetFlightDto>(flight);
+        await _unitOfWork.Flights.AddAndSaveAsync(flight, cancellationToken);
+        var getFlightDto = await _unitOfWork.Flights.GetFlightDtoByIdAsync(flight.Id, cancellationToken);
+        result.Value = getFlightDto;
 
         LogCreateSuccess(flight);
         return result;
