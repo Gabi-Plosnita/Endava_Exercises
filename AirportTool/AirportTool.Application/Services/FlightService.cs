@@ -264,22 +264,28 @@ public class FlightService : IFlightService
     private void LogCreateStart(CreateFlightDto dto)
     {
         _logger.LogInformation(
-            "Creating flight {@FlightInfo}",
-             new
-             {
-                 dto.AirlineIataCode,
-                 dto.FlightNumber,
-                 dto.OriginAirportIataCode,
-                 dto.DestinationAirportIataCode,
-                 dto.DefaultAircraftTail,
-                 dto.IsActive
-             });
+            @"Creating flight:
+                Airline={AirlineIata},
+                FlightNumber={FlightNumber},
+                Origin={Origin},
+                Destination={Destination},
+                DefaultAircraftTail={DefaultTail},
+                IsActive={IsActive}",
+            dto.AirlineIataCode,
+            dto.FlightNumber,
+            dto.OriginAirportIataCode,
+            dto.DestinationAirportIataCode,
+            dto.DefaultAircraftTail,
+            dto.IsActive);
     }
 
     private void LogCreateFailure(CreateFlightDto dto, Result result)
     {
         _logger.LogWarning(
-            "Create flight failed for Airline={AirlineIata}, FlightNumber={FlightNumber}. Errors: {@Errors}",
+            @"Create flight failed:
+                Airline={AirlineIata},
+                FlightNumber={FlightNumber},
+                Errors={Errors}",
             dto.AirlineIataCode,
             dto.FlightNumber,
             result.Errors);
@@ -288,37 +294,51 @@ public class FlightService : IFlightService
     private void LogCreateSuccess(Flight flight)
     {
         _logger.LogInformation(
-            "Flight created successfully {@FlightInfo}",
-            new
-            {
-                flight.Id,
-                flight.AirlineId,
-                flight.FlightNumber,
-                flight.OriginAirportId,
-                flight.DestinationAirportId
-            });
+            @"Flight created successfully:
+                FlightId={FlightId},
+                AirlineId={AirlineId},
+                FlightNumber={FlightNumber},
+                OriginId={OriginId},
+                DestinationId={DestinationId},
+                DefaultAircraftId={DefaultAircraftId},
+                IsActive={IsActive}",
+            flight.Id,
+            flight.AirlineId,
+            flight.FlightNumber,
+            flight.OriginAirportId,
+            flight.DestinationAirportId,
+            flight.DefaultAircraftId,
+            flight.IsActive);
     }
+
 
     private void LogUpdateStart(int flightId, UpdateFlightDto dto)
     {
         _logger.LogInformation(
-            "Updating flight {@FlightUpdateInfo}",
-            new
-            {
-                FlightId = flightId,
-                dto.AirlineIataCode,
-                dto.FlightNumber,
-                dto.OriginAirportIataCode,
-                dto.DestinationAirportIataCode,
-                dto.DefaultAircraftTail,
-                dto.IsActive
-            });
+            @"Updating flight:
+                FlightId={FlightId},
+                Airline={AirlineIata},
+                FlightNumber={FlightNumber},
+                Origin={Origin},
+                Destination={Destination},
+                DefaultAircraftTail={DefaultTail},
+                IsActive={IsActive}",
+            flightId,
+            dto.AirlineIataCode,
+            dto.FlightNumber,
+            dto.OriginAirportIataCode,
+            dto.DestinationAirportIataCode,
+            dto.DefaultAircraftTail,
+            dto.IsActive);
     }
+
 
     private void LogUpdateFailure(int flightId, Result result)
     {
         _logger.LogWarning(
-            "Update flight failed for FlightId={FlightId}. Errors: {@Errors}",
+            @"Update flight failed:
+                FlightId={FlightId},
+                Errors={Errors}",
             flightId,
             result.Errors);
     }
@@ -326,7 +346,10 @@ public class FlightService : IFlightService
     private void LogUpdateSuccess(Flight flight)
     {
         _logger.LogInformation(
-            "Flight updated successfully: FlightId={FlightId}, AirlineId={AirlineId}, FlightNumber={FlightNumber}",
+            @"Flight updated successfully:
+                FlightId={FlightId},
+                AirlineId={AirlineId},
+                FlightNumber={FlightNumber}",
             flight.Id,
             flight.AirlineId,
             flight.FlightNumber);
