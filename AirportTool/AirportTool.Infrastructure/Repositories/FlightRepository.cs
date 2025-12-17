@@ -11,6 +11,27 @@ public class FlightRepository : EfRepositoryBase<Flight, FlightDb, int>, IFlight
     {
     }
 
+    public Task<GetFlightDto?> GetFlightDtoByIdAsync(int flightId, CancellationToken cancellationToken)
+    {
+        return _context.Flights
+                       .AsNoTracking()
+                       .Where(f => f.FlightId == flightId)
+                       .Select(f => new GetFlightDto
+                       {
+                           FlightId = f.FlightId,
+                           FlightNumber = f.FlightNumber,
+                           AirlineIata = f.Airline.Iatacode,
+                           AirlineName = f.Airline.Name,
+                           OriginIata = f.OriginAirport.Iatacode,
+                           OriginName = f.OriginAirport.Name,
+                           DestinationIata = f.DestinationAirport.Iatacode,
+                           DestinationName = f.DestinationAirport.Name,
+                           DefaultAircraftTail = f.DefaultAircraft != null ? f.DefaultAircraft.TailNumber : null,
+                           IsActive = f.IsActive
+                       })
+                       .SingleOrDefaultAsync(cancellationToken);
+    }
+
     public async Task<Flight?> GetFlightByAirlineAndFlightNumberAsync(
         string airlineIataCode, string flightNumber, CancellationToken cancellationToken)
     {
