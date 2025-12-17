@@ -22,12 +22,14 @@ public class FlightService : IFlightService
     {
         var flight = await _unitOfWork.Flights.GetByIdAsync(flightId, cancellationToken);
         var getFlightDto = _mapper.Map<GetFlightDto>(flight);
+        LogGetById(flightId, getFlightDto != null);
         return getFlightDto;
     }
 
     public async Task<Result<GetFlightDto?>> CreateAsync(CreateFlightDto dto, CancellationToken cancellationToken)
     {
         var result = new Result<GetFlightDto?>();
+        LogCreateStart(dto);
 
         ValidateFlightNumber(dto.FlightNumber, result);
         ValidateOriginAndDestinationAirportsAreDifferent(dto.OriginAirportIataCode, dto.DestinationAirportIataCode, result);
@@ -41,14 +43,15 @@ public class FlightService : IFlightService
         var originAirport = await ValidateAirportExistsAsync(dto.OriginAirportIataCode, result, cancellationToken);
         var destinationAirport = await ValidateAirportExistsAsync(dto.DestinationAirportIataCode, result, cancellationToken);
 
-        Aircraft? defaultAircraftTail = null;
+        Aircraft? defaultAircraft = null;
         if (dto.DefaultAircraftTail != null)
         {
-            defaultAircraftTail = await ValidateAircraftExistsAsync(dto.DefaultAircraftTail, result, cancellationToken);
+            defaultAircraft = await ValidateAircraftExistsAsync(dto.DefaultAircraftTail, result, cancellationToken);
         }
 
         if (result.IsFailure)
         {
+            LogCreateFailure(dto, result);
             return result;
         }
 
@@ -58,23 +61,27 @@ public class FlightService : IFlightService
             AirlineId = airline!.Id,
             OriginAirportId = originAirport!.Id,
             DestinationAirportId = destinationAirport!.Id,
-            DefaultAircraftId = defaultAircraftTail?.Id,
+            DefaultAircraftId = defaultAircraft?.Id,
             IsActive = dto.IsActive
         };
 
         await _unitOfWork.Flights.AddAsync(flight, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
         result.Value = _mapper.Map<GetFlightDto>(flight);
+
+        LogCreateSuccess(flight);
         return result;
     }
 
     public async Task<Result> UpdateAsync(int flightId, UpdateFlightDto dto, CancellationToken cancellationToken)
     {
         var result = new Result();
+        LogUpdateStart(flightId, dto);
 
         var flight = await ValidateFlightExistsAsync(flightId, result, cancellationToken);
         if (result.IsFailure || flight == null)
         {
+            LogUpdateFailure(flightId, result);
             return result;
         }
 
@@ -90,14 +97,15 @@ public class FlightService : IFlightService
         var originAirport = await ValidateAirportExistsAsync(dto.OriginAirportIataCode, result, cancellationToken);
         var destinationAirport = await ValidateAirportExistsAsync(dto.DestinationAirportIataCode, result, cancellationToken);
 
-        Aircraft? defaultAircraftTail = null;
+        Aircraft? defaultAircraft = null;
         if (dto.DefaultAircraftTail != null)
         {
-            defaultAircraftTail = await ValidateAircraftExistsAsync(dto.DefaultAircraftTail, result, cancellationToken);
+            defaultAircraft = await ValidateAircraftExistsAsync(dto.DefaultAircraftTail, result, cancellationToken);
         }
 
         if (result.IsFailure)
         {
+            LogUpdateFailure(flightId, result);
             return result;
         }
 
@@ -105,32 +113,39 @@ public class FlightService : IFlightService
         flight.AirlineId = airline!.Id;
         flight.OriginAirportId = originAirport!.Id;
         flight.DestinationAirportId = destinationAirport!.Id;
-        flight.DefaultAircraftId = defaultAircraftTail?.Id;
+        flight.DefaultAircraftId = defaultAircraft?.Id;
         flight.IsActive = dto.IsActive;
 
         await _unitOfWork.Flights.UpdateAsync(flight, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        LogUpdateSuccess(flight);
         return result;
     }
 
     public async Task<Result> DeleteByIdAsync(int flightId, CancellationToken cancellationToken)
     {
         var result = new Result();
+        LogDeleteStart(flightId);
 
         var flight = await ValidateFlightExistsAsync(flightId, result, cancellationToken);
         if (result.IsFailure || flight == null)
         {
+            LogDeleteFailure(flightId, result);
             return result;
         }
 
         await ValidateFlightHasNoAssociatedFlightSchedulesAsync(flightId, result, cancellationToken);
         if (result.IsFailure)
         {
+            LogDeleteFailure(flightId, result);
             return result;
         }
 
         await _unitOfWork.Flights.RemoveAsync(flight, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        LogDeleteSuccess(flightId);
         return result;
     }
 
@@ -261,6 +276,18 @@ public class FlightService : IFlightService
         }
     }
 
+    private void LogGetById(int flightId, bool found)
+    {
+        if (found)
+        {
+            _logger.LogDebug("Retrieved flight with ID {FlightId}.", flightId);
+        }
+        else
+        {
+            _logger.LogDebug("Flight with ID {FlightId} not found.", flightId);
+        }
+    }
+
     private void LogCreateStart(CreateFlightDto dto)
     {
         _logger.LogInformation(
@@ -357,19 +384,27 @@ public class FlightService : IFlightService
 
     private void LogDeleteStart(int flightId)
     {
-        _logger.LogInformation("Deleting flight with ID {FlightId}.", flightId);
+        _logger.LogInformation(
+            @"Deleting flight:
+                FlightId={FlightId}",
+            flightId);
     }
 
     private void LogDeleteFailure(int flightId, Result result)
     {
         _logger.LogWarning(
-            "Delete flight failed for FlightId={FlightId}. Errors: {@Errors}",
+            @"Delete flight failed:
+                FlightId={FlightId},
+                Errors={Errors}",
             flightId,
             result.Errors);
     }
 
     private void LogDeleteSuccess(int flightId)
     {
-        _logger.LogInformation("Flight deleted successfully: FlightId={FlightId}", flightId);
+        _logger.LogInformation(
+            @"Flight deleted successfully:
+                FlightId={FlightId}",
+            flightId);
     }
 }
