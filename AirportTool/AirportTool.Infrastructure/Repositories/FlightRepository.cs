@@ -60,4 +60,13 @@ public class FlightRepository : EfRepositoryBase<Flight, FlightDb, int>, IFlight
                              .AsNoTracking()
                              .AnyAsync(fs => fs.FlightId == flightId, cancellationToken);
     }
+
+    public async Task<Flight> AddAndSaveAsync(Flight flight, CancellationToken cancellationToken)
+    {
+        var flightDb = _mapper.Map<FlightDb>(flight);
+        await _context.Flights.AddAsync(flightDb, cancellationToken);
+        await _context.SaveChangesAsync(cancellationToken);
+        _mapper.Map(flightDb, flight);
+        return flight;
+    }
 }

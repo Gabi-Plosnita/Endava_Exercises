@@ -13,4 +13,6 @@ public interface IFlightRepository : IRepository<Flight, int>
         int airlineId, string flightNumber, CancellationToken cancellationToken);
 
     Task<bool> HasAnyFlightSchedulesAsync(int flightId, CancellationToken cancellationToken);
+
+    Task<Flight> AddAndSaveAsync(Flight flight, CancellationToken cancellationToken);
 }
