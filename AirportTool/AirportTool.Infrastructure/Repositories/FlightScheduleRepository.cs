@@ -53,7 +53,7 @@ public class FlightScheduleRepository : EfRepositoryBase<FlightSchedule, FlightS
                        .FirstOrDefaultAsync(cancellationToken);
     }
 
-    public async Task<IReadOnlyCollection<FlightScheduleSearchDto>> GetFilteredFlightSchedulesAsync(
+    public async Task<IReadOnlyList<FlightScheduleSearchDto>> GetFilteredFlightSchedulesAsync(
         FlightFilterDto filter, CancellationToken cancellationToken)
     {
         var skip = (filter.PageIndex - 1) * filter.PageSize;

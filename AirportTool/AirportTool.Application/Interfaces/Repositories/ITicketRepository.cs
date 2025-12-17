@@ -4,6 +4,6 @@ namespace AirportTool.Application;
 
 public interface ITicketRepository : IRepository<Ticket, long>
 {
-    Task<IReadOnlyCollection<Ticket>> GetTicketsByFlightScheduleIdAsync(
+    Task<IReadOnlyList<Ticket>> GetTicketsByFlightScheduleIdAsync(
         int flightScheduleId, CancellationToken cancellationToken);
 }

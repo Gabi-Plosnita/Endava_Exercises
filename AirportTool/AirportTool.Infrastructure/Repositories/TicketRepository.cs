@@ -11,7 +11,7 @@ public class TicketRepository : EfRepositoryBase<Ticket, TicketDb, long>, ITicke
     {
     }
 
-    public async Task<IReadOnlyCollection<Ticket>> GetTicketsByFlightScheduleIdAsync(
+    public async Task<IReadOnlyList<Ticket>> GetTicketsByFlightScheduleIdAsync(
         int flightScheduleId, CancellationToken cancellationToken)
     {
         var ticketDbs = await _context.Tickets
@@ -19,6 +19,6 @@ public class TicketRepository : EfRepositoryBase<Ticket, TicketDb, long>, ITicke
                                     .Where(t => t.FlightScheduleId == flightScheduleId)
                                     .ToListAsync(cancellationToken);
 
-        return _mapper.Map<IReadOnlyCollection<Ticket>>(ticketDbs);
+        return _mapper.Map<IReadOnlyList<Ticket>>(ticketDbs);
     }
 }
