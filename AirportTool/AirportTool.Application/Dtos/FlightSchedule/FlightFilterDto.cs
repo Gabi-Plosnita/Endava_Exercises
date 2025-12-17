@@ -1,6 +1,6 @@
 ﻿namespace AirportTool.Application;
 
-public class FlightFilterDto : PagedQueryDto
+public class FlightFilterDto : BaseFilterDto
 {
     public string? OriginIata { get; init; }
     public string? DestinationIata { get; init; }
