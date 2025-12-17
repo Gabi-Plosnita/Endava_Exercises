@@ -1,17 +1,19 @@
 ﻿using AirportTool.Domain;
 using AutoMapper;
+using Microsoft.Extensions.Logging;
 using System.Text.RegularExpressions;
 
 namespace AirportTool.Application;
 
 public class FlightService : IFlightService
 {
-    //Add loggging //
+    private readonly ILogger<FlightService> _logger;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
 
-    public FlightService(IUnitOfWork unitOfWork, IMapper mapper)
+    public FlightService(ILogger<FlightService> logger, IUnitOfWork unitOfWork, IMapper mapper)
     {
+        _logger = logger;
         _unitOfWork = unitOfWork;
         _mapper = mapper;
     }
@@ -116,9 +118,9 @@ public class FlightService : IFlightService
         var result = new Result();
 
         var flight = await ValidateFlightExistsAsync(flightId, result, cancellationToken);
-        if (result.IsFailure || flight == null) 
-        { 
-            return result; 
+        if (result.IsFailure || flight == null)
+        {
+            return result;
         }
 
         await ValidateFlightHasNoAssociatedFlightSchedulesAsync(flightId, result, cancellationToken);
@@ -233,7 +235,7 @@ public class FlightService : IFlightService
     private async Task<Aircraft?> ValidateAircraftExistsAsync(string tailNumber, Result result, CancellationToken cancellationToken)
     {
         var aircraft = await _unitOfWork.Aircrafts.GetByTailNumberAsync(tailNumber, cancellationToken);
-        if(aircraft == null)
+        if (aircraft == null)
         {
             var error = new Error
             {
@@ -257,5 +259,94 @@ public class FlightService : IFlightService
             };
             result.AddError(error);
         }
+    }
+
+    private void LogCreateStart(CreateFlightDto dto)
+    {
+        _logger.LogInformation(
+            "Creating flight {@FlightInfo}",
+             new
+             {
+                 dto.AirlineIataCode,
+                 dto.FlightNumber,
+                 dto.OriginAirportIataCode,
+                 dto.DestinationAirportIataCode,
+                 dto.DefaultAircraftTail,
+                 dto.IsActive
+             });
+    }
+
+    private void LogCreateFailure(CreateFlightDto dto, Result result)
+    {
+        _logger.LogWarning(
+            "Create flight failed for Airline={AirlineIata}, FlightNumber={FlightNumber}. Errors: {@Errors}",
+            dto.AirlineIataCode,
+            dto.FlightNumber,
+            result.Errors);
+    }
+
+    private void LogCreateSuccess(Flight flight)
+    {
+        _logger.LogInformation(
+            "Flight created successfully {@FlightInfo}",
+            new
+            {
+                flight.Id,
+                flight.AirlineId,
+                flight.FlightNumber,
+                flight.OriginAirportId,
+                flight.DestinationAirportId
+            });
+    }
+
+    private void LogUpdateStart(int flightId, UpdateFlightDto dto)
+    {
+        _logger.LogInformation(
+            "Updating flight {@FlightUpdateInfo}",
+            new
+            {
+                FlightId = flightId,
+                dto.AirlineIataCode,
+                dto.FlightNumber,
+                dto.OriginAirportIataCode,
+                dto.DestinationAirportIataCode,
+                dto.DefaultAircraftTail,
+                dto.IsActive
+            });
+    }
+
+    private void LogUpdateFailure(int flightId, Result result)
+    {
+        _logger.LogWarning(
+            "Update flight failed for FlightId={FlightId}. Errors: {@Errors}",
+            flightId,
+            result.Errors);
+    }
+
+    private void LogUpdateSuccess(Flight flight)
+    {
+        _logger.LogInformation(
+            "Flight updated successfully: FlightId={FlightId}, AirlineId={AirlineId}, FlightNumber={FlightNumber}",
+            flight.Id,
+            flight.AirlineId,
+            flight.FlightNumber);
+    }
+
+    private void LogDeleteStart(int flightId)
+    {
+        _logger.LogInformation("Deleting flight with ID {FlightId}.", flightId);
+    }
+
+    private void LogDeleteFailure(int flightId, Result result)
+    {
+        _logger.LogWarning(
+            "Delete flight failed for FlightId={FlightId}. Errors: {@Errors}",
+            flightId,
+            result.Errors);
+    }
+
+    private void LogDeleteSuccess(int flightId)
+    {
+        _logger.LogInformation("Flight deleted successfully: FlightId={FlightId}", flightId);
     }
 }
