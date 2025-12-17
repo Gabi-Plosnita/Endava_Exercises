@@ -6,13 +6,13 @@ public class Result
 {
     public bool IsSuccessful => Errors.Count == 0;
     public bool IsFailure => !IsSuccessful;
-    public List<string> Errors { get; } = new();
+    public List<Error> Errors { get; } = new();
 
     public Result()
     {
     }
 
-    public Result(IEnumerable<string> errors)
+    public Result(IEnumerable<Error> errors)
     {
         if (errors != null)
         {
@@ -20,15 +20,15 @@ public class Result
         }
     }
 
-    public void AddError(string error)
+    public void AddError(Error error)
     {
-        if (!string.IsNullOrWhiteSpace(error))
+        if (error != null)
         {
             Errors.Add(error);
         }
     }
 
-    public void AddErrors(IEnumerable<string> errors)
+    public void AddErrors(IEnumerable<Error> errors)
     {
         if (errors != null)
         {
@@ -48,12 +48,11 @@ public class Result
 
         for (int i = 0; i < Errors.Count; i++)
         {
-            sb.AppendLine($"  {i + 1}. {Errors[i]}");
+            sb.AppendLine($"  {i + 1}. {Errors[i].Message} (Type: {Errors[i].Type})");
         }
 
         return sb.ToString().TrimEnd();
     }
-
 }
 
 public class Result<T> : Result
@@ -69,12 +68,12 @@ public class Result<T> : Result
         Value = value;
     }
 
-    public Result(T value, IEnumerable<string> errors) : base(errors)
+    public Result(T value, IEnumerable<Error> errors) : base(errors)
     {
         Value = value;
     }
 
-    public Result(IEnumerable<string> errors) : base(errors)
+    public Result(IEnumerable<Error> errors) : base(errors)
     {
     }
 }

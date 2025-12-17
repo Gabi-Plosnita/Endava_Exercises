@@ -6,6 +6,7 @@ namespace AirportTool.Application;
 
 public class FlightService : IFlightService
 {
+    //Add loggging //
     private readonly IUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
 
@@ -135,12 +136,22 @@ public class FlightService : IFlightService
     {
         if (string.IsNullOrWhiteSpace(flightNumber))
         {
-            result.AddError("FlightNumber is required.");
+            var error = new Error
+            {
+                Message = "FlightNumber is required.",
+                Type = ErrorType.Validation
+            };
+            result.AddError(error);
             return;
         }
         if (!Regex.IsMatch(flightNumber, @"^[A-Za-z]+[0-9]+$"))
         {
-            result.AddError("FlightNumber must be letters followed by numbers.");
+            var error = new Error
+            {
+                Message = "FlightNumber must be letters followed by numbers.",
+                Type = ErrorType.Validation
+            };
+            result.AddError(error);
         }
     }
 
@@ -148,7 +159,12 @@ public class FlightService : IFlightService
     {
         if (originIataCode == destinationIataCode)
         {
-            result.AddError("Origin and Destination airports must be different.");
+            var error = new Error
+            {
+                Message = "Origin and Destination airports must be different.",
+                Type = ErrorType.Validation
+            };
+            result.AddError(error);
         }
     }
 
@@ -157,7 +173,12 @@ public class FlightService : IFlightService
         var airline = await _unitOfWork.Airlines.GetByIataCodeAsync(iataCode, cancellationToken);
         if (airline == null)
         {
-            result.AddError($"Airline with IataCode {iataCode} not found.");
+            var error = new Error
+            {
+                Message = $"Airline with IataCode {iataCode} not found.",
+                Type = ErrorType.Validation
+            };
+            result.AddError(error);
         }
         return airline;
     }
@@ -169,7 +190,12 @@ public class FlightService : IFlightService
 
         if (existingFlight != null && existingFlight.Id != currentFlightId)
         {
-            result.AddError("Another flight with the same FlightNumber already exists for this airline.");
+            var error = new Error
+            {
+                Message = "Another flight with the same FlightNumber already exists for this airline.",
+                Type = ErrorType.Validation
+            };
+            result.AddError(error);
         }
     }
 
@@ -179,7 +205,12 @@ public class FlightService : IFlightService
         var flight = await _unitOfWork.Flights.GetByIdAsync(flightId, cancellationToken);
         if (flight == null)
         {
-            result.AddError($"Flight with ID {flightId} not found.");
+            var error = new Error
+            {
+                Message = $"Flight with ID {flightId} not found.",
+                Type = ErrorType.NotFound
+            };
+            result.AddError(error);
         }
         return flight;
     }
@@ -189,7 +220,12 @@ public class FlightService : IFlightService
         var airport = await _unitOfWork.Airports.GetByIataCodeAsync(iataCode, cancellationToken);
         if (airport == null)
         {
-            result.AddError($"Airport with IataCode {iataCode} not found.");
+            var error = new Error
+            {
+                Message = $"Airport with IataCode {iataCode} not found.",
+                Type = ErrorType.Validation
+            };
+            result.AddError(error);
         }
         return airport;
     }
@@ -199,7 +235,12 @@ public class FlightService : IFlightService
         var aircraft = await _unitOfWork.Aircrafts.GetByTailNumberAsync(tailNumber, cancellationToken);
         if(aircraft == null)
         {
-            result.AddError($"Aircraft with TailNumber {tailNumber} not found");
+            var error = new Error
+            {
+                Message = $"Aircraft with TailNumber {tailNumber} not found.",
+                Type = ErrorType.Validation
+            };
+            result.AddError(error);
         }
         return aircraft;
     }
@@ -209,7 +250,12 @@ public class FlightService : IFlightService
         var hasAssociatedSchedules = await _unitOfWork.Flights.HasAnyFlightSchedulesAsync(flightId, cancellationToken);
         if (hasAssociatedSchedules)
         {
-            result.AddError($"Flight with ID {flightId} cannot be deleted because it has associated schedules.");
+            var error = new Error
+            {
+                Message = $"Flight with ID {flightId} cannot be deleted because it has associated schedules.",
+                Type = ErrorType.Validation
+            };
+            result.AddError(error);
         }
     }
 }
