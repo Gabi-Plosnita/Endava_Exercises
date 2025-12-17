@@ -66,7 +66,7 @@ public class FlightService : IFlightService
         return result;
     }
 
-    public async Task<Result> UpdateAsync(int flightId, CreateFlightDto dto, CancellationToken cancellationToken)
+    public async Task<Result> UpdateAsync(int flightId, UpdateFlightDto dto, CancellationToken cancellationToken)
     {
         var result = new Result();
 

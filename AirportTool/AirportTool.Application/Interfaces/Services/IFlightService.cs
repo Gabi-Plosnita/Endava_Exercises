@@ -6,7 +6,7 @@ public interface IFlightService
 
     Task<Result<GetFlightDto?>> CreateAsync(CreateFlightDto dto, CancellationToken cancellationToken);
 
-    Task<Result> UpdateAsync(int flightId, CreateFlightDto dto, CancellationToken cancellationToken);
+    Task<Result> UpdateAsync(int flightId, UpdateFlightDto dto, CancellationToken cancellationToken);
 
     Task<Result> DeleteByIdAsync(int flightId, CancellationToken cancellationToken);
 }
