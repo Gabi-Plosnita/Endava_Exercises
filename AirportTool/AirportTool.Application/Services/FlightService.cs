@@ -7,15 +7,15 @@ namespace AirportTool.Application;
 
 public class FlightService : IFlightService
 {
-    private readonly ILogger<FlightService> _logger;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
+    private readonly ILogger<FlightService> _logger;
 
-    public FlightService(ILogger<FlightService> logger, IUnitOfWork unitOfWork, IMapper mapper)
+    public FlightService(IUnitOfWork unitOfWork, IMapper mapper, ILogger<FlightService> logger)
     {
-        _logger = logger;
         _unitOfWork = unitOfWork;
         _mapper = mapper;
+        _logger = logger;
     }
 
     public async Task<GetFlightDto?> GetByIdAsync(int flightId, CancellationToken cancellationToken)
