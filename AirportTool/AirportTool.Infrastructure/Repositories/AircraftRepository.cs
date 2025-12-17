@@ -11,7 +11,7 @@ public class AircraftRepository : EfRepositoryBase<Aircraft, AircraftDb, int>, I
     {
     }
 
-    public async Task<Aircraft?> GetByTailNumberAsync(string tailNumber, CancellationToken cancellationToken = default)
+    public async Task<Aircraft?> GetByTailNumberAsync(string tailNumber, CancellationToken cancellationToken)
     {
         var aircraftDb = await _context.Aircraft
                                        .AsNoTracking()

@@ -2,13 +2,13 @@
 
 public interface IRepository<TDomain, TKey> where TDomain : class
 {
-    Task<TDomain?> GetByIdAsync(TKey id, CancellationToken cancellationToken = default);
+    Task<TDomain?> GetByIdAsync(TKey id, CancellationToken cancellationToken);
 
-    Task<IReadOnlyList<TDomain>> GetAllAsync(CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<TDomain>> GetAllAsync(CancellationToken cancellationToken);
 
-    Task AddAsync(TDomain domainModel, CancellationToken cancellationToken = default);
+    Task AddAsync(TDomain domainModel, CancellationToken cancellationToken);
 
-    Task UpdateAsync(TDomain domainModel, CancellationToken cancellationToken = default);
+    Task UpdateAsync(TDomain domainModel, CancellationToken cancellationToken);
 
-    Task RemoveAsync(TDomain domainModel, CancellationToken cancellationToken = default);
+    Task RemoveAsync(TDomain domainModel, CancellationToken cancellationToken);
 }

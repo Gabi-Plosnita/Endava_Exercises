@@ -34,7 +34,7 @@ public class UnitOfWork : IUnitOfWork, IAsyncDisposable
         Aircrafts = aircraftRepository;
     }
 
-    public Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    public Task<int> SaveChangesAsync(CancellationToken cancellationToken)
         => _context.SaveChangesAsync(cancellationToken);
 
     public ValueTask DisposeAsync()

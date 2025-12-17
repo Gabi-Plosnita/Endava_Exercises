@@ -12,7 +12,7 @@ public class BookingRepository : EfRepositoryBase<Booking, BookingDb, long>, IBo
     }
 
     public async Task<Booking?> GetByConfirmationCodeAsync(
-        string confirmationCode, CancellationToken cancellationToken = default)
+        string confirmationCode, CancellationToken cancellationToken)
     {
         var bookingDb = await _context.Bookings
                                       .AsNoTracking()

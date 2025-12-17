@@ -10,5 +10,5 @@ public interface IUnitOfWork
     public IAirportRepository Airports { get; }
     public IAircraftRepository Aircrafts { get; }
 
-    Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
+    Task<int> SaveChangesAsync(CancellationToken cancellationToken);
 }

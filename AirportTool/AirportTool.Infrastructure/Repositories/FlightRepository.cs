@@ -12,7 +12,7 @@ public class FlightRepository : EfRepositoryBase<Flight, FlightDb, int>, IFlight
     }
 
     public async Task<Flight?> GetFlightByAirlineAndFlightNumberAsync(
-        string airlineIataCode, string flightNumber, CancellationToken cancellationToken = default)
+        string airlineIataCode, string flightNumber, CancellationToken cancellationToken)
     {
         var flightDb = await _context.Flights
                                      .AsNoTracking()
@@ -23,7 +23,7 @@ public class FlightRepository : EfRepositoryBase<Flight, FlightDb, int>, IFlight
     }
 
     public async Task<Flight> GetByAirlineIdAndFlightNumberAsync(
-        int airlineId, string flightNumber, CancellationToken cancellationToken = default)
+        int airlineId, string flightNumber, CancellationToken cancellationToken)
     {
         var flightDb = await _context.Flights
                                      .AsNoTracking()
@@ -33,7 +33,7 @@ public class FlightRepository : EfRepositoryBase<Flight, FlightDb, int>, IFlight
         return _mapper.Map<Flight>(flightDb);
     }
 
-    public async Task<bool> HasAnyFlightSchedulesAsync(int flightId, CancellationToken cancellationToken = default)
+    public async Task<bool> HasAnyFlightSchedulesAsync(int flightId, CancellationToken cancellationToken)
     {
         return await _context.FlightSchedules
                              .AsNoTracking()

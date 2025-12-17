@@ -5,14 +5,14 @@ namespace AirportTool.Application;
 public interface IFlightScheduleRepository : IRepository<FlightSchedule, int>
 {
     Task<FlightSchedule?> GetByFlightAndDepartureAsync(
-        int flightId, DateTime departureUtc, CancellationToken cancellationToken = default);
+        int flightId, DateTime departureUtc, CancellationToken cancellationToken);
 
     Task<FlightScheduleDetailsDto?> GetFlightScheduleDetailsAsync(
-        int flightScheduleId, CancellationToken cancellationToken = default);
+        int flightScheduleId, CancellationToken cancellationToken);
 
     Task<IReadOnlyCollection<FlightScheduleSearchDto>> GetFilteredFlightSchedulesAsync(
-        FlightFilterDto filter, CancellationToken cancellationToken = default);
+        FlightFilterDto filter, CancellationToken cancellationToken);
 
     Task<IReadOnlyList<DailyFlightStatsDto>> GetDailyStatsAsync(
-        DateTime startUtc, DateTime endUtc, CancellationToken cancellationToken = default);
+        DateTime startUtc, DateTime endUtc, CancellationToken cancellationToken);
 }

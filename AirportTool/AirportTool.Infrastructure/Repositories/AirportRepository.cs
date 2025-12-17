@@ -11,7 +11,7 @@ public class AirportRepository : EfRepositoryBase<Airport, AirportDb, int>, IAir
     {
     }
 
-    public async Task<Airport?> GetByIataCodeAsync(string iataCode, CancellationToken cancellationToken = default)
+    public async Task<Airport?> GetByIataCodeAsync(string iataCode, CancellationToken cancellationToken)
     {
         var airportDb = await _context.Airports
                                       .AsNoTracking()

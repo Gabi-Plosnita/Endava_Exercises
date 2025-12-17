@@ -12,7 +12,7 @@ public class FlightScheduleRepository : EfRepositoryBase<FlightSchedule, FlightS
     }
 
     public async Task<FlightSchedule?> GetByFlightAndDepartureAsync(
-        int flightId, DateTime departureUtc, CancellationToken cancellationToken = default)
+        int flightId, DateTime departureUtc, CancellationToken cancellationToken)
     {
         var flightScheduleDb = await _context.FlightSchedules
                                              .FirstOrDefaultAsync(fs => fs.FlightId == flightId
@@ -23,7 +23,7 @@ public class FlightScheduleRepository : EfRepositoryBase<FlightSchedule, FlightS
     }
 
     public Task<FlightScheduleDetailsDto?> GetFlightScheduleDetailsAsync(
-        int flightScheduleId, CancellationToken cancellationToken = default)
+        int flightScheduleId, CancellationToken cancellationToken)
     {
         return _context.FlightSchedules
                        .AsNoTracking()
@@ -54,7 +54,7 @@ public class FlightScheduleRepository : EfRepositoryBase<FlightSchedule, FlightS
     }
 
     public async Task<IReadOnlyCollection<FlightScheduleSearchDto>> GetFilteredFlightSchedulesAsync(
-        FlightFilterDto filter, CancellationToken cancellationToken = default)
+        FlightFilterDto filter, CancellationToken cancellationToken)
     {
         var skip = (filter.PageIndex - 1) * filter.PageSize;
 
@@ -120,7 +120,7 @@ public class FlightScheduleRepository : EfRepositoryBase<FlightSchedule, FlightS
     }
 
     public async Task<IReadOnlyList<DailyFlightStatsDto>> GetDailyStatsAsync(
-        DateTime startUtc, DateTime endUtc, CancellationToken cancellationToken = default)
+        DateTime startUtc, DateTime endUtc, CancellationToken cancellationToken)
     {
         var flightScheduleDbs = await _context.FlightSchedules
                                               .AsNoTracking()
