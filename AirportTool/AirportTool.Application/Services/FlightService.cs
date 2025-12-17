@@ -22,7 +22,8 @@ public class FlightService : IFlightService
     {
         var flight = await _unitOfWork.Flights.GetByIdAsync(flightId, cancellationToken);
         var getFlightDto = _mapper.Map<GetFlightDto>(flight);
-        LogGetById(flightId, getFlightDto != null);
+        var found = getFlightDto != null;
+        LogGetById(flightId, found);
         return getFlightDto;
     }
 
