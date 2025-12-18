@@ -68,7 +68,37 @@ public class AircraftService : IAircraftService
 
     public async Task<Result> UpdateAsync(int id, UpdateAircraftDto dto, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        var result = new Result();
+
+        var existingAircraft = await ValidateAircraftExistsAsync(id, result, cancellationToken);
+        if (result.IsFailure || existingAircraft == null)
+        {
+            return result;
+        }
+
+        ValidateSeatCapacityIsPositive(dto.SeatCapacity, result);
+        await ValidateAircraftTailIsUnique(dto.TailNumber, result, cancellationToken);
+
+        Airline? airline = null;
+        if (!string.IsNullOrEmpty(dto.OwnedByAirlineIataCode))
+        {
+            airline = await ValidateAirlineExistsAsync(dto.OwnedByAirlineIataCode, result, cancellationToken);
+        }
+
+        if (result.IsFailure)
+        {
+            return result;
+        }
+
+        existingAircraft.TailNumber = dto.TailNumber;
+        existingAircraft.Model = dto.Model;
+        existingAircraft.SeatCapacity = dto.SeatCapacity;
+        existingAircraft.OwnedByAirlineId = airline?.AirlineId;
+
+        await _unitOfWork.Aircrafts.UpdateAsync(existingAircraft, cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        return result;
     }
 
     public async Task<Result> DeleteByIdAsync(int id, CancellationToken cancellationToken)
@@ -118,6 +148,22 @@ public class AircraftService : IAircraftService
             result.AddError(error);
         }
         return airline;
+    }
+
+    private async Task<Aircraft?> ValidateAircraftExistsAsync(
+        int aircraftId, Result result, CancellationToken cancellationToken)
+    {
+        var aircraft = await _unitOfWork.Aircrafts.GetByIdAsync(aircraftId, cancellationToken);
+        if (aircraft == null)
+        {
+            var error = new Error
+            {
+                Message = $"Aircraft with ID {aircraftId} not found.",
+                Type = ErrorType.NotFound
+            };
+            result.AddError(error);
+        }
+        return aircraft;
     }
 
     #endregion
