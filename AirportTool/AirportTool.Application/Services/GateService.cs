@@ -40,6 +40,12 @@ public class GateService : IGateService
         }
 
         var airport = await ValidateAirportExistsAsync(dto.AirportIataCode, result, cancellationToken);
+        if(airport != null)
+        {
+            await ValidateGateCodeIsUniqueForAirport(
+                gateToUpdateId: null, airport.AirportId, dto.AirportIataCode, dto.Code, result, cancellationToken);
+        }
+
         if (result.IsFailure)
         {
             return result;
@@ -109,6 +115,21 @@ public class GateService : IGateService
             result.AddError(error);
         }
         return gate;
+    }
+
+    private async Task ValidateGateCodeIsUniqueForAirport(
+        int? gateToUpdateId, int airportId, string airportIataCode, string code, Result result, CancellationToken cancellationToken)
+    {
+        var gate = await _unitOfWork.Gates.GetByAirlineIdAndCodeAsync(airportId, code, cancellationToken);
+        if (gate != null && gateToUpdateId != gate.GateId)
+        {
+            var error = new Error
+            {
+                Message = $"Gate with Code {code} already exists for Airport {airportIataCode}.",
+                Type = ErrorType.Validation
+            };
+            result.AddError(error);
+        }
     }
 
     #endregion
