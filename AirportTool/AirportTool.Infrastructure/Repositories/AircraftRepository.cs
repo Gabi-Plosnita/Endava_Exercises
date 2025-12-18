@@ -19,4 +19,21 @@ public class AircraftRepository : EfRepositoryBase<Aircraft, AircraftDb, int>, I
 
         return _mapper.Map<Aircraft>(aircraftDb);
     }
+
+    public Task<GetAircraftDto?> GetDtoByIdAsync(int id, CancellationToken cancellationToken)
+    {
+        return _context.Aircraft
+                       .AsNoTracking()
+                       .Where(a => a.AircraftId == id)
+                       .Select(a => new GetAircraftDto
+                       {
+                           AircraftId = a.AircraftId,
+                           TailNumber = a.TailNumber,
+                           Model = a.Model,
+                           SeatCapacity = a.SeatCapacity,
+                           OwnedByAirlineIataCode = a.OwnedByAirline != null ? a.OwnedByAirline.Iatacode : null,
+                           OwnedByAirlineName = a.OwnedByAirline != null ? a.OwnedByAirline.Name : null
+                       })
+                       .SingleOrDefaultAsync(cancellationToken);
+    }
 }
