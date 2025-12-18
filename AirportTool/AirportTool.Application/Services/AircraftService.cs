@@ -27,7 +27,10 @@ public class AircraftService : IAircraftService
 
     public async Task<Result<PagedResult<GetAircraftDto>>> GetByFilterAsync(AircraftFilterDto dto, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        var result = new Result<PagedResult<GetAircraftDto>>();
+        var filteredResult = await _unitOfWork.Aircrafts.GetDtoByFilterAsync(dto, cancellationToken);
+        result.Value = filteredResult;
+        return result;
     }
 
     public async Task<Result<GetAircraftDto?>> CreateAsync(CreateAircraftDto dto, CancellationToken cancellationToken)
