@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using AirportTool.Domain;
+using Microsoft.Extensions.Logging;
 
 namespace AirportTool.Application;
 
@@ -27,9 +28,34 @@ public class GateService : IGateService
         return getGateDto;
     }
 
-    public Task<Result<GetGateDto?>> CreateAsync(CreateGateDto dto, CancellationToken cancellationToken)
+    public async Task<Result<GetGateDto?>> CreateAsync(CreateGateDto dto, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        var result = new Result<GetGateDto?>();
+
+        var dtoValidationResult = _createGateDtoValidator.Validate(dto);
+        result.AddErrors(dtoValidationResult.Errors);
+        if(result.IsFailure)
+        {
+            return result;
+        }
+
+        var airport = await ValidateAirportExistsAsync(dto.AirportIataCode, result, cancellationToken);
+        if(result.IsFailure)
+        {
+            return result;
+        }
+
+        var gate = new Gate
+        {
+            AirportId = airport!.AirportId,
+            Code = dto.Code
+        };
+
+        await _unitOfWork.Gates.AddAndSaveAsync(gate, cancellationToken);
+        var getGateDto = await _unitOfWork.Gates.GetDtoByIdAsync(gate.GateId, cancellationToken);
+        result.Value = getGateDto;
+
+        return result;
     }
 
     public Task<Result> UpdateAsync(int id, UpdateGateDto dto, CancellationToken cancellationToken)
@@ -43,6 +69,21 @@ public class GateService : IGateService
     }
 
     #region Business Rules Methods
+
+    private async Task<Airport?> ValidateAirportExistsAsync(string airportIataCode, Result result, CancellationToken cancellationToken)
+    {
+        var airport = await _unitOfWork.Airports.GetByIataCodeAsync(airportIataCode, cancellationToken);
+        if (airport == null)
+        {
+            var error = new Error
+            {
+                Message = $"Airport with Iata Code {airportIataCode} not found.",
+                Type = ErrorType.Validation
+            };
+            result.AddError(error);
+        }
+        return airport;
+    }
 
     #endregion
 
