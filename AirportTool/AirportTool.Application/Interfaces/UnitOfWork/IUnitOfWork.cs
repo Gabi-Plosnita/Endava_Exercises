@@ -9,6 +9,7 @@ public interface IUnitOfWork
     public IAirlineRepository Airlines { get; }
     public IAirportRepository Airports { get; }
     public IAircraftRepository Aircrafts { get; }
+    public IGateRepository Gates { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken);
 }
