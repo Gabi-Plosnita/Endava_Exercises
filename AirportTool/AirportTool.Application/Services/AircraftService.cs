@@ -103,7 +103,18 @@ public class AircraftService : IAircraftService
 
     public async Task<Result> DeleteByIdAsync(int id, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        var result = new Result();
+
+        var existingAircraft = await ValidateAircraftExistsAsync(id, result, cancellationToken);
+        if (result.IsFailure || existingAircraft == null)
+        {
+            return result;
+        }
+
+        await _unitOfWork.Aircrafts.RemoveAsync(existingAircraft, cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        return result;
     }
 
     #region Validation Methods
