@@ -78,8 +78,8 @@ public class FlightService : IFlightService
         var result = new Result();
         LogUpdateStart(flightId, dto);
 
-        var flight = await ValidateFlightExistsAsync(flightId, result, cancellationToken);
-        if (result.IsFailure || flight == null)
+        var existingFlight = await ValidateFlightExistsAsync(flightId, result, cancellationToken);
+        if (result.IsFailure || existingFlight == null)
         {
             LogUpdateFailure(flightId, result);
             return result;
@@ -109,17 +109,17 @@ public class FlightService : IFlightService
             return result;
         }
 
-        flight.FlightNumber = dto.FlightNumber;
-        flight.AirlineId = airline!.AirlineId;
-        flight.OriginAirportId = originAirport!.AirportId;
-        flight.DestinationAirportId = destinationAirport!.AirportId;
-        flight.DefaultAircraftId = defaultAircraft?.AircraftId;
-        flight.IsActive = dto.IsActive;
+        existingFlight.FlightNumber = dto.FlightNumber;
+        existingFlight.AirlineId = airline!.AirlineId;
+        existingFlight.OriginAirportId = originAirport!.AirportId;
+        existingFlight.DestinationAirportId = destinationAirport!.AirportId;
+        existingFlight.DefaultAircraftId = defaultAircraft?.AircraftId;
+        existingFlight.IsActive = dto.IsActive;
 
-        await _unitOfWork.Flights.UpdateAsync(flight, cancellationToken);
+        await _unitOfWork.Flights.UpdateAsync(existingFlight, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-        LogUpdateSuccess(flight);
+        LogUpdateSuccess(existingFlight);
         return result;
     }
 
