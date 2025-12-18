@@ -74,8 +74,11 @@ public class AircraftRepository : EfRepositoryBase<Aircraft, AircraftDb, int>, I
         };
     }
 
-    public Task AddAndSaveAsync(Aircraft aircraft, CancellationToken cancellationToken)
+    public async Task AddAndSaveAsync(Aircraft aircraft, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        var aircraftDb = _mapper.Map<AircraftDb>(aircraft);
+        await _context.Aircraft.AddAsync(aircraftDb, cancellationToken);
+        await _context.SaveChangesAsync(cancellationToken);
+        _mapper.Map(aircraftDb, aircraft);
     }
 }
