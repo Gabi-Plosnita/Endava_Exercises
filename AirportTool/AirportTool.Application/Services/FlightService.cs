@@ -1,20 +1,23 @@
 ﻿using AirportTool.Domain;
-using AutoMapper;
 using Microsoft.Extensions.Logging;
-using System.Text.RegularExpressions;
 
 namespace AirportTool.Application;
 
 public class FlightService : IFlightService
 {
     private readonly IUnitOfWork _unitOfWork;
-    private readonly IMapper _mapper;
+    private readonly IValidator<CreateFlightDto> _createFlightDtoValidator;
+    private readonly IValidator<UpdateFlightDto> _updateFlightDtoValidator;
     private readonly ILogger<FlightService> _logger;
 
-    public FlightService(IUnitOfWork unitOfWork, IMapper mapper, ILogger<FlightService> logger)
+    public FlightService(IUnitOfWork unitOfWork, 
+                         IValidator<CreateFlightDto> createFlightDtoValidator, 
+                         IValidator<UpdateFlightDto> updateFlightDtoValidator, 
+                         ILogger<FlightService> logger)
     {
         _unitOfWork = unitOfWork;
-        _mapper = mapper;
+        _createFlightDtoValidator = createFlightDtoValidator;
+        _updateFlightDtoValidator = updateFlightDtoValidator;
         _logger = logger;
     }
 
@@ -31,8 +34,13 @@ public class FlightService : IFlightService
         var result = new Result<GetFlightDto?>();
         LogCreateStart(dto);
 
-        ValidateFlightNumber(dto.FlightNumber, result);
-        ValidateOriginAndDestinationAirportsAreDifferent(dto.OriginAirportIataCode, dto.DestinationAirportIataCode, result);
+        var dtoValidationResult = _createFlightDtoValidator.Validate(dto);
+        result.AddErrors(dtoValidationResult.Errors);
+        if (result.IsFailure)
+        {
+            LogCreateFailure(dto, result);
+            return result;
+        }
 
         var airline = await ValidateAirlineExistsAsync(dto.AirlineIataCode, result, cancellationToken);
         if (airline != null)
@@ -79,15 +87,20 @@ public class FlightService : IFlightService
         var result = new Result();
         LogUpdateStart(flightId, dto);
 
+        var dtoValidationResult = _updateFlightDtoValidator.Validate(dto);
+        result.AddErrors(dtoValidationResult.Errors);
+        if(result.IsFailure)
+        {
+            LogUpdateFailure(flightId, result);
+            return result;
+        }
+
         var existingFlight = await ValidateFlightExistsAsync(flightId, result, cancellationToken);
         if (result.IsFailure || existingFlight == null)
         {
             LogUpdateFailure(flightId, result);
             return result;
         }
-
-        ValidateFlightNumber(dto.FlightNumber, result);
-        ValidateOriginAndDestinationAirportsAreDifferent(dto.OriginAirportIataCode, dto.DestinationAirportIataCode, result);
 
         var airline = await ValidateAirlineExistsAsync(dto.AirlineIataCode, result, cancellationToken);
         if (airline != null)
@@ -151,43 +164,7 @@ public class FlightService : IFlightService
         return result;
     }
 
-    #region Validator Methods
-
-    private void ValidateFlightNumber(string flightNumber, Result result)
-    {
-        if (string.IsNullOrWhiteSpace(flightNumber))
-        {
-            var error = new Error
-            {
-                Message = "FlightNumber is required.",
-                Type = ErrorType.Validation
-            };
-            result.AddError(error);
-            return;
-        }
-        if (!Regex.IsMatch(flightNumber, @"^[A-Za-z]+[0-9]+$"))
-        {
-            var error = new Error
-            {
-                Message = "FlightNumber must be letters followed by numbers.",
-                Type = ErrorType.Validation
-            };
-            result.AddError(error);
-        }
-    }
-
-    private void ValidateOriginAndDestinationAirportsAreDifferent(string originIataCode, string destinationIataCode, Result result)
-    {
-        if (originIataCode == destinationIataCode)
-        {
-            var error = new Error
-            {
-                Message = "Origin and Destination airports must be different.",
-                Type = ErrorType.Validation
-            };
-            result.AddError(error);
-        }
-    }
+    #region Business Rules Methods
 
     private async Task<Airline?> ValidateAirlineExistsAsync(string iataCode, Result result, CancellationToken cancellationToken)
     {
@@ -219,7 +196,6 @@ public class FlightService : IFlightService
             result.AddError(error);
         }
     }
-
 
     private async Task<Flight?> ValidateFlightExistsAsync(int flightId, Result result, CancellationToken cancellationToken)
     {
