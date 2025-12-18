@@ -19,8 +19,7 @@ public class AircraftService : IAircraftService
 
     public async Task<GetAircraftDto?> GetByIdAsync(int id, CancellationToken cancellationToken)
     {
-        var aircraft = await _unitOfWork.Aircrafts.GetByIdAsync(id, cancellationToken);
-        var getAircraftDto = _mapper.Map<GetAircraftDto>(aircraft);
+        var getAircraftDto = await _unitOfWork.Aircrafts.GetDtoByIdAsync(id, cancellationToken);
         var found = getAircraftDto != null;
         LogGetById(id, found);
         return getAircraftDto;
