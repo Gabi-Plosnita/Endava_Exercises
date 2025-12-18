@@ -56,9 +56,9 @@ public class AircraftService : IAircraftService
             OwnedByAirlineId = airline?.AirlineId
         };
 
-        await _unitOfWork.Aircrafts.AddAsync(aircraft, cancellationToken);
-        await _unitOfWork.SaveChangesAsync(cancellationToken);
-        result.Value = _mapper.Map<GetAircraftDto>(aircraft);
+        await _unitOfWork.Aircrafts.AddAndSaveAsync(aircraft, cancellationToken);
+        var getAircraftDto = await _unitOfWork.Aircrafts.GetDtoByIdAsync(aircraft.AircraftId, cancellationToken);
+        result.Value = getAircraftDto;
 
         return result;
     }
