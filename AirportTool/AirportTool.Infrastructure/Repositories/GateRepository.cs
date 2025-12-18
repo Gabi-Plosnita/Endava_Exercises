@@ -25,4 +25,12 @@ public class GateRepository : EfRepositoryBase<Gate, GateDb, int>, IGateReposito
                        })
                        .SingleOrDefaultAsync(cancellationToken);
     }
+
+    public async Task AddAndSaveAsync(Gate gate, CancellationToken cancellationToken)
+    {
+        var gateDb = _mapper.Map<Gate>(gate);
+        await _context.AddAsync(gateDb, cancellationToken);
+        await _context.SaveChangesAsync(cancellationToken);
+        _mapper.Map(gateDb, gate);
+    }
 }
