@@ -10,9 +10,9 @@ public class GateService : IGateService
     private readonly IValidator<UpdateGateDto> _updateGateDtoValidator;
     private readonly ILogger<GateService> _logger;
 
-    public GateService(IUnitOfWork unitOfWork, 
-                       IValidator<CreateGateDto> createGateDtoValidator, 
-                       IValidator<UpdateGateDto> updateGateDtoValidator, 
+    public GateService(IUnitOfWork unitOfWork,
+                       IValidator<CreateGateDto> createGateDtoValidator,
+                       IValidator<UpdateGateDto> updateGateDtoValidator,
                        ILogger<GateService> logger)
     {
         _unitOfWork = unitOfWork;
@@ -34,13 +34,13 @@ public class GateService : IGateService
 
         var dtoValidationResult = _createGateDtoValidator.Validate(dto);
         result.AddErrors(dtoValidationResult.Errors);
-        if(result.IsFailure)
+        if (result.IsFailure)
         {
             return result;
         }
 
         var airport = await ValidateAirportExistsAsync(dto.AirportIataCode, result, cancellationToken);
-        if(result.IsFailure)
+        if (result.IsFailure)
         {
             return result;
         }
@@ -63,9 +63,20 @@ public class GateService : IGateService
         throw new NotImplementedException();
     }
 
-    public Task<Result> DeleteByIdAsync(int id, CancellationToken cancellationToken)
+    public async Task<Result> DeleteByIdAsync(int id, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        var result = new Result();
+
+        var gate = await ValidateGateExistsAsync(id, result, cancellationToken);
+        if (result.IsFailure || gate == null)
+        {
+            return result;
+        }
+
+        await _unitOfWork.Gates.RemoveAsync(gate, cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        return result;
     }
 
     #region Business Rules Methods
@@ -83,6 +94,21 @@ public class GateService : IGateService
             result.AddError(error);
         }
         return airport;
+    }
+
+    private async Task<Gate?> ValidateGateExistsAsync(int id, Result result, CancellationToken cancellationToken)
+    {
+        var gate = await _unitOfWork.Gates.GetByIdAsync(id, cancellationToken);
+        if (gate == null)
+        {
+            var error = new Error
+            {
+                Message = $"Gate with Id {id} not found.",
+                Type = ErrorType.NotFound
+            };
+            result.AddError(error);
+        }
+        return gate;
     }
 
     #endregion
