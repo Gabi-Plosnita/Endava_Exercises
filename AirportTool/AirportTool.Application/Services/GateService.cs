@@ -47,8 +47,8 @@ public class GateService : IGateService
                 airportId: airport.AirportId, 
                 airportIataCode: dto.AirportIataCode, 
                 code: dto.Code, 
-                result: result, 
-                cancellationToken: cancellationToken);
+                result, 
+                cancellationToken);
         }
 
         if (result.IsFailure)
@@ -91,8 +91,8 @@ public class GateService : IGateService
             airportId: existingGate.AirportId,
             airportIataCode: dto.AirportIataCode,
             code: dto.Code,
-            result: result,
-            cancellationToken: cancellationToken);
+            result,
+            cancellationToken);
 
         if (result.IsFailure)
         {

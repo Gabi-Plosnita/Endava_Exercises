@@ -51,7 +51,11 @@ public class AircraftService : IAircraftService
             return result;
         }
 
-        await ValidateAircraftTailIsUniqueAsync(aircraftToUpdateId: null, dto.TailNumber, result, cancellationToken);
+        await ValidateAircraftTailIsUniqueAsync(
+            aircraftToUpdateId: null, 
+            tailNumber: dto.TailNumber, 
+            result, 
+            cancellationToken);
 
         Airline? airline = null;
         if (!string.IsNullOrEmpty(dto.OwnedByAirlineIataCode))
@@ -102,7 +106,11 @@ public class AircraftService : IAircraftService
             return result;
         }
 
-        await ValidateAircraftTailIsUniqueAsync(aircraftToUpdateId: id, dto.TailNumber, result, cancellationToken);
+        await ValidateAircraftTailIsUniqueAsync(
+            aircraftToUpdateId: id, 
+            tailNumber: dto.TailNumber, 
+            result, 
+            cancellationToken);
 
         Airline? airline = null;
         if (!string.IsNullOrEmpty(dto.OwnedByAirlineIataCode))

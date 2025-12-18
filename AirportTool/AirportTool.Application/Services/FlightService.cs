@@ -46,7 +46,12 @@ public class FlightService : IFlightService
         if (airline != null)
         {
             await ValidateFlightIsUniqueForAirlineAsync(
-                flightToUpdateId: null, airline.AirlineId, airline.Iatacode, dto.FlightNumber, result, cancellationToken);
+                flightToUpdateId: null, 
+                airlineId: airline.AirlineId, 
+                airlineIataCode: airline.Iatacode, 
+                flightNumber: dto.FlightNumber, 
+                result, 
+                cancellationToken);
         }
 
         var originAirport = await ValidateAirportExistsAsync(dto.OriginAirportIataCode, result, cancellationToken);
@@ -106,7 +111,12 @@ public class FlightService : IFlightService
         if (airline != null)
         {
             await ValidateFlightIsUniqueForAirlineAsync(
-                flightToUpdateId: flightId, airline.AirlineId, airline.Iatacode, dto.FlightNumber, result, cancellationToken);
+                flightToUpdateId: flightId, 
+                airlineId: airline.AirlineId, 
+                airlineIataCode: airline.Iatacode, 
+                flightNumber: dto.FlightNumber, 
+                result, 
+                cancellationToken);
         }
 
         var originAirport = await ValidateAirportExistsAsync(dto.OriginAirportIataCode, result, cancellationToken);
