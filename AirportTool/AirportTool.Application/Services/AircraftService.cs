@@ -38,7 +38,7 @@ public class AircraftService : IAircraftService
         var result = new Result<GetAircraftDto?>();
 
         ValidateSeatCapacityIsPositive(dto.SeatCapacity, result);
-        await ValidateAircraftTailIsUnique(dto.TailNumber, result, cancellationToken);
+        await ValidateAircraftTailIsUniqueAsync(aircraftToUpdateId: null, dto.TailNumber, result, cancellationToken);
 
         Airline? airline = null;
         if (!string.IsNullOrEmpty(dto.OwnedByAirlineIataCode))
@@ -77,7 +77,7 @@ public class AircraftService : IAircraftService
         }
 
         ValidateSeatCapacityIsPositive(dto.SeatCapacity, result);
-        await ValidateAircraftTailIsUnique(dto.TailNumber, result, cancellationToken);
+        await ValidateAircraftTailIsUniqueAsync(aircraftToUpdateId: id, dto.TailNumber, result, cancellationToken);
 
         Airline? airline = null;
         if (!string.IsNullOrEmpty(dto.OwnedByAirlineIataCode))
@@ -118,10 +118,11 @@ public class AircraftService : IAircraftService
     }
 
     #region Validation Methods
-    private async Task ValidateAircraftTailIsUnique(string tailNumber, Result result, CancellationToken cancellationToken)
+    private async Task ValidateAircraftTailIsUniqueAsync(
+        int? aircraftToUpdateId, string tailNumber, Result result, CancellationToken cancellationToken)
     {
         var existingAircraft = await _unitOfWork.Aircrafts.GetByTailNumberAsync(tailNumber, cancellationToken);
-        if (existingAircraft != null)
+        if (existingAircraft != null && existingAircraft.AircraftId != aircraftToUpdateId)
         {
             var error = new Error
             {

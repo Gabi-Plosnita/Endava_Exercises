@@ -37,7 +37,8 @@ public class FlightService : IFlightService
         var airline = await ValidateAirlineExistsAsync(dto.AirlineIataCode, result, cancellationToken);
         if (airline != null)
         {
-            await ValidateFlightIsUniqueForAirlineAsync(null, airline.AirlineId, dto.FlightNumber, result, cancellationToken);
+            await ValidateFlightIsUniqueForAirlineAsync(
+                flightToUpdateId: null, airline.AirlineId, dto.FlightNumber, result, cancellationToken);
         }
 
         var originAirport = await ValidateAirportExistsAsync(dto.OriginAirportIataCode, result, cancellationToken);
@@ -91,7 +92,8 @@ public class FlightService : IFlightService
         var airline = await ValidateAirlineExistsAsync(dto.AirlineIataCode, result, cancellationToken);
         if (airline != null)
         {
-            await ValidateFlightIsUniqueForAirlineAsync(flightId, airline.AirlineId, dto.FlightNumber, result, cancellationToken);
+            await ValidateFlightIsUniqueForAirlineAsync(
+                flightToUpdateId: flightId, airline.AirlineId, dto.FlightNumber, result, cancellationToken);
         }
 
         var originAirport = await ValidateAirportExistsAsync(dto.OriginAirportIataCode, result, cancellationToken);
@@ -203,11 +205,11 @@ public class FlightService : IFlightService
     }
 
     private async Task ValidateFlightIsUniqueForAirlineAsync(
-        int? currentFlightId, int airlineId, string flightNumber, Result result, CancellationToken cancellationToken)
+        int? flightToUpdateId, int airlineId, string flightNumber, Result result, CancellationToken cancellationToken)
     {
         var existingFlight = await _unitOfWork.Flights.GetByAirlineIdAndFlightNumberAsync(airlineId, flightNumber, cancellationToken);
 
-        if (existingFlight != null && existingFlight.FlightId != currentFlightId)
+        if (existingFlight != null && existingFlight.FlightId != flightToUpdateId)
         {
             var error = new Error
             {
