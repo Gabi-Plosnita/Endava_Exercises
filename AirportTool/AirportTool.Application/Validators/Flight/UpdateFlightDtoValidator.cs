@@ -2,11 +2,11 @@
 
 namespace AirportTool.Application;
 
-public class CreateFlightDtoValidator : BaseValidator, IValidator<CreateFlightDto>
+public class UpdateFlightDtoValidator : BaseValidator, IValidator<UpdateFlightDto>
 {
     private static readonly Regex FlightNumberRegex = new(@"^[A-Za-z]+[0-9]+$", RegexOptions.Compiled);
 
-    public Result Validate(CreateFlightDto dto)
+    public Result Validate(UpdateFlightDto dto)
     {
         var result = new Result();
 
