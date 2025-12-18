@@ -149,6 +149,8 @@ public class FlightService : IFlightService
         return result;
     }
 
+    #region Validator Methods
+
     private void ValidateFlightNumber(string flightNumber, Result result)
     {
         if (string.IsNullOrWhiteSpace(flightNumber))
@@ -276,6 +278,9 @@ public class FlightService : IFlightService
         }
     }
 
+    #endregion
+
+    #region Logging Methods
     private void LogGetById(int flightId, bool found)
     {
         if (found)
@@ -407,4 +412,6 @@ public class FlightService : IFlightService
                 FlightId={FlightId}",
             flightId);
     }
+
+    #endregion
 }

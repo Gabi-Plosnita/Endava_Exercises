@@ -73,6 +73,7 @@ public class AircraftService : IAircraftService
         throw new NotImplementedException();
     }
 
+    #region Validation Methods
     private async Task ValidateAircraftTailIsUnique(string tailNumber, Result result, CancellationToken cancellationToken)
     {
         var existingAircraft = await _unitOfWork.Aircrafts.GetByTailNumberAsync(tailNumber, cancellationToken);
@@ -116,6 +117,10 @@ public class AircraftService : IAircraftService
         return airline;
     }
 
+    #endregion
+
+    #region Logging Methods
+
     private void LogGetById(int aircraftId, bool found)
     {
         if (found)
@@ -127,4 +132,6 @@ public class AircraftService : IAircraftService
             _logger.LogDebug("Aircraft with ID {AircraftId} not found.", aircraftId);
         }
     }
+
+    #endregion
 }
