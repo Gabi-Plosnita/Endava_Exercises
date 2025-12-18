@@ -14,27 +14,35 @@ public class UpdateFlightDtoValidator : BaseValidator, IValidator<UpdateFlightDt
         ValidateRequired(dto.AirlineIataCode, nameof(dto.AirlineIataCode), result);
         ValidateRequired(dto.OriginAirportIataCode, nameof(dto.OriginAirportIataCode), result);
         ValidateRequired(dto.DestinationAirportIataCode, nameof(dto.DestinationAirportIataCode), result);
-
-        if (!string.IsNullOrWhiteSpace(dto.FlightNumber) && !FlightNumberRegex.IsMatch(dto.FlightNumber))
-        {
-            result.AddError(new Error
-            {
-                Message = "FlightNumber must be letters followed by numbers.",
-                Type = ErrorType.Validation
-            });
-        }
-
-        if (!string.IsNullOrWhiteSpace(dto.OriginAirportIataCode)
-            && !string.IsNullOrWhiteSpace(dto.DestinationAirportIataCode)
-            && dto.OriginAirportIataCode == dto.DestinationAirportIataCode)
-        {
-            result.AddError(new Error
-            {
-                Message = "Origin and Destination airports must be different.",
-                Type = ErrorType.Validation
-            });
-        }
+        ValidateFlightNumberFormat(dto.FlightNumber, result);
+        ValidateOriginAndDestinationAreDifferent(dto.OriginAirportIataCode, dto.DestinationAirportIataCode, result);
 
         return result;
+    }
+
+    private void ValidateFlightNumberFormat(string flightNumber, Result result)
+    {
+        if (!FlightNumberRegex.IsMatch(flightNumber))
+        {
+            var error = new Error
+            {
+                Message = "Flight number must start with letters followed by numbers (e.g., AA123).",
+                Type = ErrorType.Validation
+            };
+            result.AddError(error);
+        }
+    }
+
+    private void ValidateOriginAndDestinationAreDifferent(string origin, string destination, Result result)
+    {
+        if (!string.IsNullOrWhiteSpace(origin) && !string.IsNullOrWhiteSpace(destination) && origin == destination)
+        {
+            var error = new Error
+            {
+                Message = "Origin and destination airports must be different.",
+                Type = ErrorType.Validation
+            };
+            result.AddError(error);
+        }
     }
 }
