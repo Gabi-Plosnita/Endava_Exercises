@@ -20,7 +20,7 @@ public class FlightService : IFlightService
 
     public async Task<GetFlightDto?> GetByIdAsync(int flightId, CancellationToken cancellationToken)
     {
-        var getFlightDto = await _unitOfWork.Flights.GetFlightDtoByIdAsync(flightId, cancellationToken);
+        var getFlightDto = await _unitOfWork.Flights.GetDtoByIdAsync(flightId, cancellationToken);
         var found = getFlightDto != null;
         LogGetById(flightId, found);
         return getFlightDto;
@@ -66,7 +66,7 @@ public class FlightService : IFlightService
         };
 
         await _unitOfWork.Flights.AddAndSaveAsync(flight, cancellationToken);
-        var getFlightDto = await _unitOfWork.Flights.GetFlightDtoByIdAsync(flight.FlightId, cancellationToken);
+        var getFlightDto = await _unitOfWork.Flights.GetDtoByIdAsync(flight.FlightId, cancellationToken);
         result.Value = getFlightDto;
 
         LogCreateSuccess(flight);

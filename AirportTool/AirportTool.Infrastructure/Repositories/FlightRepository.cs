@@ -11,7 +11,7 @@ public class FlightRepository : EfRepositoryBase<Flight, FlightDb, int>, IFlight
     {
     }
 
-    public Task<GetFlightDto?> GetFlightDtoByIdAsync(int flightId, CancellationToken cancellationToken)
+    public Task<GetFlightDto?> GetDtoByIdAsync(int flightId, CancellationToken cancellationToken)
     {
         return _context.Flights
                        .AsNoTracking()
