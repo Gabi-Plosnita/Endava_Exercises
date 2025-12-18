@@ -1,6 +1,7 @@
 ﻿using AirportTool.Application;
 using AirportTool.Domain;
 using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 
 namespace AirportTool.Infrastructure;
 
@@ -8,5 +9,20 @@ public class GateRepository : EfRepositoryBase<Gate, GateDb, int>, IGateReposito
 {
     public GateRepository(AirportDbContext context, IMapper mapper) : base(context, mapper)
     {
+    }
+
+    public Task<GetGateDto?> GetDtoByIdAsync(int id, CancellationToken cancellationToken)
+    {
+        return _context.Gates
+                       .AsNoTracking()
+                       .Where(g => g.GateId == id)
+                       .Select(g => new GetGateDto
+                       {
+                           GateId = g.GateId,
+                           AirportIataCode = g.Airport.Iatacode,
+                           AirportName = g.Airport.Name,
+                           Code = g.Code
+                       })
+                       .SingleOrDefaultAsync(cancellationToken);
     }
 }
