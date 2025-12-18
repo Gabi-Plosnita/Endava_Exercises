@@ -2,7 +2,7 @@
 
 public interface IGateService
 {
-    Task<Result<GetGateDto?>> GetByIdAsync(int id, CancellationToken cancellationToken);
+    Task<GetGateDto?> GetByIdAsync(int id, CancellationToken cancellationToken);
 
     Task<Result<GetGateDto?>> CreateAsync(CreateGateDto dto, CancellationToken cancellationToken);
 
