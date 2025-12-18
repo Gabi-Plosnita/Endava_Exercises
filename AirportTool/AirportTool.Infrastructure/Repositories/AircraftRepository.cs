@@ -36,4 +36,46 @@ public class AircraftRepository : EfRepositoryBase<Aircraft, AircraftDb, int>, I
                        })
                        .SingleOrDefaultAsync(cancellationToken);
     }
+
+    public async Task<PagedResult<GetAircraftDto>> GetDtoByFilterAsync(
+        AircraftFilterDto filterDto, CancellationToken cancellationToken)
+    {
+        var skip = filterDto.PageIndex * filterDto.PageSize;
+
+        var query = _context.Aircraft.AsNoTracking();
+
+        if (!string.IsNullOrEmpty(filterDto.AirlineIataCode))
+        {
+            query = query.Where(a => a.OwnedByAirline != null && a.OwnedByAirline.Iatacode == filterDto.AirlineIataCode);
+        }
+
+        var totalCount = await query.CountAsync(cancellationToken);
+
+        var items = await query.OrderBy(a => a.AircraftId)
+                               .Skip(skip)
+                               .Take(filterDto.PageSize)
+                               .Select(a => new GetAircraftDto
+                               {
+                                   AircraftId = a.AircraftId,
+                                   TailNumber = a.TailNumber,
+                                   Model = a.Model,
+                                   SeatCapacity = a.SeatCapacity,
+                                   OwnedByAirlineIataCode = a.OwnedByAirline != null ? a.OwnedByAirline.Iatacode : null,
+                                   OwnedByAirlineName = a.OwnedByAirline != null ? a.OwnedByAirline.Name : null
+                               })
+                               .ToListAsync(cancellationToken);
+
+        return new PagedResult<GetAircraftDto>
+        {
+            Items = items,
+            TotalCount = totalCount,
+            PageIndex = filterDto.PageIndex,
+            PageSize = filterDto.PageSize
+        };
+    }
+
+    public Task AddAndSaveAsync(Aircraft aircraft, CancellationToken cancellationToken)
+    {
+        throw new NotImplementedException();
+    }
 }
