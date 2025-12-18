@@ -1,5 +1,4 @@
 ﻿using AirportTool.Domain;
-using AutoMapper;
 using Microsoft.Extensions.Logging;
 
 namespace AirportTool.Application;
@@ -7,13 +6,18 @@ namespace AirportTool.Application;
 public class AircraftService : IAircraftService
 {
     private readonly IUnitOfWork _unitOfWork;
-    private readonly IMapper _mapper;
+    private readonly IValidator<CreateAircraftDto> _createAircraftDtoValidator;
+    private readonly IValidator<UpdateAircraftDto> _updateAircraftDtoValidator;
     private readonly ILogger<AircraftService> _logger;
 
-    public AircraftService(IUnitOfWork unitOfWork, IMapper mapper, ILogger<AircraftService> logger)
+    public AircraftService(IUnitOfWork unitOfWork,
+                           IValidator<CreateAircraftDto> createAircraftDtoValidator,
+                           IValidator<UpdateAircraftDto> updateAircraftDtoValidator,
+                           ILogger<AircraftService> logger)
     {
         _unitOfWork = unitOfWork;
-        _mapper = mapper;
+        _createAircraftDtoValidator = createAircraftDtoValidator;
+        _updateAircraftDtoValidator = updateAircraftDtoValidator;
         _logger = logger;
     }
 
@@ -37,7 +41,13 @@ public class AircraftService : IAircraftService
     {
         var result = new Result<GetAircraftDto?>();
 
-        ValidateSeatCapacityIsPositive(dto.SeatCapacity, result);
+        var dtoValidationResult = _createAircraftDtoValidator.Validate(dto);
+        result.AddErrors(dtoValidationResult.Errors);
+        if (result.IsFailure)
+        {
+            return result;
+        }
+
         await ValidateAircraftTailIsUniqueAsync(aircraftToUpdateId: null, dto.TailNumber, result, cancellationToken);
 
         Airline? airline = null;
@@ -70,13 +80,19 @@ public class AircraftService : IAircraftService
     {
         var result = new Result();
 
+        var dtoValidationResult = _updateAircraftDtoValidator.Validate(dto);
+        result.AddErrors(dtoValidationResult.Errors);
+        if (result.IsFailure)
+        {
+            return result;
+        }
+
         var existingAircraft = await ValidateAircraftExistsAsync(id, result, cancellationToken);
         if (result.IsFailure || existingAircraft == null)
         {
             return result;
         }
 
-        ValidateSeatCapacityIsPositive(dto.SeatCapacity, result);
         await ValidateAircraftTailIsUniqueAsync(aircraftToUpdateId: id, dto.TailNumber, result, cancellationToken);
 
         Airline? airline = null;
@@ -127,19 +143,6 @@ public class AircraftService : IAircraftService
             var error = new Error
             {
                 Message = $"An aircraft with tail number '{tailNumber}' already exists.",
-                Type = ErrorType.Validation
-            };
-            result.AddError(error);
-        }
-    }
-
-    private void ValidateSeatCapacityIsPositive(int seatCapacity, Result result)
-    {
-        if (seatCapacity <= 0)
-        {
-            var error = new Error
-            {
-                Message = "Seat capacity must be a positive integer.",
                 Type = ErrorType.Validation
             };
             result.AddError(error);
