@@ -41,10 +41,13 @@ public class AircraftService : IAircraftService
     {
         var result = new Result<GetAircraftDto?>();
 
+        LogCreateStart(dto);
+
         var dtoValidationResult = _createAircraftDtoValidator.Validate(dto);
         result.AddErrors(dtoValidationResult.Errors);
         if (result.IsFailure)
         {
+            LogCreateFailure(dto, result);
             return result;
         }
 
@@ -58,6 +61,7 @@ public class AircraftService : IAircraftService
 
         if (result.IsFailure)
         {
+            LogCreateFailure(dto, result);
             return result;
         }
 
@@ -73,6 +77,7 @@ public class AircraftService : IAircraftService
         var getAircraftDto = await _unitOfWork.Aircrafts.GetDtoByIdAsync(aircraft.AircraftId, cancellationToken);
         result.Value = getAircraftDto;
 
+        LogCreateSuccess(aircraft);
         return result;
     }
 
@@ -80,16 +85,20 @@ public class AircraftService : IAircraftService
     {
         var result = new Result();
 
+        LogUpdateStart(id, dto);
+
         var dtoValidationResult = _updateAircraftDtoValidator.Validate(dto);
         result.AddErrors(dtoValidationResult.Errors);
         if (result.IsFailure)
         {
+            LogUpdateFailure(id, result);
             return result;
         }
 
         var existingAircraft = await ValidateAircraftExistsAsync(id, result, cancellationToken);
         if (result.IsFailure || existingAircraft == null)
         {
+            LogUpdateFailure(id, result);
             return result;
         }
 
@@ -103,6 +112,7 @@ public class AircraftService : IAircraftService
 
         if (result.IsFailure)
         {
+            LogUpdateFailure(id, result);
             return result;
         }
 
@@ -114,6 +124,7 @@ public class AircraftService : IAircraftService
         await _unitOfWork.Aircrafts.UpdateAsync(existingAircraft, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
+        LogUpdateSuccess(existingAircraft);
         return result;
     }
 
@@ -121,19 +132,24 @@ public class AircraftService : IAircraftService
     {
         var result = new Result();
 
+        LogDeleteStart(id);
+
         var existingAircraft = await ValidateAircraftExistsAsync(id, result, cancellationToken);
         if (result.IsFailure || existingAircraft == null)
         {
+            LogDeleteFailure(id, result);
             return result;
         }
 
         await _unitOfWork.Aircrafts.RemoveAsync(existingAircraft, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
+        LogDeleteSuccess(id);
         return result;
     }
 
-    #region Validation Methods
+
+    #region Business Rules Methods
     private async Task ValidateAircraftTailIsUniqueAsync(
         int? aircraftToUpdateId, string tailNumber, Result result, CancellationToken cancellationToken)
     {
@@ -195,6 +211,114 @@ public class AircraftService : IAircraftService
         {
             _logger.LogDebug("Aircraft with ID {AircraftId} not found.", aircraftId);
         }
+    }
+
+    private void LogCreateStart(CreateAircraftDto dto)
+    {
+        _logger.LogInformation(
+            @"Creating aircraft:
+                TailNumber={TailNumber},
+                Model={Model},
+                SeatCapacity={SeatCapacity},
+                OwnedByAirlineIataCode={OwnedByAirlineIataCode}",
+            dto.TailNumber,
+            dto.Model,
+            dto.SeatCapacity,
+            dto.OwnedByAirlineIataCode);
+    }
+
+    private void LogCreateFailure(CreateAircraftDto dto, Result result)
+    {
+        _logger.LogWarning(
+            @"Create aircraft failed:
+                TailNumber={TailNumber},
+                Errors={Errors}",
+            dto.TailNumber,
+            result.Errors);
+    }
+
+    private void LogCreateSuccess(Aircraft aircraft)
+    {
+        _logger.LogInformation(
+            @"Aircraft created successfully:
+                AircraftId={AircraftId},
+                TailNumber={TailNumber},
+                Model={Model},
+                SeatCapacity={SeatCapacity},
+                OwnedByAirlineId={OwnedByAirlineId}",
+            aircraft.AircraftId,
+            aircraft.TailNumber,
+            aircraft.Model,
+            aircraft.SeatCapacity,
+            aircraft.OwnedByAirlineId);
+    }
+
+    private void LogUpdateStart(int aircraftId, UpdateAircraftDto dto)
+    {
+        _logger.LogInformation(
+            @"Updating aircraft:
+                AircraftId={AircraftId},
+                TailNumber={TailNumber},
+                Model={Model},
+                SeatCapacity={SeatCapacity},
+                OwnedByAirlineIataCode={OwnedByAirlineIataCode}",
+            aircraftId,
+            dto.TailNumber,
+            dto.Model,
+            dto.SeatCapacity,
+            dto.OwnedByAirlineIataCode);
+    }
+
+    private void LogUpdateFailure(int aircraftId, Result result)
+    {
+        _logger.LogWarning(
+            @"Update aircraft failed:
+                AircraftId={AircraftId},
+                Errors={Errors}",
+            aircraftId,
+            result.Errors);
+    }
+
+    private void LogUpdateSuccess(Aircraft aircraft)
+    {
+        _logger.LogInformation(
+            @"Aircraft updated successfully:
+                AircraftId={AircraftId},
+                TailNumber={TailNumber},
+                Model={Model},
+                SeatCapacity={SeatCapacity},
+                OwnedByAirlineId={OwnedByAirlineId}",
+            aircraft.AircraftId,
+            aircraft.TailNumber,
+            aircraft.Model,
+            aircraft.SeatCapacity,
+            aircraft.OwnedByAirlineId);
+    }
+
+    private void LogDeleteStart(int aircraftId)
+    {
+        _logger.LogInformation(
+            @"Deleting aircraft:
+                AircraftId={AircraftId}",
+            aircraftId);
+    }
+
+    private void LogDeleteFailure(int aircraftId, Result result)
+    {
+        _logger.LogWarning(
+            @"Delete aircraft failed:
+                AircraftId={AircraftId},
+                Errors={Errors}",
+            aircraftId,
+            result.Errors);
+    }
+
+    private void LogDeleteSuccess(int aircraftId)
+    {
+        _logger.LogInformation(
+            @"Aircraft deleted successfully:
+                AircraftId={AircraftId}",
+            aircraftId);
     }
 
     #endregion
