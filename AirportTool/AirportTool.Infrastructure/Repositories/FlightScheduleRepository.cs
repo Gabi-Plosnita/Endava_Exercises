@@ -54,8 +54,7 @@ public class FlightScheduleRepository : EfRepositoryBase<FlightSchedule, FlightS
     }
 
     public async Task<PagedResult<FlightScheduleSearchDto>> GetFilteredFlightSchedulesAsync(
-    FlightFilterDto filter,
-    CancellationToken cancellationToken)
+        FlightFilterDto filter, CancellationToken cancellationToken)
     {
         var skip = filter.PageIndex * filter.PageSize;
 
@@ -85,39 +84,38 @@ public class FlightScheduleRepository : EfRepositoryBase<FlightSchedule, FlightS
 
         var totalCount = await query.CountAsync(cancellationToken);
 
-        var items = await query
-            .OrderBy(fs => fs.ScheduledDepartureUtc)
-            .Skip(skip)
-            .Take(filter.PageSize)
-            .Select(fs => new FlightScheduleSearchDto
-            {
-                FlightScheduleId = fs.FlightScheduleId,
-                FlightId = fs.FlightId,
-                FlightNumber = fs.Flight.FlightNumber,
+        var items = await query.OrderBy(fs => fs.ScheduledDepartureUtc)
+                               .Skip(skip)
+                               .Take(filter.PageSize)
+                               .Select(fs => new FlightScheduleSearchDto
+                               {
+                                   FlightScheduleId = fs.FlightScheduleId,
+                                   FlightId = fs.FlightId,
+                                   FlightNumber = fs.Flight.FlightNumber,
 
-                AirlineIata = fs.Flight.Airline.Iatacode,
-                AirlineName = fs.Flight.Airline.Name,
+                                   AirlineIata = fs.Flight.Airline.Iatacode,
+                                   AirlineName = fs.Flight.Airline.Name,
 
-                OriginIata = fs.Flight.OriginAirport.Iatacode,
-                OriginName = fs.Flight.OriginAirport.Name,
+                                   OriginIata = fs.Flight.OriginAirport.Iatacode,
+                                   OriginName = fs.Flight.OriginAirport.Name,
 
-                DestinationIata = fs.Flight.DestinationAirport.Iatacode,
-                DestinationName = fs.Flight.DestinationAirport.Name,
+                                   DestinationIata = fs.Flight.DestinationAirport.Iatacode,
+                                   DestinationName = fs.Flight.DestinationAirport.Name,
 
-                ScheduledDepartureUtc = fs.ScheduledDepartureUtc,
-                ScheduledArrivalUtc = fs.ScheduledArrivalUtc,
+                                   ScheduledDepartureUtc = fs.ScheduledDepartureUtc,
+                                   ScheduledArrivalUtc = fs.ScheduledArrivalUtc,
 
-                Status = fs.Status,
+                                   Status = fs.Status,
 
-                DefaultAircraftTail = fs.Flight.DefaultAircraft != null
-                    ? fs.Flight.DefaultAircraft.TailNumber
-                    : null,
+                                   DefaultAircraftTail = fs.Flight.DefaultAircraft != null
+                                       ? fs.Flight.DefaultAircraft.TailNumber
+                                       : null,
 
-                AssignedAircraftTail = fs.AssignedAircraft != null
-                    ? fs.AssignedAircraft.TailNumber
-                    : null
-            })
-            .ToListAsync(cancellationToken);
+                                   AssignedAircraftTail = fs.AssignedAircraft != null
+                                       ? fs.AssignedAircraft.TailNumber
+                                       : null
+                               })
+                               .ToListAsync(cancellationToken);
 
         return new PagedResult<FlightScheduleSearchDto>
         {
