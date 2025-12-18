@@ -26,6 +26,17 @@ public class GateRepository : EfRepositoryBase<Gate, GateDb, int>, IGateReposito
                        .SingleOrDefaultAsync(cancellationToken);
     }
 
+    public async Task<Gate?> GetByAirlineIdAndCodeAsync(int airportId, string code, CancellationToken cancellationToken)
+    {
+        var gateDb = await _context.Gates
+                           .AsNoTracking()
+                           .Where(g => g.AirportId == airportId && g.Code == code)
+                           .SingleOrDefaultAsync(cancellationToken);
+
+        var gate = _mapper.Map<Gate>(gateDb);
+        return gate;
+    }
+
     public async Task AddAndSaveAsync(Gate gate, CancellationToken cancellationToken)
     {
         var gateDb = _mapper.Map<Gate>(gate);
