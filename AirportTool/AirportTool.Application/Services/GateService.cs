@@ -120,8 +120,8 @@ public class GateService : IGateService
     private async Task ValidateGateCodeIsUniqueForAirport(
         int? gateToUpdateId, int airportId, string airportIataCode, string code, Result result, CancellationToken cancellationToken)
     {
-        var gate = await _unitOfWork.Gates.GetByAirlineIdAndCodeAsync(airportId, code, cancellationToken);
-        if (gate != null && gateToUpdateId != gate.GateId)
+        var existingGate = await _unitOfWork.Gates.GetByAirlineIdAndCodeAsync(airportId, code, cancellationToken);
+        if (existingGate != null && existingGate.GateId != gateToUpdateId)
         {
             var error = new Error
             {

@@ -182,7 +182,7 @@ public class FlightService : IFlightService
     }
 
     private async Task ValidateFlightIsUniqueForAirlineAsync(
-        int? flightToUpdateId, int airlineId, string flightNumber, Result result, CancellationToken cancellationToken)
+        int? flightToUpdateId, int airlineId, string airlineIataCode, string flightNumber, Result result, CancellationToken cancellationToken)
     {
         var existingFlight = await _unitOfWork.Flights.GetByAirlineIdAndFlightNumberAsync(airlineId, flightNumber, cancellationToken);
 
@@ -190,7 +190,7 @@ public class FlightService : IFlightService
         {
             var error = new Error
             {
-                Message = "Another flight with the same FlightNumber already exists for this airline.",
+                Message = $"Flight with Number {flightNumber} already exists for Airline {airlineIataCode}",
                 Type = ErrorType.Validation
             };
             result.AddError(error);
