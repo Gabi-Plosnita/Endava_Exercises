@@ -40,10 +40,15 @@ public class GateService : IGateService
         }
 
         var airport = await ValidateAirportExistsAsync(dto.AirportIataCode, result, cancellationToken);
-        if(airport != null)
+        if (airport != null)
         {
             await ValidateGateCodeIsUniqueForAirport(
-                gateToUpdateId: null, airport.AirportId, dto.AirportIataCode, dto.Code, result, cancellationToken);
+                gateToUpdateId: null, 
+                airportId: airport.AirportId, 
+                airportIataCode: dto.AirportIataCode, 
+                code: dto.Code, 
+                result: result, 
+                cancellationToken: cancellationToken);
         }
 
         if (result.IsFailure)
@@ -64,9 +69,43 @@ public class GateService : IGateService
         return result;
     }
 
-    public Task<Result> UpdateAsync(int id, UpdateGateDto dto, CancellationToken cancellationToken)
+    public async Task<Result> UpdateAsync(int id, UpdateGateDto dto, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        var result = new Result();
+
+        var dtoValidationResult = _updateGateDtoValidator.Validate(dto);
+        result.AddErrors(dtoValidationResult.Errors);
+        if (result.IsFailure)
+        {
+            return result;
+        }
+
+        var existingGate = await ValidateGateExistsAsync(id, result, cancellationToken);
+        if (result.IsFailure || existingGate == null)
+        {
+            return result;
+        }
+
+        await ValidateGateCodeIsUniqueForAirport(
+            gateToUpdateId: existingGate.GateId,
+            airportId: existingGate.AirportId,
+            airportIataCode: dto.AirportIataCode,
+            code: dto.Code,
+            result: result,
+            cancellationToken: cancellationToken);
+
+        if (result.IsFailure)
+        {
+            return result;
+        }
+
+        existingGate.AirportId = existingGate.AirportId;
+        existingGate.Code = dto.Code;
+
+        await _unitOfWork.Gates.UpdateAsync(existingGate, cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        return result;
     }
 
     public async Task<Result> DeleteByIdAsync(int id, CancellationToken cancellationToken)
