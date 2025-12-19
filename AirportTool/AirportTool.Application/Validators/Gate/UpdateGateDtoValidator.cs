@@ -7,7 +7,7 @@ public class UpdateGateDtoValidator : BaseValidator, IValidator<UpdateGateDto>
         var result = new Result();
 
         ValidateRequired(dto.AirportIataCode, nameof(dto.AirportIataCode), result);
-        ValidateRequired(dto.Code, nameof(dto.Code), result);
+        ValidateRequired(dto.GateCode, nameof(dto.GateCode), result);
 
         return result;
     }

@@ -66,6 +66,8 @@ public class TicketService : ITicketService
             return result;
         }
 
+        // Validate constraint for FlightScheduleId + FareClass uniqueness could be added here
+
         var ticket = _mapper.Map<Ticket>(dto);
         await _unitOfWork.Tickets.AddAndSaveAsync(ticket, cancellationToken);
         var getTicketDto = await _unitOfWork.Tickets.GetDtoByIdAsync(ticket.TicketId, cancellationToken);

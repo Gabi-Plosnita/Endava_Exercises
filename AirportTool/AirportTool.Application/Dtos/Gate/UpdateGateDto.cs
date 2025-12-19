@@ -4,5 +4,5 @@ public class UpdateGateDto
 {
     public string AirportIataCode { get; set; } = null!;
 
-    public string Code { get; set; } = null!;
+    public string GateCode { get; set; } = null!;
 }

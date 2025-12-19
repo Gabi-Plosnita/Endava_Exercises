@@ -1,4 +1,5 @@
 ﻿using AirportTool.Domain;
+using AutoMapper;
 using Microsoft.Extensions.Logging;
 
 namespace AirportTool.Application;
@@ -8,16 +9,19 @@ public class FlightService : IFlightService
     private readonly IUnitOfWork _unitOfWork;
     private readonly IValidator<CreateFlightDto> _createFlightDtoValidator;
     private readonly IValidator<UpdateFlightDto> _updateFlightDtoValidator;
+    private readonly IMapper _mapper;
     private readonly ILogger<FlightService> _logger;
 
     public FlightService(IUnitOfWork unitOfWork, 
                          IValidator<CreateFlightDto> createFlightDtoValidator, 
                          IValidator<UpdateFlightDto> updateFlightDtoValidator, 
+                         IMapper mapper,
                          ILogger<FlightService> logger)
     {
         _unitOfWork = unitOfWork;
         _createFlightDtoValidator = createFlightDtoValidator;
         _updateFlightDtoValidator = updateFlightDtoValidator;
+        _mapper = mapper;
         _logger = logger;
     }
 
@@ -69,15 +73,11 @@ public class FlightService : IFlightService
             return result;
         }
 
-        var flight = new Flight
-        {
-            FlightNumber = dto.FlightNumber,
-            AirlineId = airline!.AirlineId,
-            OriginAirportId = originAirport!.AirportId,
-            DestinationAirportId = destinationAirport!.AirportId,
-            DefaultAircraftId = defaultAircraft?.AircraftId,
-            IsActive = dto.IsActive
-        };
+        var flight = _mapper.Map<Flight>(dto);
+        flight.AirlineId = airline!.AirlineId;
+        flight.OriginAirportId = originAirport!.AirportId;
+        flight.DestinationAirportId = destinationAirport!.AirportId;
+        flight.DefaultAircraftId = defaultAircraft?.AircraftId;
 
         await _unitOfWork.Flights.AddAndSaveAsync(flight, cancellationToken);
         var getFlightDto = await _unitOfWork.Flights.GetDtoByIdAsync(flight.FlightId, cancellationToken);
@@ -134,12 +134,11 @@ public class FlightService : IFlightService
             return result;
         }
 
-        existingFlight.FlightNumber = dto.FlightNumber;
+        _mapper.Map(dto, existingFlight);
         existingFlight.AirlineId = airline!.AirlineId;
         existingFlight.OriginAirportId = originAirport!.AirportId;
         existingFlight.DestinationAirportId = destinationAirport!.AirportId;
         existingFlight.DefaultAircraftId = defaultAircraft?.AircraftId;
-        existingFlight.IsActive = dto.IsActive;
 
         await _unitOfWork.Flights.UpdateAsync(existingFlight, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);

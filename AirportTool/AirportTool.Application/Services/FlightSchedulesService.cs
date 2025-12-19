@@ -1,4 +1,5 @@
 ﻿using AirportTool.Domain;
+using AutoMapper;
 using Microsoft.Extensions.Logging;
 
 namespace AirportTool.Application;
@@ -9,17 +10,22 @@ public class FlightSchedulesService : IFlightSchedulesService
     private readonly IValidator<BaseFilterDto> _baseFilterDtoValidator;
     private readonly IValidator<FlightScheduleFilterDto> _flightScheduleFilterDtoValidator;
     private readonly IValidator<UpsertFlightScheduleDto> _upsertFlightScheduleDtoValidator;
+    private readonly IMapper _mapper;
     private ILogger<FlightSchedulesService> _logger;
     
     public FlightSchedulesService(
         IUnitOfWork unitOfWork,
         IValidator<BaseFilterDto> baseFilterDtoValidator,
         IValidator<FlightScheduleFilterDto> flightScheduleFilterDtoValidator,
+        IValidator<UpsertFlightScheduleDto> upsertFlightScheduleDtoValidator,
+        IMapper mapper,
         ILogger<FlightSchedulesService> logger)
     {
         _unitOfWork = unitOfWork;
         _baseFilterDtoValidator = baseFilterDtoValidator;
         _flightScheduleFilterDtoValidator = flightScheduleFilterDtoValidator;
+        _upsertFlightScheduleDtoValidator = upsertFlightScheduleDtoValidator;
+        _mapper = mapper;
         _logger = logger;
     }
 
@@ -95,15 +101,9 @@ public class FlightSchedulesService : IFlightSchedulesService
             return result;
         }
 
-        var flightSchedule = new FlightSchedule
-        {
-            FlightId = dto.FlightId,
-            ScheduledDepartureUtc = dto.ScheduledDepartureUtc,
-            ScheduledArrivalUtc = dto.ScheduledArrivalUtc,
-            GateId = gate?.GateId,
-            AssignedAircraftId = assignedAircraft?.AircraftId,
-            Status = dto.Status,
-        };
+        var flightSchedule = _mapper.Map<FlightSchedule>(dto);
+        flightSchedule.GateId = gate?.GateId;
+        flightSchedule.AssignedAircraftId = assignedAircraft?.AircraftId;
 
         await _unitOfWork.FlightSchedules.AddAndSaveAsync(flightSchedule, cancellationToken);
         var getFlightScheduleDto = await _unitOfWork.FlightSchedules.GetDtoByIdAsync(flightSchedule.FlightScheduleId, cancellationToken);

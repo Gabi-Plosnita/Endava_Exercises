@@ -1,4 +1,5 @@
 ﻿using AirportTool.Domain;
+using AutoMapper;
 using Microsoft.Extensions.Logging;
 
 namespace AirportTool.Application;
@@ -9,16 +10,20 @@ public class AircraftService : IAircraftService
     private readonly IValidator<CreateAircraftDto> _createAircraftDtoValidator;
     private readonly IValidator<UpdateAircraftDto> _updateAircraftDtoValidator;
     private readonly IValidator<BaseFilterDto> _baseFilterDtoValidator;
+    private readonly IMapper _mapper;
     private readonly ILogger<AircraftService> _logger;
 
     public AircraftService(IUnitOfWork unitOfWork,
                            IValidator<CreateAircraftDto> createAircraftDtoValidator,
                            IValidator<UpdateAircraftDto> updateAircraftDtoValidator,
+                           IMapper mapper,
                            ILogger<AircraftService> logger)
     {
         _unitOfWork = unitOfWork;
         _createAircraftDtoValidator = createAircraftDtoValidator;
         _updateAircraftDtoValidator = updateAircraftDtoValidator;
+        _baseFilterDtoValidator = new BaseFilterDtoValidator();
+        _mapper = mapper;
         _logger = logger;
     }
 
@@ -78,13 +83,8 @@ public class AircraftService : IAircraftService
             return result;
         }
 
-        var aircraft = new Aircraft
-        {
-            TailNumber = dto.TailNumber,
-            Model = dto.Model,
-            SeatCapacity = dto.SeatCapacity,
-            OwnedByAirlineId = airline?.AirlineId
-        };
+        var aircraft = _mapper.Map<Aircraft>(dto);
+        aircraft.OwnedByAirlineId = airline?.AirlineId;
 
         await _unitOfWork.Aircrafts.AddAndSaveAsync(aircraft, cancellationToken);
         var getAircraftDto = await _unitOfWork.Aircrafts.GetDtoByIdAsync(aircraft.AircraftId, cancellationToken);
@@ -133,9 +133,7 @@ public class AircraftService : IAircraftService
             return result;
         }
 
-        existingAircraft.TailNumber = dto.TailNumber;
-        existingAircraft.Model = dto.Model;
-        existingAircraft.SeatCapacity = dto.SeatCapacity;
+        _mapper.Map(dto, existingAircraft);
         existingAircraft.OwnedByAirlineId = airline?.AirlineId;
 
         await _unitOfWork.Aircrafts.UpdateAsync(existingAircraft, cancellationToken);

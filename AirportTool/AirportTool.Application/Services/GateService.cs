@@ -1,4 +1,5 @@
 ﻿using AirportTool.Domain;
+using AutoMapper;
 using Microsoft.Extensions.Logging;
 
 namespace AirportTool.Application;
@@ -8,16 +9,19 @@ public class GateService : IGateService
     private readonly IUnitOfWork _unitOfWork;
     private readonly IValidator<CreateGateDto> _createGateDtoValidator;
     private readonly IValidator<UpdateGateDto> _updateGateDtoValidator;
+    private readonly IMapper _mapper;
     private readonly ILogger<GateService> _logger;
 
     public GateService(IUnitOfWork unitOfWork,
                        IValidator<CreateGateDto> createGateDtoValidator,
                        IValidator<UpdateGateDto> updateGateDtoValidator,
+                       IMapper mapper,
                        ILogger<GateService> logger)
     {
         _unitOfWork = unitOfWork;
         _createGateDtoValidator = createGateDtoValidator;
         _updateGateDtoValidator = updateGateDtoValidator;
+        _mapper = mapper;
         _logger = logger;
     }
 
@@ -61,11 +65,8 @@ public class GateService : IGateService
             return result;
         }
 
-        var gate = new Gate
-        {
-            AirportId = airport!.AirportId,
-            Code = dto.Code
-        };
+        var gate = _mapper.Map<Gate>(dto);
+        gate.AirportId = airport!.AirportId;
 
         await _unitOfWork.Gates.AddAndSaveAsync(gate, cancellationToken);
         var getGateDto = await _unitOfWork.Gates.GetDtoByIdAsync(gate.GateId, cancellationToken);
@@ -100,7 +101,7 @@ public class GateService : IGateService
             gateToUpdateId: existingGate.GateId,
             airportId: existingGate.AirportId,
             airportIataCode: dto.AirportIataCode,
-            code: dto.Code,
+            code: dto.GateCode,
             result,
             cancellationToken);
 
@@ -110,8 +111,7 @@ public class GateService : IGateService
             return result;
         }
 
-        existingGate.AirportId = existingGate.AirportId;
-        existingGate.Code = dto.Code;
+        _mapper.Map(dto, existingGate);
 
         await _unitOfWork.Gates.UpdateAsync(existingGate, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
@@ -246,7 +246,7 @@ public class GateService : IGateService
                 Code={Code}",
             gateId,
             dto.AirportIataCode,
-            dto.Code);
+            dto.GateCode);
     }
 
     private void LogUpdateFailure(int gateId, Result result)
