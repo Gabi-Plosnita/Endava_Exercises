@@ -8,6 +8,7 @@ public class AircraftService : IAircraftService
     private readonly IUnitOfWork _unitOfWork;
     private readonly IValidator<CreateAircraftDto> _createAircraftDtoValidator;
     private readonly IValidator<UpdateAircraftDto> _updateAircraftDtoValidator;
+    private readonly IValidator<BaseFilterDto> _baseFilterDtoValidator;
     private readonly ILogger<AircraftService> _logger;
 
     public AircraftService(IUnitOfWork unitOfWork,
@@ -32,6 +33,14 @@ public class AircraftService : IAircraftService
     public async Task<Result<PagedResult<GetAircraftDto>>> GetByFilterAsync(AircraftFilterDto dto, CancellationToken cancellationToken)
     {
         var result = new Result<PagedResult<GetAircraftDto>>();
+
+        var dtoValidationResult = _baseFilterDtoValidator.Validate(dto);
+        result.AddErrors(dtoValidationResult.Errors);
+        if (result.IsFailure)
+        {
+            return result;
+        }
+
         var filteredResult = await _unitOfWork.Aircrafts.GetDtoByFilterAsync(dto, cancellationToken);
         result.Value = filteredResult;
         return result;
