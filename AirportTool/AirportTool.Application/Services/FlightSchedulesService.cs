@@ -32,9 +32,20 @@ public class FlightSchedulesService : IFlightSchedulesService
         throw new NotImplementedException();
     }
 
-    public async Task<Result<IReadOnlyList<DailyFlightStatsDto>>> GetDailyStatsAsync(DateTime startUtc, DateTime endUtc, CancellationToken cancellationToken)
+    public async Task<Result<IReadOnlyList<DailyFlightStatsDto>>> GetDailyStatsAsync(
+        DateOnly startUtc, DateOnly endUtc, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        var result = new Result<IReadOnlyList<DailyFlightStatsDto>>();
+
+        ValidateStartAndEndUtc(startUtc, endUtc, result);
+        if (result.IsFailure)
+        {
+            return result;
+        }
+
+        var statsDto = await _unitOfWork.FlightSchedules.GetDailyStatsAsync(startUtc, endUtc, cancellationToken);
+        result.Value = statsDto;
+        return result;
     }
 
     public async Task<Result<GetFlightScheduleDto?>> CreateAsync(UpsertFlightScheduleDto dto, CancellationToken cancellationToken)
@@ -46,4 +57,22 @@ public class FlightSchedulesService : IFlightSchedulesService
     {
         throw new NotImplementedException();
     }
+
+    #region Business Rules Methods
+
+    private void ValidateStartAndEndUtc(DateOnly startUtc, DateOnly endUtc, Result result)
+    {
+        if (startUtc >= endUtc)
+        {
+            var error = new Error
+            {
+                Message = "The startUtc must be earlier than endUtc.",
+                Type = ErrorType.Validation
+            };
+            result.AddError(error);
+        }
+
+    }
+
+    #endregion
 }

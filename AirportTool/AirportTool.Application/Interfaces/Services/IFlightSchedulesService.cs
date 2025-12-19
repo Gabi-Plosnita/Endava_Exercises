@@ -6,7 +6,7 @@ public interface IFlightSchedulesService
 
     Task<Result<PagedResult<FlightScheduleSearchDto>>> GetByFilterAsync(FlightScheduleFilterDto dto, CancellationToken cancellationToken);
 
-    Task<Result<IReadOnlyList<DailyFlightStatsDto>>> GetDailyStatsAsync(DateTime startUtc, DateTime endUtc, CancellationToken cancellationToken);
+    Task<Result<IReadOnlyList<DailyFlightStatsDto>>> GetDailyStatsAsync(DateOnly startUtc, DateOnly endUtc, CancellationToken cancellationToken);
 
     Task<Result<GetFlightScheduleDto?>> CreateAsync(UpsertFlightScheduleDto dto, CancellationToken cancellationToken);
 
