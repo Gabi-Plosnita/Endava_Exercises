@@ -159,4 +159,12 @@ public class FlightScheduleRepository : EfRepositoryBase<FlightSchedule, FlightS
 
         return results;
     }
+
+    public async Task AddAndSaveAsync(FlightSchedule flightSchedule, CancellationToken cancellationToken)
+    {
+        var flightScheduleDb = _mapper.Map<FlightScheduleDb>(flightSchedule);
+        _context.FlightSchedules.Add(flightScheduleDb);
+        await _context.SaveChangesAsync(cancellationToken);
+        _mapper.Map(flightScheduleDb, flightSchedule);
+    }
 }
