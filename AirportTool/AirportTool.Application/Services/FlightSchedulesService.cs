@@ -29,7 +29,19 @@ public class FlightSchedulesService : IFlightSchedulesService
 
     public async Task<Result<PagedResult<FlightScheduleSearchDto>>> GetByFilterAsync(FlightScheduleFilterDto dto, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        var result = new Result<PagedResult<FlightScheduleSearchDto>>();
+
+        var dtoValidationResult = _baseFilterDtoValidator.Validate(dto);
+        result.AddErrors(dtoValidationResult.Errors);
+        if (result.IsFailure)
+        {
+            return result;
+        }
+
+        var filteredDtoResult = await _unitOfWork.FlightSchedules.GetFilteredFlightSchedulesAsync(dto, cancellationToken);
+        result.Value = filteredDtoResult;
+
+        return result;
     }
 
     public async Task<Result<IReadOnlyList<DailyFlightStatsDto>>> GetDailyStatsAsync(
