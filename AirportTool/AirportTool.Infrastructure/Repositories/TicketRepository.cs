@@ -11,27 +11,52 @@ public class TicketRepository : EfRepositoryBase<Ticket, TicketDb, long>, ITicke
     {
     }
 
-    public async Task<IReadOnlyList<GetTicketDto>> GetByFlightScheduleIdAsync(
-        int flightScheduleId, CancellationToken cancellationToken)
+    public Task<GetTicketDto?> GetDtoByIdAsync(long ticketId, CancellationToken cancellationToken)
     {
-        var getTicketDtos = await _context.Tickets
-                                    .AsNoTracking()
-                                    .Where(t => t.FlightScheduleId == flightScheduleId)
-                                    .Select(t => new GetTicketDto
-                                    {
-                                        TicketId = t.TicketId,
-                                        FlightScheduleId = t.FlightScheduleId,
-                                        FareClass = t.FareClass,
-                                        BasePrice = t.BasePrice,
-                                        Taxes = t.Taxes,
-                                        TotalPrice = t.TotalPrice,
-                                        Currency = t.Currency,
-                                        IsRefundable = t.IsRefundable,
-                                        SeatInventory = t.SeatInventory
-                                    })
-                                    .ToListAsync(cancellationToken);
+        return _context.Tickets
+                       .AsNoTracking()
+                       .Where(t => t.TicketId == ticketId)
+                       .Select(t => new GetTicketDto
+                       {
+                           TicketId = t.TicketId,
+                           FlightScheduleId = t.FlightScheduleId,
+                           FareClass = t.FareClass,
+                           BasePrice = t.BasePrice,
+                           Taxes = t.Taxes,
+                           TotalPrice = t.TotalPrice,
+                           Currency = t.Currency,
+                           IsRefundable = t.IsRefundable,
+                           SeatInventory = t.SeatInventory
+                       })
+                       .SingleOrDefaultAsync(cancellationToken);
+    }
 
-        return getTicketDtos;
+    public async Task<IReadOnlyList<GetTicketDto>> GetByFlightScheduleIdAsync(int flightScheduleId, CancellationToken cancellationToken)
+    {
+        return await _context.Tickets
+                             .AsNoTracking()
+                             .Where(t => t.FlightScheduleId == flightScheduleId)
+                             .Select(t => new GetTicketDto
+                             {
+                                 TicketId = t.TicketId,
+                                 FlightScheduleId = t.FlightScheduleId,
+                                 FareClass = t.FareClass,
+                                 BasePrice = t.BasePrice,
+                                 Taxes = t.Taxes,
+                                 TotalPrice = t.TotalPrice,
+                                 Currency = t.Currency,
+                                 IsRefundable = t.IsRefundable,
+                                 SeatInventory = t.SeatInventory
+                             })
+                             .ToListAsync(cancellationToken);
+    }
+
+    public async Task AddAndSaveAsync(Ticket ticket, CancellationToken cancellationToken)
+    {
+        var ticketDb = _mapper.Map<TicketDb>(ticket);
+        await _context.Tickets.AddAsync(ticketDb, cancellationToken);
+        await _context.SaveChangesAsync(cancellationToken);
+        _mapper.Map(ticketDb, ticket);
     }
 
     public Task<bool> HasBookingsAsync(long ticketId, CancellationToken cancellationToken)
