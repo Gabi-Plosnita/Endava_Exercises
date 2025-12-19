@@ -88,6 +88,8 @@ public class FlightSchedulesService : IFlightSchedulesService
             assignedAircraft = await ValidateAircraftExistsAsync(dto.AssignedAircraftTail, result, cancellationToken);
         }
 
+        // Gate overlap validation //
+
         if (result.IsFailure)
         {
             return result;
