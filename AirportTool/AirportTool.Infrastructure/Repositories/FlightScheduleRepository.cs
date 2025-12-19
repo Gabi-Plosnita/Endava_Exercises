@@ -167,4 +167,30 @@ public class FlightScheduleRepository : EfRepositoryBase<FlightSchedule, FlightS
         await _context.SaveChangesAsync(cancellationToken);
         _mapper.Map(flightScheduleDb, flightSchedule);
     }
+
+    public async Task<IReadOnlyList<ScheduleConflictDto>> GetGateOverlapsAsync(
+        int? gateId,
+        DateTime proposedStartUtc,
+        DateTime proposedEndUtc,
+        int? excludeFlightScheduleId,
+        CancellationToken cancellationToken)
+    {
+        var conflicts = await _context.FlightSchedules
+            .AsNoTracking()
+            .Where(fs => fs.GateId == gateId
+                         && (excludeFlightScheduleId == null || fs.FlightScheduleId != excludeFlightScheduleId))
+            .Where(fs => proposedStartUtc < fs.ScheduledArrivalUtc && fs.ScheduledDepartureUtc < proposedEndUtc)
+            .OrderBy(fs => fs.ScheduledDepartureUtc)
+            .Select(fs => new ScheduleConflictDto
+            {
+                FlightScheduleId = fs.FlightScheduleId,
+                FlightNumber = fs.Flight.FlightNumber,
+                AirlineIata = fs.Flight.Airline.Iatacode,
+                ScheduledDepartureUtc = fs.ScheduledDepartureUtc,
+                ScheduledArrivalUtc = fs.ScheduledArrivalUtc
+            })
+            .ToListAsync(cancellationToken);
+
+        return conflicts;
+    }
 }

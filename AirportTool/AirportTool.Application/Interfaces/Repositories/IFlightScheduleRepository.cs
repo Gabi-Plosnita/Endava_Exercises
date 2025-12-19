@@ -17,4 +17,11 @@ public interface IFlightScheduleRepository : IRepository<FlightSchedule, int>
         DateOnly startUtc, DateOnly endUtc, CancellationToken cancellationToken);
 
     Task AddAndSaveAsync(FlightSchedule flightSchedule, CancellationToken cancellationToken);
+
+    Task<IReadOnlyList<ScheduleConflictDto>> GetGateOverlapsAsync(
+        int? gateId, 
+        DateTime proposedStartUtc, 
+        DateTime proposedEndUtc,
+        int? excludeFlightScheduleId, 
+        CancellationToken cancellationToken);
 }
