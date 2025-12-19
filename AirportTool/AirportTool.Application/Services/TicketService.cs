@@ -1,4 +1,5 @@
 ﻿using AirportTool.Domain;
+using AutoMapper;
 using Microsoft.Extensions.Logging;
 
 namespace AirportTool.Application;
@@ -6,12 +7,23 @@ namespace AirportTool.Application;
 public class TicketService : ITicketService
 {
     private readonly IUnitOfWork _unitOfWork;
+    private readonly IValidator<CreateTicketDto> _createTicketDtoValidator;
+    private readonly IValidator<UpdateTicketDto> _updateTicketDtoValidator;
+    private readonly IMapper _mapper;
     private readonly ILogger<TicketService> _logger;
 
-    public TicketService(IUnitOfWork unitOfWork, ILogger<TicketService> logger)
+    public TicketService(
+        IUnitOfWork unitOfWork, 
+        IValidator<CreateTicketDto> createTicketDtoValidator,
+        IValidator<UpdateTicketDto> updateTicketDtoValidator,
+        ILogger<TicketService> logger,
+        IMapper mapper)
     {
         _unitOfWork = unitOfWork;
+        _createTicketDtoValidator = createTicketDtoValidator;
+        _updateTicketDtoValidator = updateTicketDtoValidator;
         _logger = logger;
+        _mapper = mapper;
     }
 
     public async Task<Result<IReadOnlyList<GetTicketDto>>> GetByFlightScheduleIdAsync(int flightScheduleId, CancellationToken cancellationToken)
@@ -30,14 +42,53 @@ public class TicketService : ITicketService
         return result;
     }
 
-    public Task<Result<GetTicketDto?>> CreateAsync(CreateTicketDto dto, CancellationToken cancellationToken)
+    public async Task<Result<GetTicketDto?>> CreateAsync(CreateTicketDto dto, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        var result = new Result<GetTicketDto?>();
+
+        var dtoValidationResult = _createTicketDtoValidator.Validate(dto);
+        result.AddErrors(dtoValidationResult.Errors);
+        if(result.IsFailure)
+        {
+            return result;
+        }
+
+        await ValidateFlightScheduleExistsAsync(dto.FlightScheduleId, result, cancellationToken);
+        if (result.IsFailure)
+        {
+            return result;
+        }
+
+        var ticket = _mapper.Map<Ticket>(dto);
+        await _unitOfWork.Tickets.AddAndSaveAsync(ticket, cancellationToken);
+        var getTicketDto = await _unitOfWork.Tickets.GetDtoByIdAsync(ticket.TicketId, cancellationToken);
+        result.Value = getTicketDto;
+
+        return result;
     }
 
-    public Task<Result> UpdateAsync(long ticketId, UpdateTicketDto dto, CancellationToken cancellationToken)
+    public async Task<Result> UpdateAsync(long ticketId, UpdateTicketDto dto, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        var result = new Result();
+
+        var dtoValidationResult = _updateTicketDtoValidator.Validate(dto);
+        result.AddErrors(dtoValidationResult.Errors);
+        if (result.IsFailure)
+        {
+            return result;
+        }
+
+        var existingTicket = await ValidateTicketExistsAsync(ticketId, result, cancellationToken);
+        if (result.IsFailure || existingTicket == null)
+        {
+            return result;
+        }
+
+        _mapper.Map(dto, existingTicket);
+        await _unitOfWork.Tickets.UpdateAsync(existingTicket, cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        return result;
     }
 
     public async Task<Result> DeleteByIdAsync(long ticketId, CancellationToken cancellationToken)
@@ -57,6 +108,8 @@ public class TicketService : ITicketService
         }
 
         await _unitOfWork.Tickets.RemoveAsync(ticket, cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+
         return result;
     }
 
@@ -104,5 +157,9 @@ public class TicketService : ITicketService
             result.AddError(error);
         }
     }
+    #endregion
+
+    #region Logging Methods
+
     #endregion
 }
