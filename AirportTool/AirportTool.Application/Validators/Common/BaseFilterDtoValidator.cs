@@ -9,7 +9,7 @@ public class BaseFilterDtoValidator : BaseValidator, IValidator<BaseFilterDto>
         {   
             result.AddError(new Error
             {
-                Message = "PageIndex must be greater than or equal to 0.",
+                Message = "Page Index must be greater than or equal to 0.",
                 Type = ErrorType.Validation
             });
         }
@@ -17,7 +17,7 @@ public class BaseFilterDtoValidator : BaseValidator, IValidator<BaseFilterDto>
         {
             result.AddError(new Error
             {
-                Message = "PageSize must be between 1 and 100",
+                Message = "Page Size must be between 1 and 100",
                 Type = ErrorType.Validation
             });
         }
