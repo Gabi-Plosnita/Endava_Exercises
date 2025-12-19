@@ -127,27 +127,30 @@ public class FlightScheduleRepository : EfRepositoryBase<FlightSchedule, FlightS
     }
 
     public async Task<IReadOnlyList<DailyFlightStatsDto>> GetDailyStatsAsync(
-        DateTime startUtc, DateTime endUtc, CancellationToken cancellationToken)
+        DateOnly startUtc, DateOnly endUtc, CancellationToken cancellationToken)
     {
+        var startDateTime = startUtc.ToDateTime(TimeOnly.MinValue);
+        var endDateTime = endUtc.ToDateTime(TimeOnly.MaxValue);
+
         var flightScheduleDbs = await _context.FlightSchedules
                                               .AsNoTracking()
-                                              .Where(fs => fs.ScheduledDepartureUtc >= startUtc
-                                                           && fs.ScheduledDepartureUtc <= endUtc)
+                                              .Where(fs => fs.ScheduledDepartureUtc >= startDateTime 
+                                                           && fs.ScheduledDepartureUtc <= endDateTime)
                                               .ToListAsync(cancellationToken);
 
-        var groupedFlightSchedules = flightScheduleDbs.GroupBy(fs => fs.ScheduledDepartureUtc.Date)
+        var groupedFlightSchedules = flightScheduleDbs.GroupBy(fs => DateOnly.FromDateTime(fs.ScheduledDepartureUtc))
                                                       .ToDictionary(g => g.Key, g => g.Count());
 
         var results = new List<DailyFlightStatsDto>();
-        var currentDate = startUtc.Date;
+        var currentDate = startUtc;
 
-        while (currentDate <= endUtc.Date)
+        while (currentDate <= endUtc)
         {
             groupedFlightSchedules.TryGetValue(currentDate, out var count);
 
             results.Add(new DailyFlightStatsDto
             {
-                Date = DateOnly.FromDateTime(currentDate),
+                Date = currentDate,
                 TotalFlights = count
             });
 

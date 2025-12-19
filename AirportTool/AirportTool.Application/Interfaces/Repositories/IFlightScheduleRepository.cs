@@ -14,5 +14,5 @@ public interface IFlightScheduleRepository : IRepository<FlightSchedule, int>
         FlightScheduleFilterDto filter, CancellationToken cancellationToken);
 
     Task<IReadOnlyList<DailyFlightStatsDto>> GetDailyStatsAsync(
-        DateTime startUtc, DateTime endUtc, CancellationToken cancellationToken);
+        DateOnly startUtc, DateOnly endUtc, CancellationToken cancellationToken);
 }
