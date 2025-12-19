@@ -22,13 +22,13 @@ public class FlightScheduleRepository : EfRepositoryBase<FlightSchedule, FlightS
         return _mapper.Map<FlightSchedule>(flightScheduleDb);
     }
 
-    public Task<FlightScheduleDetailsDto?> GetFlightScheduleDetailsAsync(
+    public Task<GetFlightScheduleDto?> GetFlightScheduleDetailsAsync(
         int flightScheduleId, CancellationToken cancellationToken)
     {
         return _context.FlightSchedules
                        .AsNoTracking()
                        .Where(fs => fs.FlightScheduleId == flightScheduleId)
-                       .Select(fs => new FlightScheduleDetailsDto
+                       .Select(fs => new GetFlightScheduleDto
                        {
                            FlightScheduleId = fs.FlightScheduleId,
                            FlightId = fs.FlightId,
