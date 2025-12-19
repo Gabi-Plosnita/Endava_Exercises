@@ -7,7 +7,7 @@ public interface IFlightScheduleRepository : IRepository<FlightSchedule, int>
     Task<FlightSchedule?> GetByFlightAndDepartureAsync(
         int flightId, DateTime departureUtc, CancellationToken cancellationToken);
 
-    Task<GetFlightScheduleDto?> GetFlightScheduleDetailsAsync(
+    Task<GetFlightScheduleDto?> GetDtoByIdAsync(
         int flightScheduleId, CancellationToken cancellationToken);
 
     Task<PagedResult<FlightScheduleSearchDto>> GetFilteredFlightSchedulesAsync(

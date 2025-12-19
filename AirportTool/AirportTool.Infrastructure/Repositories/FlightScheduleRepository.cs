@@ -22,7 +22,7 @@ public class FlightScheduleRepository : EfRepositoryBase<FlightSchedule, FlightS
         return _mapper.Map<FlightSchedule>(flightScheduleDb);
     }
 
-    public Task<GetFlightScheduleDto?> GetFlightScheduleDetailsAsync(
+    public Task<GetFlightScheduleDto?> GetDtoByIdAsync(
         int flightScheduleId, CancellationToken cancellationToken)
     {
         return _context.FlightSchedules

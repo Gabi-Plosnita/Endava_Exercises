@@ -21,27 +21,28 @@ public class FlightSchedulesService : IFlightSchedulesService
         _logger = logger;
     }
 
-    public Task<GetFlightScheduleDto?> GetByIdAsync(int id, CancellationToken cancellationToken)
+    public async Task<GetFlightScheduleDto?> GetFlightScheduleDtoByIdAsync(int id, CancellationToken cancellationToken)
+    {
+        var getFlightScheduleDto = await _unitOfWork.FlightSchedules.GetDtoByIdAsync(id, cancellationToken);
+        return getFlightScheduleDto;
+    }
+
+    public async Task<Result<PagedResult<FlightScheduleSearchDto>>> GetByFilterAsync(FlightScheduleFilterDto dto, CancellationToken cancellationToken)
     {
         throw new NotImplementedException();
     }
 
-    public Task<Result<PagedResult<FlightScheduleSearchDto>>> GetByFilterAsync(FlightScheduleFilterDto dto, CancellationToken cancellationToken)
+    public async Task<Result<IReadOnlyList<DailyFlightStatsDto>>> GetDailyStatsAsync(DateTime startUtc, DateTime endUtc, CancellationToken cancellationToken)
     {
         throw new NotImplementedException();
     }
 
-    public Task<Result<IReadOnlyList<DailyFlightStatsDto>>> GetDailyStatsAsync(DateTime startUtc, DateTime endUtc, CancellationToken cancellationToken)
+    public async Task<Result<GetFlightScheduleDto?>> CreateAsync(UpsertFlightScheduleDto dto, CancellationToken cancellationToken)
     {
         throw new NotImplementedException();
     }
 
-    public Task<Result<GetFlightScheduleDto?>> CreateAsync(UpsertFlightScheduleDto dto, CancellationToken cancellationToken)
-    {
-        throw new NotImplementedException();
-    }
-
-    public Task<ImportResultDto> ImportAsync(IEnumerable<UpsertFlightScheduleDto> dtos, CancellationToken cancellationToken)
+    public async Task<ImportResultDto> ImportAsync(IEnumerable<UpsertFlightScheduleDto> dtos, CancellationToken cancellationToken)
     {
         throw new NotImplementedException();
     }
