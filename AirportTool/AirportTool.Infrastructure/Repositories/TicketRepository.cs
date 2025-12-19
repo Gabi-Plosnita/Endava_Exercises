@@ -11,14 +11,33 @@ public class TicketRepository : EfRepositoryBase<Ticket, TicketDb, long>, ITicke
     {
     }
 
-    public async Task<IReadOnlyList<Ticket>> GetTicketsByFlightScheduleIdAsync(
+    public async Task<IReadOnlyList<GetTicketDto>> GetByFlightScheduleIdAsync(
         int flightScheduleId, CancellationToken cancellationToken)
     {
-        var ticketDbs = await _context.Tickets
+        var getTicketDtos = await _context.Tickets
                                     .AsNoTracking()
                                     .Where(t => t.FlightScheduleId == flightScheduleId)
+                                    .Select(t => new GetTicketDto
+                                    {
+                                        TicketId = t.TicketId,
+                                        FlightScheduleId = t.FlightScheduleId,
+                                        FareClass = t.FareClass,
+                                        BasePrice = t.BasePrice,
+                                        Taxes = t.Taxes,
+                                        TotalPrice = t.TotalPrice,
+                                        Currency = t.Currency,
+                                        IsRefundable = t.IsRefundable,
+                                        SeatInventory = t.SeatInventory
+                                    })
                                     .ToListAsync(cancellationToken);
 
-        return _mapper.Map<IReadOnlyList<Ticket>>(ticketDbs);
+        return getTicketDtos;
+    }
+
+    public Task<bool> HasBookingsAsync(long ticketId, CancellationToken cancellationToken)
+    {
+        return _context.Bookings
+                       .AsNoTracking()
+                       .AnyAsync(b => b.TicketId == ticketId, cancellationToken);
     }
 }
