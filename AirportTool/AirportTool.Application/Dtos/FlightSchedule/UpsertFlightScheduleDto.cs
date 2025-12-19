@@ -1,4 +1,6 @@
-﻿namespace AirportTool.Application;
+﻿using AirportTool.Domain;
+
+namespace AirportTool.Application;
 
 public class UpsertFlightScheduleDto
 {
@@ -11,4 +13,6 @@ public class UpsertFlightScheduleDto
     public string? GateCode { get; set; } = null!;
 
     public string? AssignedAircraftTail { get; set; } = null!;
+
+    public FlightScheduleStatus Status { get; set; }
 }
