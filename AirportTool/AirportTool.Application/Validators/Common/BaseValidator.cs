@@ -13,4 +13,16 @@ public class BaseValidator
             });
         }
     }
+
+    protected void ValidatePositive(decimal value, string fieldName, Result result)
+    {
+        if (value <= 0)
+        {
+            result.AddError(new Error
+            {
+                Message = $"{fieldName} must be positive.",
+                Type = ErrorType.Validation
+            });
+        }
+    }
 }
