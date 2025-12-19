@@ -1,6 +1,6 @@
 ﻿namespace AirportTool.Application;
 
-public class FlightFilterDto : BaseFilterDto
+public class FlightScheduleFilterDto : BaseFilterDto
 {
     public string? OriginIata { get; init; }
 

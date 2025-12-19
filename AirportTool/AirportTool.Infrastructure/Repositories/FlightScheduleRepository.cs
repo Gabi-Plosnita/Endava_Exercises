@@ -54,7 +54,7 @@ public class FlightScheduleRepository : EfRepositoryBase<FlightSchedule, FlightS
     }
 
     public async Task<PagedResult<FlightScheduleSearchDto>> GetFilteredFlightSchedulesAsync(
-        FlightFilterDto filter, CancellationToken cancellationToken)
+        FlightScheduleFilterDto filter, CancellationToken cancellationToken)
     {
         var skip = filter.PageIndex * filter.PageSize;
 
