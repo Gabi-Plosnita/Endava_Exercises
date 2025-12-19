@@ -13,7 +13,7 @@ public class TicketService : ITicketService
     private readonly ILogger<TicketService> _logger;
 
     public TicketService(
-        IUnitOfWork unitOfWork, 
+        IUnitOfWork unitOfWork,
         IValidator<CreateTicketDto> createTicketDtoValidator,
         IValidator<UpdateTicketDto> updateTicketDtoValidator,
         ILogger<TicketService> logger,
@@ -26,36 +26,43 @@ public class TicketService : ITicketService
         _mapper = mapper;
     }
 
-    public async Task<Result<IReadOnlyList<GetTicketDto>>> GetByFlightScheduleIdAsync(int flightScheduleId, CancellationToken cancellationToken)
+    public async Task<Result<IReadOnlyList<GetTicketDto>>> GetByFlightScheduleIdAsync(
+        int flightScheduleId, CancellationToken cancellationToken)
     {
         var result = new Result<IReadOnlyList<GetTicketDto>>();
+        LogGetByFlightScheduleIdStart(flightScheduleId);
 
         await ValidateFlightScheduleExistsAsync(flightScheduleId, result, cancellationToken);
         if (result.IsFailure)
         {
+            LogGetByFlightScheduleIdFailure(flightScheduleId, result);
             return result;
         }
 
         var getTicketDtos = await _unitOfWork.Tickets.GetByFlightScheduleIdAsync(flightScheduleId, cancellationToken);
         result.Value = getTicketDtos;
 
+        LogGetByFlightScheduleIdSuccess(flightScheduleId, getTicketDtos?.Count ?? 0);
         return result;
     }
 
     public async Task<Result<GetTicketDto?>> CreateAsync(CreateTicketDto dto, CancellationToken cancellationToken)
     {
         var result = new Result<GetTicketDto?>();
+        LogCreateStart(dto);
 
         var dtoValidationResult = _createTicketDtoValidator.Validate(dto);
         result.AddErrors(dtoValidationResult.Errors);
-        if(result.IsFailure)
+        if (result.IsFailure)
         {
+            LogCreateFailure(dto, result);
             return result;
         }
 
         await ValidateFlightScheduleExistsAsync(dto.FlightScheduleId, result, cancellationToken);
         if (result.IsFailure)
         {
+            LogCreateFailure(dto, result);
             return result;
         }
 
@@ -64,23 +71,27 @@ public class TicketService : ITicketService
         var getTicketDto = await _unitOfWork.Tickets.GetDtoByIdAsync(ticket.TicketId, cancellationToken);
         result.Value = getTicketDto;
 
+        LogCreateSuccess(ticket);
         return result;
     }
 
     public async Task<Result> UpdateAsync(long ticketId, UpdateTicketDto dto, CancellationToken cancellationToken)
     {
         var result = new Result();
+        LogUpdateStart(ticketId, dto);
 
         var dtoValidationResult = _updateTicketDtoValidator.Validate(dto);
         result.AddErrors(dtoValidationResult.Errors);
         if (result.IsFailure)
         {
+            LogUpdateFailure(ticketId, result);
             return result;
         }
 
         var existingTicket = await ValidateTicketExistsAsync(ticketId, result, cancellationToken);
         if (result.IsFailure || existingTicket == null)
         {
+            LogUpdateFailure(ticketId, result);
             return result;
         }
 
@@ -88,28 +99,33 @@ public class TicketService : ITicketService
         await _unitOfWork.Tickets.UpdateAsync(existingTicket, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
+        LogUpdateSuccess(ticketId);
         return result;
     }
 
     public async Task<Result> DeleteByIdAsync(long ticketId, CancellationToken cancellationToken)
     {
         var result = new Result();
+        LogDeleteStart(ticketId);
 
         var ticket = await ValidateTicketExistsAsync(ticketId, result, cancellationToken);
         if (result.IsFailure || ticket == null)
         {
+            LogDeleteFailure(ticketId, result);
             return result;
         }
 
         await ValidateTicketHasNoBookings(ticketId, result, cancellationToken);
         if (result.IsFailure)
         {
+            LogDeleteFailure(ticketId, result);
             return result;
         }
 
         await _unitOfWork.Tickets.RemoveAsync(ticket, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
+        LogDeleteSuccess(ticketId);
         return result;
     }
 
@@ -157,9 +173,138 @@ public class TicketService : ITicketService
             result.AddError(error);
         }
     }
+
     #endregion
 
     #region Logging Methods
+
+    private void LogGetByFlightScheduleIdStart(int flightScheduleId)
+    {
+        _logger.LogInformation(
+            @"Retrieving tickets by flight schedule:
+                FlightScheduleId={FlightScheduleId}",
+            flightScheduleId);
+    }
+
+    private void LogGetByFlightScheduleIdFailure(int flightScheduleId, Result result)
+    {
+        _logger.LogWarning(
+            @"Get tickets by flight schedule failed:
+                FlightScheduleId={FlightScheduleId},
+                Errors={Errors}",
+            flightScheduleId,
+            result.Errors);
+    }
+
+    private void LogGetByFlightScheduleIdSuccess(int flightScheduleId, int count)
+    {
+        _logger.LogDebug(
+            "Retrieved {Count} ticket(s) for FlightScheduleId {FlightScheduleId}.",
+            count,
+            flightScheduleId);
+    }
+
+    private void LogCreateStart(CreateTicketDto dto)
+    {
+        _logger.LogInformation(
+            @"Creating ticket:
+                FlightScheduleId={FlightScheduleId},
+                FareClass={FareClass},
+                BasePrice={BasePrice},
+                Taxes={Taxes},
+                Currency={Currency},
+                IsRefundable={IsRefundable},
+                SeatInventory={SeatInventory}",
+            dto.FlightScheduleId,
+            dto.FareClass,
+            dto.BasePrice,
+            dto.Taxes,
+            dto.Currency,
+            dto.IsRefundable,
+            dto.SeatInventory);
+    }
+
+    private void LogCreateFailure(CreateTicketDto dto, Result result)
+    {
+        _logger.LogWarning(
+            @"Create ticket failed:
+                FlightScheduleId={FlightScheduleId},
+                FareClass={FareClass},
+                Errors={Errors}",
+            dto.FlightScheduleId,
+            dto.FareClass,
+            result.Errors);
+    }
+
+    private void LogCreateSuccess(Ticket ticket)
+    {
+        _logger.LogInformation(
+            @"Ticket created successfully:
+                TicketId={TicketId},
+                FlightScheduleId={FlightScheduleId},
+                FareClass={FareClass},
+                Currency={Currency},
+                SeatInventory={SeatInventory}",
+            ticket.TicketId,
+            ticket.FlightScheduleId,
+            ticket.FareClass,
+            ticket.Currency,
+            ticket.SeatInventory);
+    }
+
+    private void LogUpdateStart(long ticketId, UpdateTicketDto dto)
+    {
+        _logger.LogInformation(
+            @"Updating ticket:
+                TicketId={TicketId},
+                SeatInventory={SeatInventory}",
+            ticketId,
+            dto.SeatInventory);
+    }
+
+    private void LogUpdateFailure(long ticketId, Result result)
+    {
+        _logger.LogWarning(
+            @"Update ticket failed:
+                TicketId={TicketId},
+                Errors={Errors}",
+            ticketId,
+            result.Errors);
+    }
+
+    private void LogUpdateSuccess(long ticketId)
+    {
+        _logger.LogInformation(
+            @"Ticket updated successfully:
+                TicketId={TicketId}",
+            ticketId);
+    }
+
+    private void LogDeleteStart(long ticketId)
+    {
+        _logger.LogInformation(
+            @"Deleting ticket:
+                TicketId={TicketId}",
+            ticketId);
+    }
+
+    private void LogDeleteFailure(long ticketId, Result result)
+    {
+        _logger.LogWarning(
+            @"Delete ticket failed:
+                TicketId={TicketId},
+                Errors={Errors}",
+            ticketId,
+            result.Errors);
+    }
+
+    private void LogDeleteSuccess(long ticketId)
+    {
+        _logger.LogInformation(
+            @"Ticket deleted successfully:
+                TicketId={TicketId}",
+            ticketId);
+    }
 
     #endregion
 }
