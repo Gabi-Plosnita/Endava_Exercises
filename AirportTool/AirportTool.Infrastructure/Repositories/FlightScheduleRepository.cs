@@ -185,7 +185,7 @@ public class FlightScheduleRepository : EfRepositoryBase<FlightSchedule, FlightS
             {
                 FlightScheduleId = fs.FlightScheduleId,
                 FlightNumber = fs.Flight.FlightNumber,
-                AirlineIata = fs.Flight.Airline.Iatacode,
+                AirportIata = fs.Flight.OriginAirport.Iatacode,
                 ScheduledDepartureUtc = fs.ScheduledDepartureUtc,
                 ScheduledArrivalUtc = fs.ScheduledArrivalUtc
             })
