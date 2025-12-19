@@ -1,6 +1,6 @@
 ﻿namespace AirportTool.Application;
 
-public class ImportResponseDto
+public class ImportResultDto
 {
     public int Total { get; set; }
 
