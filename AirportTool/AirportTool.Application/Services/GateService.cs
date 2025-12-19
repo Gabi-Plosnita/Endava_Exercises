@@ -53,7 +53,6 @@ public class GateService : IGateService
             await ValidateGateCodeIsUniqueForAirport(
                 gateToUpdateId: null,
                 airportId: airport.AirportId,
-                airportIataCode: dto.AirportIataCode,
                 code: dto.Code,
                 result,
                 cancellationToken);
@@ -100,7 +99,6 @@ public class GateService : IGateService
         await ValidateGateCodeIsUniqueForAirport(
             gateToUpdateId: existingGate.GateId,
             airportId: existingGate.AirportId,
-            airportIataCode: dto.AirportIataCode,
             code: dto.GateCode,
             result,
             cancellationToken);
@@ -173,14 +171,14 @@ public class GateService : IGateService
     }
 
     private async Task ValidateGateCodeIsUniqueForAirport(
-        int? gateToUpdateId, int airportId, string airportIataCode, string code, Result result, CancellationToken cancellationToken)
+        int? gateToUpdateId, int airportId, string code, Result result, CancellationToken cancellationToken)
     {
         var existingGate = await _unitOfWork.Gates.GetByAirlineIdAndCodeAsync(airportId, code, cancellationToken);
         if (existingGate != null && existingGate.GateId != gateToUpdateId)
         {
             var error = new Error
             {
-                Message = $"Gate with Code {code} already exists for Airport {airportIataCode}.",
+                Message = $"Gate with Code {code} already exists for Airport {airportId}.",
                 Type = ErrorType.Validation
             };
             result.AddError(error);
