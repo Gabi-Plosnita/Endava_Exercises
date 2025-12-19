@@ -11,11 +11,11 @@ public class UpdateTicketDtoValidator : IValidator<UpdateTicketDto>
 
     private void ValidateSeatInventory(UpdateTicketDto instance, Result result)
     {
-        if (instance.SeatInventory <= 0)
+        if (instance.SeatInventory < 0)
         {
             var error = new Error
             {
-                Message = "Seat inventory must be positive.",
+                Message = "Seat inventory cannot be negative.",
                 Type = ErrorType.Validation
             };
             result.AddError(error);
