@@ -240,10 +240,8 @@ public class GateService : IGateService
         _logger.LogInformation(
             @"Updating gate:
                 GateId={GateId},
-                AirportIataCode={AirportIataCode},
                 Code={Code}",
             gateId,
-            dto.AirportIataCode,
             dto.GateCode);
     }
 
