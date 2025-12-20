@@ -25,4 +25,23 @@ public class BaseValidator
             });
         }
     }
+
+    protected void ValidateEmail(string email, Result result)
+    {
+        ValidateRequired(email, nameof(email), result);
+        if(result.IsFailure)
+        {
+            return;
+        }
+        var isValid = email.Contains("@") && email.Contains(".");
+        if (isValid)
+        {
+            var error = new Error
+            {
+                Message = $"{nameof(email)} is not a valid email address.",
+                Type = ErrorType.Validation
+            };
+            result.AddError(error);
+        }
+    }
 }
