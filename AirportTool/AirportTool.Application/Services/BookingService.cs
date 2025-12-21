@@ -108,9 +108,10 @@ public class BookingService : IBookingService
             return result;
         }
 
-        var createdBooking = await ValidateBookingExistsAsync(booking.ConfirmationCode, result, cancellationToken);
+        var createdBooking = await ValidateCreatedBookingExists(booking.ConfirmationCode, result, cancellationToken);
         if (result.IsFailure || createdBooking == null)
         {
+            LogCreatePostSaveNotFound(booking.ConfirmationCode);
             LogCreateFailure(createBookingDto, result);
             return result;
         }
@@ -228,6 +229,21 @@ public class BookingService : IBookingService
         }
     }
 
+    private async Task<Booking?> ValidateCreatedBookingExists(string confirmationCode, Result result, CancellationToken cancellationToken)
+    {
+        var booking = await _unitOfWork.Bookings.GetByConfirmationCodeAsync(confirmationCode, cancellationToken);
+        if(booking == null)
+        {
+            var error = new Error
+            {
+                Message = $"Booking with confirmation code '{confirmationCode}' was not found after creation.",
+                Type = ErrorType.Unexpected
+            };
+            result.AddError(error);
+        }
+        return booking;
+    }
+
     #endregion
 
     #region Logging Methods
@@ -280,6 +296,15 @@ public class BookingService : IBookingService
             dto.PassengerEmail,
             dto.Quantity,
             result.Errors);
+    }
+
+    private void LogCreatePostSaveNotFound(string confirmationCode)
+    {
+        _logger.LogError(
+            @"Booking creation inconsistency detected:
+            ConfirmationCode={ConfirmationCode}
+            Reason=Booking not found after successful save operation",
+            confirmationCode);
     }
 
     private void LogCreateConflict(CreateBookingDto dto, string confirmationCode)

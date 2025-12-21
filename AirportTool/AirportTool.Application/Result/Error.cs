@@ -12,4 +12,5 @@ public enum ErrorType
     NotFound,
     Validation,
     Conflict,
+    Unexpected,
 }
