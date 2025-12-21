@@ -4,6 +4,8 @@ namespace AirportTool.Application;
 
 public class GetBookingDto
 {
+    public long BookingId { get; set; }
+
     public long TicketId { get; set; }
 
     public string PassengerFullName { get; set; } = null!;
