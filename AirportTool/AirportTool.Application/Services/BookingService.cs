@@ -2,6 +2,7 @@
 using AirportTool.Domain;
 using AutoMapper;
 using Microsoft.Extensions.Logging;
+using System.Xml.XPath;
 
 namespace AirportTool.Application;
 
@@ -44,15 +45,49 @@ public class BookingService : IBookingService
         }
 
         var getBookingDto = _mapper.Map<GetBookingDto>(booking);
-        getBookingDto.TotalPrice = (ticket.BasePrice + ticket.Taxes) * booking.Quantity;
+        getBookingDto.TotalPrice = CalculateTotalPrice(ticket.BasePrice, ticket.Taxes, booking.Quantity);
         result.Value = getBookingDto;
 
         return result;
     }
 
-    public Task<Result<GetBookingDto?>> CreateBookingAsync(CreateBookingDto createBookingDto, CancellationToken cancellationToken)
+    public async Task<Result<GetBookingDto?>> CreateBookingAsync(CreateBookingDto createBookingDto, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        var result = new Result<GetBookingDto?>();
+
+        var dtoValidationResult = _createBookingDtoValidator.Validate(createBookingDto);
+        result.AddErrors(dtoValidationResult.Errors);
+        if (result.IsFailure)
+        {
+            return result;
+        }
+
+        var ticket = await ValidateTicketExistsAsync(createBookingDto.TicketId, result, cancellationToken);
+        if (result.IsFailure || ticket == null)
+        {
+            return result;
+        }
+        
+        ValidateSeatAvailability(createBookingDto.Quantity, ticket.SeatInventory, result);
+
+        if(result.IsFailure)
+        {
+            return result;
+        }
+
+        var booking = _mapper.Map<Booking>(createBookingDto);
+        booking.ConfirmationCode = _codeGenerator.Generate();
+        ticket.SeatInventory -= createBookingDto.Quantity;
+        await _unitOfWork.Bookings.AddAsync(booking, cancellationToken);
+        await _unitOfWork.Tickets.UpdateAsync(ticket, cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        var createdBooking = await _unitOfWork.Bookings.GetByConfirmationCodeAsync(booking.ConfirmationCode, cancellationToken);
+        var getBookingDto = _mapper.Map<GetBookingDto>(createdBooking);
+        getBookingDto.TotalPrice = CalculateTotalPrice(ticket.BasePrice, ticket.Taxes, booking.Quantity);
+        result.Value = getBookingDto;
+
+        return result;
     }
 
     public async Task<Result> CancelBookingAsync(string confirmationCode, CancellationToken cancellationToken)
@@ -78,6 +113,11 @@ public class BookingService : IBookingService
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         return result;
+    }
+
+    private decimal CalculateTotalPrice(decimal basePrice, decimal taxes, int quantity)
+    {
+        return (basePrice + taxes) * quantity;
     }
 
     #region Business Rules Methods
@@ -111,5 +151,20 @@ public class BookingService : IBookingService
         }
         return ticket;
     }
+
+    private void ValidateSeatAvailability(int quantity, int seatInventory, Result result)
+    {
+        if(quantity > seatInventory)
+        {
+            var seatWord = seatInventory == 1 ? "seat" : "seats";
+            var error = new Error
+            {
+                Message = $"Only {seatInventory} {seatWord} available, but {quantity} were requested",
+                Type = ErrorType.Validation
+            };
+            result.AddError(error);
+        }
+    }
+
     #endregion
 }
