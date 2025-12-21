@@ -1,8 +1,6 @@
-﻿
-using AirportTool.Domain;
+﻿using AirportTool.Domain;
 using AutoMapper;
 using Microsoft.Extensions.Logging;
-using System.Xml.XPath;
 
 namespace AirportTool.Application;
 
@@ -67,20 +65,35 @@ public class BookingService : IBookingService
         {
             return result;
         }
-        
-        ValidateSeatAvailability(createBookingDto.Quantity, ticket.SeatInventory, result);
 
-        if(result.IsFailure)
+        ValidateSeatAvailability(createBookingDto.Quantity, ticket.SeatInventory, result);
+        if (result.IsFailure)
         {
             return result;
         }
 
         var booking = _mapper.Map<Booking>(createBookingDto);
         booking.ConfirmationCode = _codeGenerator.Generate();
+        booking.Status = BookingStatus.Active;
+
         ticket.SeatInventory -= createBookingDto.Quantity;
+
         await _unitOfWork.Bookings.AddAsync(booking, cancellationToken);
         await _unitOfWork.Tickets.UpdateAsync(ticket, cancellationToken);
-        await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        try
+        {
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
+        }
+        catch (ConcurrencyConflictException)
+        {
+            result.AddError(new Error
+            {
+                Type = ErrorType.Conflict,
+                Message = "Seat availability changed while processing your request. Please retry."
+            });
+            return result;
+        }
 
         var createdBooking = await _unitOfWork.Bookings.GetByConfirmationCodeAsync(booking.ConfirmationCode, cancellationToken);
         var getBookingDto = _mapper.Map<GetBookingDto>(createdBooking);
@@ -96,6 +109,11 @@ public class BookingService : IBookingService
 
         var booking = await ValidateBookingExistsAsync(confirmationCode, result, cancellationToken);
         if (result.IsFailure || booking == null)
+        {
+            return result;
+        }
+
+        if(booking.Status == BookingStatus.Cancelled)
         {
             return result;
         }
@@ -165,6 +183,10 @@ public class BookingService : IBookingService
             result.AddError(error);
         }
     }
+
+    #endregion
+
+    #region Logging Methods
 
     #endregion
 }
