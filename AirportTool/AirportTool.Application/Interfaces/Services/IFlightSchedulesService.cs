@@ -8,7 +8,7 @@ public interface IFlightSchedulesService
 
     Task<Result<IReadOnlyList<DailyFlightStatsDto>>> GetDailyStatsAsync(DateOnly startUtc, DateOnly endUtc, CancellationToken cancellationToken);
 
-    Task<Result<GetFlightScheduleDto?>> CreateAsync(UpsertFlightScheduleDto dto, CancellationToken cancellationToken);
+    Task<Result<UpsertFlightScheduleResultDto?>> CreateAsync(UpsertFlightScheduleDto dto, CancellationToken cancellationToken);
 
     Task<ImportResultDto> ImportAsync(IEnumerable<UpsertFlightScheduleDto> dtos, CancellationToken cancellationToken);
 }

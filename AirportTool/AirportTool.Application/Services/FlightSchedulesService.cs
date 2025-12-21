@@ -68,9 +68,11 @@ public class FlightSchedulesService : IFlightSchedulesService
         return result;
     }
 
-    public async Task<Result<GetFlightScheduleDto?>> CreateAsync(UpsertFlightScheduleDto dto, CancellationToken cancellationToken)
+    public async Task<Result<UpsertFlightScheduleResultDto>> CreateAsync(UpsertFlightScheduleDto dto, CancellationToken cancellationToken)
     {
-        var result = new Result<GetFlightScheduleDto?>();
+        var result = new Result<UpsertFlightScheduleResultDto>();
+        var upsertResultDto = new UpsertFlightScheduleResultDto();
+        result.Value = upsertResultDto;
 
         var dtoValidationResult = _upsertFlightScheduleDtoValidator.Validate(dto);
         result.AddErrors(dtoValidationResult.Errors);
@@ -94,9 +96,15 @@ public class FlightSchedulesService : IFlightSchedulesService
             assignedAircraft = await ValidateAircraftExistsAsync(dto.AssignedAircraftTail, result, cancellationToken);
         }
 
-        // Gate overlap validation //
+        upsertResultDto.ScheduleConflicts = await ValidateGateOverlapsAsync(
+            gateId: gate?.GateId, 
+            proposedStartUtc: dto.ScheduledDepartureUtc, 
+            proposedEndUtc: dto.ScheduledArrivalUtc, 
+            excludeFlightScheduleId: null, 
+            result,
+            cancellationToken);
 
-        if (result.IsFailure)
+        if (result.IsFailure || upsertResultDto.ScheduleConflicts.Any())
         {
             return result;
         }
@@ -107,7 +115,7 @@ public class FlightSchedulesService : IFlightSchedulesService
 
         await _unitOfWork.FlightSchedules.AddAndSaveAsync(flightSchedule, cancellationToken);
         var getFlightScheduleDto = await _unitOfWork.FlightSchedules.GetDtoByIdAsync(flightSchedule.FlightScheduleId, cancellationToken);
-        result.Value = getFlightScheduleDto;
+        upsertResultDto.FlightSchedule = getFlightScheduleDto;
 
         return result;  
     }
@@ -175,6 +183,32 @@ public class FlightSchedulesService : IFlightSchedulesService
             result.AddError(error);
         }
         return aircraft;
+    }
+
+    private async Task<IReadOnlyList<ScheduleConflictDto>> ValidateGateOverlapsAsync(
+        int? gateId,
+        DateTime proposedStartUtc,
+        DateTime proposedEndUtc,
+        int? excludeFlightScheduleId,
+        Result result,
+        CancellationToken cancellationToken)
+    {
+        var conflicts = await _unitOfWork.FlightSchedules.GetGateOverlapsAsync(
+            gateId,
+            proposedStartUtc,
+            proposedEndUtc,
+            excludeFlightScheduleId,
+            cancellationToken);
+        if (conflicts.Any())
+        {
+            var error = new Error
+            {
+                Message = $"Gate {gateId} is already occupied during the specified time.",
+                Type = ErrorType.Validation
+            };
+            result.AddError(error);
+        }
+        return conflicts;
     }
 
     #endregion
