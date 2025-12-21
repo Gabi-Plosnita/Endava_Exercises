@@ -95,7 +95,12 @@ public class BookingService : IBookingService
             return result;
         }
 
-        var createdBooking = await _unitOfWork.Bookings.GetByConfirmationCodeAsync(booking.ConfirmationCode, cancellationToken);
+        var createdBooking = await ValidateBookingExistsAsync(booking.ConfirmationCode, result, cancellationToken);
+        if (result.IsFailure || createdBooking == null)
+        {
+            return result;
+        }
+
         var getBookingDto = _mapper.Map<GetBookingDto>(createdBooking);
         getBookingDto.TotalPrice = CalculateTotalPrice(ticket.BasePrice, ticket.Taxes, booking.Quantity);
         result.Value = getBookingDto;
@@ -126,9 +131,22 @@ public class BookingService : IBookingService
 
         booking.Status = BookingStatus.Cancelled;
         ticket.SeatInventory += booking.Quantity;
+
         await _unitOfWork.Bookings.UpdateAsync(booking, cancellationToken);
         await _unitOfWork.Tickets.UpdateAsync(ticket, cancellationToken);
-        await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        try
+        {
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
+        }
+        catch (ConcurrencyConflictException)
+        {
+            result.AddError(new Error
+            {
+                Type = ErrorType.Conflict,
+                Message = "Booking or ticket was updated by another request. Please retry."
+            });
+        }
 
         return result;
     }
