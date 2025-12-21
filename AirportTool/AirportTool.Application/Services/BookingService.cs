@@ -98,13 +98,11 @@ public class BookingService : IBookingService
         catch (ConcurrencyConflictException)
         {
             LogCreateConflict(createBookingDto, booking.ConfirmationCode);
-
             result.AddError(new Error
             {
                 Type = ErrorType.Conflict,
                 Message = "Seat availability changed while processing your request. Please retry."
             });
-            LogCreateFailure(createBookingDto, result);
             return result;
         }
 
@@ -112,12 +110,11 @@ public class BookingService : IBookingService
         if (result.IsFailure || createdBooking == null)
         {
             LogCreatePostSaveNotFound(booking.ConfirmationCode);
-            LogCreateFailure(createBookingDto, result);
             return result;
         }
 
         var getBookingDto = _mapper.Map<GetBookingDto>(createdBooking);
-        getBookingDto.TotalPrice = CalculateTotalPrice(ticket.BasePrice, ticket.Taxes, booking.Quantity);
+        getBookingDto.TotalPrice = CalculateTotalPrice(ticket.BasePrice, ticket.Taxes, createBookingDto.Quantity);
         result.Value = getBookingDto;
 
         LogCreateSuccess(createdBooking, createBookingDto.Quantity);
