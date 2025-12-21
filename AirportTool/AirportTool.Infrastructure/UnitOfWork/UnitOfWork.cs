@@ -1,4 +1,5 @@
 ﻿using AirportTool.Application;
+using Microsoft.EntityFrameworkCore;
 
 namespace AirportTool.Infrastructure;
 
@@ -36,8 +37,17 @@ public class UnitOfWork : IUnitOfWork, IAsyncDisposable
         Gates = gates;
     }
 
-    public Task<int> SaveChangesAsync(CancellationToken cancellationToken)
-        => _context.SaveChangesAsync(cancellationToken);
+    public async Task<int> SaveChangesAsync(CancellationToken cancellationToken)
+    {
+        try
+        {
+            return await _context.SaveChangesAsync(cancellationToken);
+        }
+        catch (DbUpdateConcurrencyException ex)
+        {
+            throw new ConcurrencyConflictException("The entity was modified by another operation.", ex);
+        }
+    }
 
     public ValueTask DisposeAsync()
         => _context.DisposeAsync();
