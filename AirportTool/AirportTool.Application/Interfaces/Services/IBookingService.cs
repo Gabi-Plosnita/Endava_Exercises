@@ -2,7 +2,7 @@
 
 public interface IBookingService
 {
-    public Task<GetBookingDto?> GetBookingByCodeAsync(string confirmationCode, CancellationToken cancellationToken);
+    public Task<Result<GetBookingDto?>> GetBookingByCodeAsync(string confirmationCode, CancellationToken cancellationToken);
 
     public Task<Result<GetBookingDto?>> CreateBookingAsync(CreateBookingDto createBookingDto, CancellationToken cancellationToken);
 
