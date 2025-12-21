@@ -59,13 +59,25 @@ public class BookingService : IBookingService
     {
         var result = new Result();
 
-        var getBookingDto = await ValidateBookingExistsAsync(confirmationCode, result, cancellationToken);
-        if (result.IsFailure)
+        var booking = await ValidateBookingExistsAsync(confirmationCode, result, cancellationToken);
+        if (result.IsFailure || booking == null)
         {
             return result;
         }
 
+        var ticket = await ValidateTicketExistsAsync(booking.TicketId, result, cancellationToken);
+        if (result.IsFailure || ticket == null)
+        {
+            return result;
+        }
 
+        booking.Status = BookingStatus.Cancelled;
+        ticket.SeatInventory += booking.Quantity;
+        await _unitOfWork.Bookings.UpdateAsync(booking, cancellationToken);
+        await _unitOfWork.Tickets.UpdateAsync(ticket, cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        return result;
     }
 
     #region Business Rules Methods
