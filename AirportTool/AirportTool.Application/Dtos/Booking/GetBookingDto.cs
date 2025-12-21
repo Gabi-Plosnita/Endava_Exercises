@@ -16,7 +16,7 @@ public class GetBookingDto
 
     public int Quantity { get; set; }
 
-    public decimal TotalAmount { get; set; }
+    public decimal TotalPrice { get; set; }
 
     public BookingStatus Status { get; set; }
 }
