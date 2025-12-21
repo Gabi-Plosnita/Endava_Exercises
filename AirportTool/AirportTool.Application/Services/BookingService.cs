@@ -44,7 +44,7 @@ public class BookingService : IBookingService
         }
 
         var getBookingDto = _mapper.Map<GetBookingDto>(booking);
-        getBookingDto.TotalPrice = ticket.BasePrice * booking.Quantity;
+        getBookingDto.TotalPrice = (ticket.BasePrice + ticket.Taxes) * booking.Quantity;
         result.Value = getBookingDto;
 
         return result;
