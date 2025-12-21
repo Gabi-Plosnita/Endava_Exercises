@@ -11,13 +11,23 @@ public class BookingRepository : EfRepositoryBase<Booking, BookingDb, long>, IBo
     {
     }
 
-    public async Task<Booking?> GetByConfirmationCodeAsync(
+    public Task<GetBookingDto?> GetDtoByConfirmationCodeAsync(
         string confirmationCode, CancellationToken cancellationToken)
     {
-        var bookingDb = await _context.Bookings
-                                      .AsNoTracking()
-                                      .SingleOrDefaultAsync(b => b.ConfirmationCode == confirmationCode, cancellationToken);
-       
-        return _mapper.Map<Booking>(bookingDb);
+        return _context.Bookings
+                       .AsNoTracking()
+                       .Where(b => b.ConfirmationCode == confirmationCode)
+                       .Select(b => new GetBookingDto
+                       {
+                           BookingId = b.BookingId,
+                           TicketId = b.TicketId,
+                           PassengerFullName = b.PassengerFullName,
+                           PassengerEmail = b.PassengerEmail,
+                           ConfirmationCode = b.ConfirmationCode,
+                           Quantity = b.Quantity,
+                           TotalAmount = b.Quantity * (b.Ticket.BasePrice + b.Ticket.Taxes),
+                           Status = b.Status
+                       })
+                       .SingleOrDefaultAsync(cancellationToken);
     }
 }
