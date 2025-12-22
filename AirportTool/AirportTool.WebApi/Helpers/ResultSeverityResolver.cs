@@ -7,7 +7,7 @@ public interface IResultSeverityResolver
 {
     ErrorType? GetSeverity(Result result);
 
-    int GetHttpStatusCode(Result result);
+    HttpStatusCode GetHttpStatusCode(Result result);
 }
 
 public class ResultSeverityResolver : IResultSeverityResolver
