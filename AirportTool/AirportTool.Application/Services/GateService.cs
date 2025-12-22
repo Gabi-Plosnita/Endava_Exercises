@@ -22,12 +22,25 @@ public class GateService : IGateService
         _logger = logger;
     }
 
-    public async Task<GetGateDto?> GetByIdAsync(int id, CancellationToken cancellationToken)
+    public async Task<Result<GetGateDto?>> GetByIdAsync(int id, CancellationToken cancellationToken)
     {
+        var result = new Result<GetGateDto?>(); 
+
         var getGateDto = await _unitOfWork.Gates.GetDtoByIdAsync(id, cancellationToken);
         var found = getGateDto != null;
+
+        if(!found)
+        {
+            result.AddError(new Error
+            {
+                Message = $"Gate with Id {id} not found.",
+                Type = ErrorType.NotFound
+            });
+        }
+
         LogGetById(id, found);
-        return getGateDto;
+        result.Value = getGateDto;
+        return result;
     }
 
     public async Task<Result<GetGateDto?>> CreateAsync(CreateGateDto dto, CancellationToken cancellationToken)
@@ -66,6 +79,18 @@ public class GateService : IGateService
 
         await _unitOfWork.Gates.AddAndSaveAsync(gate, cancellationToken);
         var getGateDto = await _unitOfWork.Gates.GetDtoByIdAsync(gate.GateId, cancellationToken);
+        if(getGateDto == null)
+        {
+            result.AddError(new Error
+            {
+                Message = $"Gate with Id {gate.GateId} not found after creation.",
+                Type = ErrorType.Unexpected
+            });
+            LogGateNotFoundAfterCreation(gate.GateId);
+            LogCreateFailure(dto, result);
+            return result;
+        }
+
         result.Value = getGateDto;
 
         LogCreateSuccess(gate);
@@ -287,6 +312,13 @@ public class GateService : IGateService
         _logger.LogInformation(
             @"Gate deleted successfully:
                 GateId={GateId}",
+            gateId);
+    }
+
+    private void LogGateNotFoundAfterCreation(int gateId)
+    {
+        _logger.LogError(
+            @"Gate with ID {GateId} not found after creation.",
             gateId);
     }
 
