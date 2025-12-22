@@ -2,6 +2,8 @@
 
 public interface ITicketService
 {
+    Task<Result<GetTicketDto?>> GetByIdAsync(long ticketId, CancellationToken cancellationToken);
+
     Task<Result<IReadOnlyList<GetTicketDto>>> GetByFlightScheduleIdAsync(int flightScheduleId, CancellationToken cancellationToken);
 
     Task<Result<GetTicketDto?>> CreateAsync(CreateTicketDto dto, CancellationToken cancellationToken);

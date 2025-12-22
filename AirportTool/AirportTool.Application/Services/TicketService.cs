@@ -23,6 +23,28 @@ public class TicketService : ITicketService
         _mapper = mapper;
     }
 
+    public async Task<Result<GetTicketDto?>> GetByIdAsync(long ticketId, CancellationToken cancellationToken)
+    {
+        var result = new Result<GetTicketDto?>();
+       
+        var getTicketDto = await _unitOfWork.Tickets.GetDtoByIdAsync(ticketId, cancellationToken);
+        var found = getTicketDto != null;
+
+        if (!found)
+        {
+            result.AddError(new Error
+            {
+                Message = $"Ticket with ID {ticketId} not found.",
+                Type = ErrorType.NotFound
+            });
+            return result;
+        }
+
+        LogGetById(ticketId, found);
+        result.Value = getTicketDto;
+        return result;
+    }
+
     public async Task<Result<IReadOnlyList<GetTicketDto>>> GetByFlightScheduleIdAsync(
         int flightScheduleId, CancellationToken cancellationToken)
     {
@@ -63,11 +85,21 @@ public class TicketService : ITicketService
             return result;
         }
 
-        // Validate constraint for FlightScheduleId + FareClass uniqueness could be added here
-
         var ticket = _mapper.Map<Ticket>(dto);
         await _unitOfWork.Tickets.AddAndSaveAsync(ticket, cancellationToken);
         var getTicketDto = await _unitOfWork.Tickets.GetDtoByIdAsync(ticket.TicketId, cancellationToken);
+        if(getTicketDto == null)
+        {
+            result.AddError(new Error
+            {
+                Message = $"Failed to retrieve the created ticket with ID {ticket.TicketId}.",
+                Type = ErrorType.Unexpected
+            });
+            LogTicketNotFoundAfterCreation(ticket.TicketId);
+            LogCreateFailure(dto, result);
+            return result;
+        }
+
         result.Value = getTicketDto;
 
         LogCreateSuccess(ticket);
@@ -176,6 +208,24 @@ public class TicketService : ITicketService
     #endregion
 
     #region Logging Methods
+
+    private void LogGetById(long ticketId, bool found)
+    {
+        if (found)
+        {
+            _logger.LogDebug(
+                @"Retrieved ticket:
+                    TicketId={TicketId}",
+                ticketId);
+        }
+        else
+        {
+            _logger.LogDebug(
+                @"Ticket not found:
+                    TicketId={TicketId}",
+                ticketId);
+        }
+    }
 
     private void LogGetByFlightScheduleIdStart(int flightScheduleId)
     {
@@ -302,6 +352,13 @@ public class TicketService : ITicketService
         _logger.LogInformation(
             @"Ticket deleted successfully:
                 TicketId={TicketId}",
+            ticketId);
+    }
+
+    private void LogTicketNotFoundAfterCreation(long ticketId)
+    {
+        _logger.LogError(
+            @"Ticket with ID {TicketId} was not found after creation.",
             ticketId);
     }
 
