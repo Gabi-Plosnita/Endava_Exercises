@@ -2,6 +2,7 @@ using AirportTool.Application;
 using AirportTool.Infrastructure;
 using AirportTool.WebApi;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -31,14 +32,14 @@ builder.Services.AddScoped<ITicketRepository, TicketRepository>();
 builder.Services.AddSingleton<IDtoValidator, AnnotationDtoValidator>();
 builder.Services.AddSingleton<IUniqueCodeGenerator, AlphanumericUppercaseCodeGenerator>();
 
-// Register Application Mappings //
-builder.Services.AddAutoMapper(typeof(AirportTool.Application.AssemblyReference));
-
 // Register Infrastructure DbContext
 builder.Services.AddDbContext<AirportDbContext>(options =>options.UseSqlServer(builder.Configuration.GetConnectionString("AirportDb")));
 
-// Register Infrastructure Mapping Profiles //
-builder.Services.AddAutoMapper(typeof(AirportTool.Infrastructure.AssemblyReference));
+// Register Application + Infrastructure mapping profiles // 
+builder.Services.AddAutoMapper(cfg => { },
+    typeof(AirportTool.Application.AssemblyReference).Assembly,
+    typeof(AirportTool.Infrastructure.AssemblyReference).Assembly
+);
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
