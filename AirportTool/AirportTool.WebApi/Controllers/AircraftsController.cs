@@ -54,6 +54,7 @@ public class AircraftsController : ControllerBase
     [HttpPost]
     [ProducesResponseType(typeof(GetAircraftDto), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(List<Error>), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(List<Error>), StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> Create([FromBody] CreateAircraftDto dto, CancellationToken cancellationToken)
     {
         var result = await _aircraftService.CreateAsync(dto, cancellationToken);
