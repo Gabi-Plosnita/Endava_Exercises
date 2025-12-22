@@ -27,7 +27,9 @@ public class FlightService : IFlightService
         var result = new Result<GetFlightDto?>();
 
         var getFlightDto = await _unitOfWork.Flights.GetDtoByIdAsync(flightId, cancellationToken);
-        if (getFlightDto == null)
+        var found = getFlightDto != null;
+
+        if (!found)
         {
             result.AddError(new Error
             {
@@ -36,7 +38,6 @@ public class FlightService : IFlightService
             });
         }
 
-        var found = getFlightDto != null;
         LogGetById(flightId, found);
         result.Value = getFlightDto;
         return result;
