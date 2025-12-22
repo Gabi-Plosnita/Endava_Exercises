@@ -169,7 +169,7 @@ public class FlightScheduleRepository : EfRepositoryBase<FlightSchedule, FlightS
     }
 
     public async Task<IReadOnlyList<ScheduleConflictDto>> GetGateOverlapsAsync(
-        int? gateId,
+        int gateId,
         DateTime proposedStartUtc,
         DateTime proposedEndUtc,
         int? excludeFlightScheduleId,

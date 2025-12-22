@@ -19,7 +19,7 @@ public interface IFlightScheduleRepository : IRepository<FlightSchedule, int>
     Task AddAndSaveAsync(FlightSchedule flightSchedule, CancellationToken cancellationToken);
 
     Task<IReadOnlyList<ScheduleConflictDto>> GetGateOverlapsAsync(
-        int? gateId, 
+        int gateId, 
         DateTime proposedStartUtc, 
         DateTime proposedEndUtc,
         int? excludeFlightScheduleId, 
