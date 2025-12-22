@@ -7,20 +7,20 @@ namespace AirportTool.Application;
 public class BookingService : IBookingService
 {
     private readonly IUnitOfWork _unitOfWork;
-    private readonly IValidator<CreateBookingDto> _createBookingDtoValidator;
+    private readonly IDtoValidator _dtoValidator;
     private readonly IUniqueCodeGenerator _codeGenerator;
     private readonly IMapper _mapper;
     private readonly ILogger<BookingService> _logger;
 
     public BookingService(
         IUnitOfWork unitOfWork,
-        IValidator<CreateBookingDto> createBookingDtoValidator,
+        IDtoValidator dtoValidator,
         IUniqueCodeGenerator codeGenerator,
         IMapper mapper,
         ILogger<BookingService> logger)
     {
         _unitOfWork = unitOfWork;
-        _createBookingDtoValidator = createBookingDtoValidator;
+        _dtoValidator = dtoValidator;
         _codeGenerator = codeGenerator;
         _mapper = mapper;
         _logger = logger;
@@ -60,7 +60,7 @@ public class BookingService : IBookingService
 
         LogCreateStart(createBookingDto);
 
-        var dtoValidationResult = _createBookingDtoValidator.Validate(createBookingDto);
+        var dtoValidationResult = _dtoValidator.Validate(createBookingDto);
         result.AddErrors(dtoValidationResult.Errors);
         if (result.IsFailure)
         {

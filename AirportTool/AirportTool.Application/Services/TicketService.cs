@@ -7,21 +7,18 @@ namespace AirportTool.Application;
 public class TicketService : ITicketService
 {
     private readonly IUnitOfWork _unitOfWork;
-    private readonly IValidator<CreateTicketDto> _createTicketDtoValidator;
-    private readonly IValidator<UpdateTicketDto> _updateTicketDtoValidator;
+    private readonly IDtoValidator _dtoValidator;
     private readonly IMapper _mapper;
     private readonly ILogger<TicketService> _logger;
 
     public TicketService(
         IUnitOfWork unitOfWork,
-        IValidator<CreateTicketDto> createTicketDtoValidator,
-        IValidator<UpdateTicketDto> updateTicketDtoValidator,
+        IDtoValidator dtoValidator,
         ILogger<TicketService> logger,
         IMapper mapper)
     {
         _unitOfWork = unitOfWork;
-        _createTicketDtoValidator = createTicketDtoValidator;
-        _updateTicketDtoValidator = updateTicketDtoValidator;
+        _dtoValidator = dtoValidator;
         _logger = logger;
         _mapper = mapper;
     }
@@ -51,7 +48,7 @@ public class TicketService : ITicketService
         var result = new Result<GetTicketDto?>();
         LogCreateStart(dto);
 
-        var dtoValidationResult = _createTicketDtoValidator.Validate(dto);
+        var dtoValidationResult = _dtoValidator.Validate(dto);
         result.AddErrors(dtoValidationResult.Errors);
         if (result.IsFailure)
         {
@@ -82,7 +79,7 @@ public class TicketService : ITicketService
         var result = new Result();
         LogUpdateStart(ticketId, dto);
 
-        var dtoValidationResult = _updateTicketDtoValidator.Validate(dto);
+        var dtoValidationResult = _dtoValidator.Validate(dto);
         result.AddErrors(dtoValidationResult.Errors);
         if (result.IsFailure)
         {

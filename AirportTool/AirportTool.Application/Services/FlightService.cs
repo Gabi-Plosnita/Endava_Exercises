@@ -7,20 +7,17 @@ namespace AirportTool.Application;
 public class FlightService : IFlightService
 {
     private readonly IUnitOfWork _unitOfWork;
-    private readonly IValidator<CreateFlightDto> _createFlightDtoValidator;
-    private readonly IValidator<UpdateFlightDto> _updateFlightDtoValidator;
+    private readonly IDtoValidator _dtoValidator;
     private readonly IMapper _mapper;
     private readonly ILogger<FlightService> _logger;
 
     public FlightService(IUnitOfWork unitOfWork, 
-                         IValidator<CreateFlightDto> createFlightDtoValidator, 
-                         IValidator<UpdateFlightDto> updateFlightDtoValidator, 
+                         IDtoValidator dtoValidator, 
                          IMapper mapper,
                          ILogger<FlightService> logger)
     {
         _unitOfWork = unitOfWork;
-        _createFlightDtoValidator = createFlightDtoValidator;
-        _updateFlightDtoValidator = updateFlightDtoValidator;
+        _dtoValidator = dtoValidator;
         _mapper = mapper;
         _logger = logger;
     }
@@ -38,7 +35,7 @@ public class FlightService : IFlightService
         var result = new Result<GetFlightDto?>();
         LogCreateStart(dto);
 
-        var dtoValidationResult = _createFlightDtoValidator.Validate(dto);
+        var dtoValidationResult = _dtoValidator.Validate(dto);
         result.AddErrors(dtoValidationResult.Errors);
         if (result.IsFailure)
         {
@@ -92,7 +89,7 @@ public class FlightService : IFlightService
         var result = new Result();
         LogUpdateStart(flightId, dto);
 
-        var dtoValidationResult = _updateFlightDtoValidator.Validate(dto);
+        var dtoValidationResult = _dtoValidator.Validate(dto);
         result.AddErrors(dtoValidationResult.Errors);
         if(result.IsFailure)
         {

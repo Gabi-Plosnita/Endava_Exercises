@@ -7,24 +7,18 @@ namespace AirportTool.Application;
 public class FlightSchedulesService : IFlightSchedulesService
 {
     private readonly IUnitOfWork _unitOfWork;
-    private readonly IValidator<BaseFilterDto> _baseFilterDtoValidator;
-    private readonly IValidator<FlightScheduleFilterDto> _flightScheduleFilterDtoValidator;
-    private readonly IValidator<UpsertFlightScheduleDto> _upsertFlightScheduleDtoValidator;
+    private readonly IDtoValidator _dtoValidator;
     private readonly IMapper _mapper;
     private ILogger<FlightSchedulesService> _logger;
     
     public FlightSchedulesService(
         IUnitOfWork unitOfWork,
-        IValidator<BaseFilterDto> baseFilterDtoValidator,
-        IValidator<FlightScheduleFilterDto> flightScheduleFilterDtoValidator,
-        IValidator<UpsertFlightScheduleDto> upsertFlightScheduleDtoValidator,
+        IDtoValidator dtoValidator,
         IMapper mapper,
         ILogger<FlightSchedulesService> logger)
     {
         _unitOfWork = unitOfWork;
-        _baseFilterDtoValidator = baseFilterDtoValidator;
-        _flightScheduleFilterDtoValidator = flightScheduleFilterDtoValidator;
-        _upsertFlightScheduleDtoValidator = upsertFlightScheduleDtoValidator;
+        _dtoValidator = dtoValidator;
         _mapper = mapper;
         _logger = logger;
     }
@@ -39,7 +33,7 @@ public class FlightSchedulesService : IFlightSchedulesService
     {
         var result = new Result<PagedResult<FlightScheduleSearchDto>>();
 
-        var dtoValidationResult = _baseFilterDtoValidator.Validate(dto);
+        var dtoValidationResult = _dtoValidator.Validate(dto);
         result.AddErrors(dtoValidationResult.Errors);
         if (result.IsFailure)
         {
@@ -74,7 +68,7 @@ public class FlightSchedulesService : IFlightSchedulesService
         var upsertResultDto = new UpsertFlightScheduleResultDto();
         result.Value = upsertResultDto;
 
-        var dtoValidationResult = _upsertFlightScheduleDtoValidator.Validate(dto);
+        var dtoValidationResult = _dtoValidator.Validate(dto);
         result.AddErrors(dtoValidationResult.Errors);
 
         if (result.IsFailure)

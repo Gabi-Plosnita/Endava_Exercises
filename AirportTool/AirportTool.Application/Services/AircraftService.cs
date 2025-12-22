@@ -7,22 +7,17 @@ namespace AirportTool.Application;
 public class AircraftService : IAircraftService
 {
     private readonly IUnitOfWork _unitOfWork;
-    private readonly IValidator<CreateAircraftDto> _createAircraftDtoValidator;
-    private readonly IValidator<UpdateAircraftDto> _updateAircraftDtoValidator;
-    private readonly IValidator<BaseFilterDto> _baseFilterDtoValidator;
+    private readonly IDtoValidator _dtoValidator;
     private readonly IMapper _mapper;
     private readonly ILogger<AircraftService> _logger;
 
     public AircraftService(IUnitOfWork unitOfWork,
-                           IValidator<CreateAircraftDto> createAircraftDtoValidator,
-                           IValidator<UpdateAircraftDto> updateAircraftDtoValidator,
+                           IDtoValidator dtoValidator,
                            IMapper mapper,
                            ILogger<AircraftService> logger)
     {
         _unitOfWork = unitOfWork;
-        _createAircraftDtoValidator = createAircraftDtoValidator;
-        _updateAircraftDtoValidator = updateAircraftDtoValidator;
-        _baseFilterDtoValidator = new BaseFilterDtoValidator();
+        _dtoValidator = dtoValidator;
         _mapper = mapper;
         _logger = logger;
     }
@@ -39,7 +34,7 @@ public class AircraftService : IAircraftService
     {
         var result = new Result<PagedResult<GetAircraftDto>>();
 
-        var dtoValidationResult = _baseFilterDtoValidator.Validate(dto);
+        var dtoValidationResult = _dtoValidator.Validate(dto);
         result.AddErrors(dtoValidationResult.Errors);
         if (result.IsFailure)
         {
@@ -57,7 +52,7 @@ public class AircraftService : IAircraftService
 
         LogCreateStart(dto);
 
-        var dtoValidationResult = _createAircraftDtoValidator.Validate(dto);
+        var dtoValidationResult = _dtoValidator.Validate(dto);
         result.AddErrors(dtoValidationResult.Errors);
         if (result.IsFailure)
         {
@@ -100,7 +95,7 @@ public class AircraftService : IAircraftService
 
         LogUpdateStart(id, dto);
 
-        var dtoValidationResult = _updateAircraftDtoValidator.Validate(dto);
+        var dtoValidationResult = _dtoValidator.Validate(dto);
         result.AddErrors(dtoValidationResult.Errors);
         if (result.IsFailure)
         {

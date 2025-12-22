@@ -7,20 +7,17 @@ namespace AirportTool.Application;
 public class GateService : IGateService
 {
     private readonly IUnitOfWork _unitOfWork;
-    private readonly IValidator<CreateGateDto> _createGateDtoValidator;
-    private readonly IValidator<UpdateGateDto> _updateGateDtoValidator;
+    private readonly IDtoValidator _dtoValidator;
     private readonly IMapper _mapper;
     private readonly ILogger<GateService> _logger;
 
     public GateService(IUnitOfWork unitOfWork,
-                       IValidator<CreateGateDto> createGateDtoValidator,
-                       IValidator<UpdateGateDto> updateGateDtoValidator,
+                       IDtoValidator dtoValidator,
                        IMapper mapper,
                        ILogger<GateService> logger)
     {
         _unitOfWork = unitOfWork;
-        _createGateDtoValidator = createGateDtoValidator;
-        _updateGateDtoValidator = updateGateDtoValidator;
+        _dtoValidator = dtoValidator;
         _mapper = mapper;
         _logger = logger;
     }
@@ -39,7 +36,7 @@ public class GateService : IGateService
 
         LogCreateStart(dto);
 
-        var dtoValidationResult = _createGateDtoValidator.Validate(dto);
+        var dtoValidationResult = _dtoValidator.Validate(dto);
         result.AddErrors(dtoValidationResult.Errors);
         if (result.IsFailure)
         {
@@ -81,7 +78,7 @@ public class GateService : IGateService
 
         LogUpdateStart(id, dto);
 
-        var dtoValidationResult = _updateGateDtoValidator.Validate(dto);
+        var dtoValidationResult = _dtoValidator.Validate(dto);
         result.AddErrors(dtoValidationResult.Errors);
         if (result.IsFailure)
         {
