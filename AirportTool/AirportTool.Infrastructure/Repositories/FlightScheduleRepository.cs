@@ -134,7 +134,7 @@ public class FlightScheduleRepository : EfRepositoryBase<FlightSchedule, FlightS
 
         var flightScheduleDbs = await _context.FlightSchedules
                                               .AsNoTracking()
-                                              .Where(fs => fs.ScheduledDepartureUtc >= startDateTime 
+                                              .Where(fs => fs.ScheduledDepartureUtc >= startDateTime
                                                            && fs.ScheduledDepartureUtc <= endDateTime)
                                               .ToListAsync(cancellationToken);
 
@@ -175,10 +175,18 @@ public class FlightScheduleRepository : EfRepositoryBase<FlightSchedule, FlightS
         int? excludeFlightScheduleId,
         CancellationToken cancellationToken)
     {
+        var blockingStatuses = new[]
+        {
+            FlightScheduleStatus.Planned,
+            FlightScheduleStatus.Boarding,
+            FlightScheduleStatus.Delayed
+        };
+
         var conflicts = await _context.FlightSchedules
             .AsNoTracking()
-            .Where(fs => fs.GateId == gateId
-                         && (excludeFlightScheduleId == null || fs.FlightScheduleId != excludeFlightScheduleId))
+            .Where(fs => fs.GateId == gateId)
+            .Where(fs => blockingStatuses.Contains(fs.Status))
+            .Where(fs => excludeFlightScheduleId == null || fs.FlightScheduleId != excludeFlightScheduleId)
             .Where(fs => proposedStartUtc < fs.ScheduledArrivalUtc && fs.ScheduledDepartureUtc < proposedEndUtc)
             .OrderBy(fs => fs.ScheduledDepartureUtc)
             .Select(fs => new ScheduleConflictDto
