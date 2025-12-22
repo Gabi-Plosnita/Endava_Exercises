@@ -2,7 +2,7 @@
 
 public interface IAircraftService
 {
-    Task<GetAircraftDto?> GetByIdAsync(int id, CancellationToken cancellationToken);
+    Task<Result<GetAircraftDto?>> GetByIdAsync(int id, CancellationToken cancellationToken);
 
     Task<Result<PagedResult<GetAircraftDto>>> GetByFilterAsync(AircraftFilterDto dto, CancellationToken cancellationToken);
 

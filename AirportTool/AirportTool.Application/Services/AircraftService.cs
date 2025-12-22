@@ -22,12 +22,24 @@ public class AircraftService : IAircraftService
         _logger = logger;
     }
 
-    public async Task<GetAircraftDto?> GetByIdAsync(int id, CancellationToken cancellationToken)
+    public async Task<Result<GetAircraftDto?>> GetByIdAsync(int id, CancellationToken cancellationToken)
     {
+        var result = new Result<GetAircraftDto?>();
+
         var getAircraftDto = await _unitOfWork.Aircrafts.GetDtoByIdAsync(id, cancellationToken);
         var found = getAircraftDto != null;
+        if (!found)
+        {
+            result.AddError(new Error
+            {
+                Message = $"Aircraft with ID {id} not found.",
+                Type = ErrorType.NotFound
+            });
+        }
+
         LogGetById(id, found);
-        return getAircraftDto;
+        result.Value = getAircraftDto;
+        return result;
     }
 
     public async Task<Result<PagedResult<GetAircraftDto>>> GetByFilterAsync(AircraftFilterDto dto, CancellationToken cancellationToken)
