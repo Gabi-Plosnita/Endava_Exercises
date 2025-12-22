@@ -1,6 +1,5 @@
 ﻿using AirportTool.Application;
 using Microsoft.AspNetCore.Mvc;
-using System.Net;
 
 namespace AirportTool.WebApi;
 
@@ -22,6 +21,8 @@ public class BookingsController : ControllerBase
     [HttpGet("{code}")]
     [ProducesResponseType(typeof(GetBookingDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(List<Error>), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(List<Error>), StatusCodes.Status500InternalServerError)]
+
     public async Task<IActionResult> GetByCode([FromRoute] string code, CancellationToken cancellationToken)
     {
         var result = await _bookingService.GetBookingByCodeAsync(code, cancellationToken);
@@ -32,14 +33,6 @@ public class BookingsController : ControllerBase
             return StatusCode((int)status, result.Errors);
         }
 
-        if (result.Value is null)
-        {
-            return NotFound(new List<Error>
-            {
-                new Error { Type = ErrorType.NotFound, Message = $"Booking with confirmation code '{code}' not found." }
-            });
-        }
-
         return Ok(result.Value);
     }
 
@@ -47,6 +40,8 @@ public class BookingsController : ControllerBase
     [ProducesResponseType(typeof(object), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(List<Error>), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(List<Error>), StatusCodes.Status409Conflict)]
+    [ProducesResponseType(typeof(List<Error>), StatusCodes.Status500InternalServerError)]
+
     public async Task<IActionResult> Create([FromBody] CreateBookingDto dto, CancellationToken cancellationToken)
     {
         var result = await _bookingService.CreateBookingAsync(dto, cancellationToken);
@@ -57,15 +52,7 @@ public class BookingsController : ControllerBase
             return StatusCode((int)status, result.Errors);
         }
 
-        if (result.Value == null)
-        {
-            return StatusCode((int)HttpStatusCode.InternalServerError, new List<Error>
-            {
-                new Error { Type = ErrorType.Unexpected, Message = "Booking was created but response payload was empty." }
-            });
-        }
-
-        var confirmationCode = result.Value.ConfirmationCode;
+        var confirmationCode = result.Value!.ConfirmationCode;
         return CreatedAtAction(nameof(GetByCode), new { code = confirmationCode }, new { ConfirmationCode = confirmationCode });
     }
 
@@ -73,6 +60,8 @@ public class BookingsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(List<Error>), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(List<Error>), StatusCodes.Status409Conflict)]
+    [ProducesResponseType(typeof(List<Error>), StatusCodes.Status500InternalServerError)]
+
     public async Task<IActionResult> Cancel([FromRoute] string code, CancellationToken cancellationToken)
     {
         var result = await _bookingService.CancelBookingAsync(code, cancellationToken);
