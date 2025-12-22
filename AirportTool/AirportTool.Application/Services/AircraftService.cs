@@ -95,6 +95,18 @@ public class AircraftService : IAircraftService
 
         await _unitOfWork.Aircrafts.AddAndSaveAsync(aircraft, cancellationToken);
         var getAircraftDto = await _unitOfWork.Aircrafts.GetDtoByIdAsync(aircraft.AircraftId, cancellationToken);
+        if (getAircraftDto == null)
+        {
+            result.AddError(new Error
+            {
+                Type = ErrorType.Unexpected,
+                Message = $"Aircraft with ID {aircraft.AircraftId} was created but could not be retrieved."
+            });
+            LogAircraftCreatedButNotRetrievable(aircraft);
+            LogCreateFailure(dto, result);
+            return result;
+        }
+
         result.Value = getAircraftDto;
 
         LogCreateSuccess(aircraft);
@@ -341,6 +353,14 @@ public class AircraftService : IAircraftService
             @"Aircraft deleted successfully:
                 AircraftId={AircraftId}",
             aircraftId);
+    }
+
+    private void LogAircraftCreatedButNotRetrievable(Aircraft aircraft)
+    {
+        _logger.LogError(
+            "Data inconsistency: aircraft created but not retrievable. AircraftId={AircraftId}, TailNumber={TailNumber}",
+            aircraft.AircraftId,
+            aircraft.TailNumber);
     }
 
     #endregion
