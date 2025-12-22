@@ -82,12 +82,16 @@ public class FlightSchedulesService : IFlightSchedulesService
             return result;
         }
 
-        await ValidateFlightExistsAsync(dto.FlightId, result, cancellationToken);
+        var flight = await ValidateFlightExistsAsync(dto.FlightId, result, cancellationToken);
+        if(result.IsFailure || flight == null)
+        {
+            return result;
+        }
 
         Gate? gate = null;
         if(dto.GateCode != null)
         {
-            gate = await ValidateGateExistsAsync(dto.GateCode!, dto.FlightId, result, cancellationToken);
+            gate = await ValidateGateExistsAsync(dto.GateCode!, flight.OriginAirportId , result, cancellationToken);
         }
 
         Aircraft? assignedAircraft = null;
@@ -96,13 +100,16 @@ public class FlightSchedulesService : IFlightSchedulesService
             assignedAircraft = await ValidateAircraftExistsAsync(dto.AssignedAircraftTail, result, cancellationToken);
         }
 
-        upsertResultDto.ScheduleConflicts = await ValidateGateOverlapsAsync(
-            gateId: gate?.GateId, 
-            proposedStartUtc: dto.ScheduledDepartureUtc, 
-            proposedEndUtc: dto.ScheduledArrivalUtc, 
-            excludeFlightScheduleId: null, 
-            result,
-            cancellationToken);
+        if(gate != null)
+        {
+            upsertResultDto.ScheduleConflicts = await ValidateGateOverlapsAsync(
+                gateId: gate.GateId,
+                proposedStartUtc: dto.ScheduledDepartureUtc,
+                proposedEndUtc: dto.ScheduledArrivalUtc,
+                excludeFlightScheduleId: null,
+                result,
+                cancellationToken);
+        }
 
         if (result.IsFailure || upsertResultDto.ScheduleConflicts.Any())
         {
@@ -186,7 +193,7 @@ public class FlightSchedulesService : IFlightSchedulesService
     }
 
     private async Task<IReadOnlyList<ScheduleConflictDto>> ValidateGateOverlapsAsync(
-        int? gateId,
+        int gateId,
         DateTime proposedStartUtc,
         DateTime proposedEndUtc,
         int? excludeFlightScheduleId,
@@ -194,10 +201,10 @@ public class FlightSchedulesService : IFlightSchedulesService
         CancellationToken cancellationToken)
     {
         var conflicts = await _unitOfWork.FlightSchedules.GetGateOverlapsAsync(
-            gateId,
-            proposedStartUtc,
-            proposedEndUtc,
-            excludeFlightScheduleId,
+            gateId: gateId,
+            proposedStartUtc: proposedStartUtc,
+            proposedEndUtc: proposedEndUtc,
+            excludeFlightScheduleId: excludeFlightScheduleId,
             cancellationToken);
         if (conflicts.Any())
         {
