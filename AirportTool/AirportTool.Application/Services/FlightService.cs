@@ -22,12 +22,24 @@ public class FlightService : IFlightService
         _logger = logger;
     }
 
-    public async Task<GetFlightDto?> GetByIdAsync(int flightId, CancellationToken cancellationToken)
+    public async Task<Result<GetFlightDto?>> GetByIdAsync(int flightId, CancellationToken cancellationToken)
     {
+        var result = new Result<GetFlightDto?>();
+
         var getFlightDto = await _unitOfWork.Flights.GetDtoByIdAsync(flightId, cancellationToken);
+        if (getFlightDto == null)
+        {
+            result.AddError(new Error
+            {
+                Message = $"Flight with ID {flightId} not found.",
+                Type = ErrorType.NotFound
+            });
+        }
+
         var found = getFlightDto != null;
         LogGetById(flightId, found);
-        return getFlightDto;
+        result.Value = getFlightDto;
+        return result;
     }
 
     public async Task<Result<GetFlightDto?>> CreateAsync(CreateFlightDto dto, CancellationToken cancellationToken)
@@ -78,6 +90,18 @@ public class FlightService : IFlightService
 
         await _unitOfWork.Flights.AddAndSaveAsync(flight, cancellationToken);
         var getFlightDto = await _unitOfWork.Flights.GetDtoByIdAsync(flight.FlightId, cancellationToken);
+        if(getFlightDto == null)
+        {
+            result.AddError(new Error
+            {
+                Message = $"Flight with ID {flight.FlightId} not found after creation.",
+                Type = ErrorType.Unexpected
+            });
+            LogFlightNotFoundAfterCreation(flight.FlightId);
+            LogCreateFailure(dto, result);
+            return result;
+        }
+
         result.Value = getFlightDto;
 
         LogCreateSuccess(flight);
@@ -397,5 +421,11 @@ public class FlightService : IFlightService
             flightId);
     }
 
+    private void LogFlightNotFoundAfterCreation(int flightId)
+    {
+        _logger.LogError(
+            @"Flight with ID {FlightId} not found after creation.",
+            flightId);
+    }
     #endregion
 }
