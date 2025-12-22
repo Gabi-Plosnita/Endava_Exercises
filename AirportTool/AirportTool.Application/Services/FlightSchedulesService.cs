@@ -210,7 +210,7 @@ public class FlightSchedulesService : IFlightSchedulesService
         {
             var error = new Error
             {
-                Message = $"Gate {gateId} is already occupied during the specified time.",
+                Message = $"Gate has {conflicts.Count} schedule conflict(s) in the selected time window.",
                 Type = ErrorType.Validation
             };
             result.AddError(error);
