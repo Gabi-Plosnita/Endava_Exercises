@@ -37,12 +37,19 @@ public class BookingService : IBookingService
 
         if (result.IsFailure || booking == null)
         {
+            LogGetByCodeFailure(confirmationCode, result);
             return result;
         }
 
-        var ticket = await ValidateTicketExistsAsync(booking.TicketId, result, cancellationToken);
-        if (result.IsFailure || ticket == null)
+        var ticket = await _unitOfWork.Tickets.GetByIdAsync(booking.TicketId, cancellationToken);
+        if (ticket == null)
         {
+            result.AddError(new Error
+            {
+                Message = $"Ticket with ID '{booking.TicketId}' not found for booking '{confirmationCode}'.",
+                Type = ErrorType.Unexpected
+            });
+            LogTicketMissingForBooking(booking.TicketId, confirmationCode, "get booking");
             LogGetByCodeFailure(confirmationCode, result);
             return result;
         }
@@ -141,8 +148,14 @@ public class BookingService : IBookingService
         }
 
         var ticket = await ValidateTicketExistsAsync(booking.TicketId, result, cancellationToken);
-        if (result.IsFailure || ticket == null)
+        if (ticket == null)
         {
+            result.AddError(new Error
+            {
+                Message = $"Ticket with ID '{booking.TicketId}' not found for booking '{confirmationCode}'.",
+                Type = ErrorType.Unexpected
+            });
+            LogTicketMissingForBooking(booking.TicketId, confirmationCode, "cancel booking");
             LogCancelFailure(confirmationCode, result);
             return result;
         }
@@ -386,6 +399,15 @@ public class BookingService : IBookingService
             bookingId,
             ticketId,
             quantity);
+    }
+
+    private void LogTicketMissingForBooking(long ticketId, string confirmationCode, string operation)
+    {
+        _logger.LogError(
+            "Data inconsistency during {Operation}: Ticket with ID {TicketId} not found for booking {ConfirmationCode}.",
+            operation,
+            ticketId,
+            confirmationCode);
     }
 
     #endregion
