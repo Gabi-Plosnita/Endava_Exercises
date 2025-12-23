@@ -67,11 +67,19 @@ public class UnitOfWork : IUnitOfWork
                         throw new DatabaseNotNullException("NOT NULL constraint violation.", ex);
 
                     case 2628:
-                    case 8152: 
+                    case 8152:
                         throw new DatabaseDataTooLongException("String/bytes truncated.", ex);
+
+                    case 1205:
+                        throw new DatabaseDeadlockException("Deadlock detected.", ex);
 
                     case -2:
                         throw new DatabaseTimeoutException("Database timeout.", ex);
+
+                    case 53:
+                    case 4060:
+                    case 18456:
+                        throw new DatabaseUnavailableException("Database unavailable.", ex);
 
                     default:
                         throw new DatabaseWriteException("Database update failed.", ex);
@@ -81,6 +89,5 @@ public class UnitOfWork : IUnitOfWork
             throw new DatabaseWriteException("Database update failed.", ex);
         }
     }
-
 }
 
