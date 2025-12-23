@@ -24,35 +24,21 @@ public sealed class ApiExceptionHandlingMiddleware
         {
             _logger.LogInformation(ex, "Request was cancelled by the client.");
         }
-        catch (DatabaseConcurrencyException ex)
-        {
-            _logger.LogWarning(ex, "Database concurrency conflict.");
-
-            await WriteProblemDetailsAsync(
-                context,
-                statusCode: StatusCodes.Status409Conflict,
-                title: "Concurrency conflict",
-                detail: ex.Message);
-        }
         catch (DatabaseException ex)
         {
             var (status, title, detail, logLevel) = MapDatabaseException(ex);
 
             _logger.Log(logLevel, ex, "Database error mapped to {Status}: {Title}", status, title);
 
-            await WriteProblemDetailsAsync(
-                context,
-                statusCode: status,
-                title: title,
-                detail: detail);
+            await WriteProblemDetailsAsync(context, statusCode: status, title: title, detail: detail);
         }
         catch (InvalidOperationException ex)
         {
             _logger.LogError(ex, "Invalid operation.");
 
             await WriteProblemDetailsAsync(
-                context,
-                statusCode: StatusCodes.Status500InternalServerError,
+                context, 
+                statusCode: StatusCodes.Status500InternalServerError, 
                 title: "Internal server error",
                 detail: "An unexpected error occurred.");
         }
@@ -72,6 +58,9 @@ public sealed class ApiExceptionHandlingMiddleware
     {
         return ex switch
         {
+            DatabaseConcurrencyException =>
+                (StatusCodes.Status409Conflict, "Concurrency conflict", ex.Message, LogLevel.Warning),
+
             DatabaseUniqueConstraintException =>
                 (StatusCodes.Status409Conflict, "Duplicate resource", ex.Message, LogLevel.Information),
 
@@ -92,9 +81,6 @@ public sealed class ApiExceptionHandlingMiddleware
 
             DatabaseUnavailableException =>
                 (StatusCodes.Status503ServiceUnavailable, "Database unavailable", "Please retry later.", LogLevel.Error),
-
-            DatabaseWriteException =>
-                (StatusCodes.Status500InternalServerError, "Database error", "An unexpected error occurred.", LogLevel.Error),
 
             _ =>
                 (StatusCodes.Status500InternalServerError, "Database error", "An unexpected error occurred.", LogLevel.Error)
