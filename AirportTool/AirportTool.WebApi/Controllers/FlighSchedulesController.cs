@@ -93,8 +93,10 @@ public class SchedulesController : ControllerBase
     [ProducesResponseType(typeof(ImportSummaryDto), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ImportSummaryDto), StatusCodes.Status207MultiStatus)]
     [ProducesResponseType(typeof(List<Error>), StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> Import([FromForm] IFormFile file, CancellationToken cancellationToken)
+    public async Task<IActionResult> Import([FromForm] ImportSchedulesRequest request, CancellationToken cancellationToken)
     {
+        var file = request.File;
+
         if (file is null || file.Length == 0)
         {
             return BadRequest(new List<Error>
@@ -103,8 +105,7 @@ public class SchedulesController : ControllerBase
             });
         }
 
-        var ext = Path.GetExtension(file.FileName);
-        if (!string.Equals(ext, ".json", StringComparison.OrdinalIgnoreCase))
+        if (!string.Equals(Path.GetExtension(file.FileName), ".json", StringComparison.OrdinalIgnoreCase))
         {
             return BadRequest(new List<Error>
             {
@@ -116,13 +117,10 @@ public class SchedulesController : ControllerBase
         try
         {
             await using var stream = file.OpenReadStream();
-
-            var options = new JsonSerializerOptions
-            {
-                PropertyNameCaseInsensitive = true
-            };
-
-            rows = await JsonSerializer.DeserializeAsync<List<UpsertFlightScheduleDto>>(stream, options, cancellationToken);
+            rows = await JsonSerializer.DeserializeAsync<List<UpsertFlightScheduleDto>>(
+                stream,
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true },
+                cancellationToken);
 
             if (rows is null || rows.Count == 0)
             {
@@ -139,27 +137,19 @@ public class SchedulesController : ControllerBase
                 new Error { Message = "Invalid JSON file. Could not parse content.", Type = ErrorType.Validation }
             });
         }
-        catch (Exception)
-        {
-            return BadRequest(new List<Error>
-            {
-                new Error { Message = "Invalid file. Could not read or parse the uploaded content.", Type = ErrorType.Validation }
-            });
-        }
 
         var summary = await _flightSchedulesService.ImportAsync(rows, cancellationToken);
 
-        var allCreated = summary.Total > 0
-                         && summary.Created == summary.Total
-                         && summary.Updated == 0
-                         && summary.Failed == 0
-                         && (summary.Errors?.Count ?? 0) == 0;
+        var allCreated =
+            summary.Total > 0 &&
+            summary.Created == summary.Total &&
+            summary.Updated == 0 &&
+            summary.Failed == 0 &&
+            (summary.Errors?.Count ?? 0) == 0;
 
-        if (allCreated)
-        {
-            return StatusCode(StatusCodes.Status201Created, summary);
-        }
-
-        return StatusCode(StatusCodes.Status207MultiStatus, summary);
+        return allCreated
+            ? StatusCode(StatusCodes.Status201Created, summary)
+            : StatusCode(StatusCodes.Status207MultiStatus, summary);
     }
+
 }
