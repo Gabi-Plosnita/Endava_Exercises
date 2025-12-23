@@ -122,10 +122,15 @@ public class SchedulesController : ControllerBase
             return result;
         }
 
+        const long MaxFileSizeBytes = 2 * 1024 * 1024;
+        if (file.Length > MaxFileSizeBytes)
+        {
+            result.AddError(new Error { Message = "File size must not exceed 2 MB.", Type = ErrorType.Validation });
+        }
+
         if (!string.Equals(Path.GetExtension(file.FileName), ".json", StringComparison.OrdinalIgnoreCase))
         {
             result.AddError(new Error { Message = "Invalid file type. Please upload a .json file.", Type = ErrorType.Validation });
-            return result;
         }
 
         return result; 
