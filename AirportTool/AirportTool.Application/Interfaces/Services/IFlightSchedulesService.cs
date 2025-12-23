@@ -2,7 +2,7 @@
 
 public interface IFlightSchedulesService
 {
-    Task<GetFlightScheduleDto?> GetByIdAsync(int id, CancellationToken cancellationToken);
+    Task<Result<GetFlightScheduleDto?>> GetByIdAsync(int id, CancellationToken cancellationToken);
 
     Task<Result<PagedResult<FlightScheduleSearchDto>>> GetByFilterAsync(FlightScheduleFilterDto dto, CancellationToken cancellationToken);
 

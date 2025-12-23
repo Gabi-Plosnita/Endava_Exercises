@@ -23,10 +23,24 @@ public class FlightSchedulesService : IFlightSchedulesService
         _logger = logger;
     }
 
-    public async Task<GetFlightScheduleDto?> GetByIdAsync(int id, CancellationToken cancellationToken)
+    public async Task<Result<GetFlightScheduleDto?>> GetByIdAsync(int id, CancellationToken cancellationToken)
     {
+        var result = new Result<GetFlightScheduleDto?>();
         var getFlightScheduleDto = await _unitOfWork.FlightSchedules.GetDtoByIdAsync(id, cancellationToken);
-        return getFlightScheduleDto;
+        var found = getFlightScheduleDto != null;
+
+        if (!found)
+        {
+            result.AddError(new Error
+            {
+                Message = $"FlightSchedule with ID {id} not found.",
+                Type = ErrorType.NotFound
+            });
+        }
+
+        LogGetById(id, found);
+        result.Value = getFlightScheduleDto;
+        return result;
     }
 
     public async Task<Result<PagedResult<FlightScheduleSearchDto>>> GetByFilterAsync(FlightScheduleFilterDto dto, CancellationToken cancellationToken)
@@ -215,4 +229,20 @@ public class FlightSchedulesService : IFlightSchedulesService
     #endregion
 
     //TODO: Logging//
+
+    #region Logging Methods
+
+    private void LogGetById(int id, bool found)
+    {
+        if (found)
+        {
+            _logger.LogDebug("FlightSchedule with ID {FlightScheduleId} retrieved successfully.", id);
+        }
+        else
+        {
+            _logger.LogDebug("FlightSchedule with ID {FlightScheduleId} not found.", id);
+        }
+    }
+
+    #endregion
 }
