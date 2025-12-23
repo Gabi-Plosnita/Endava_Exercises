@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AirportTool.Infrastructure;
 
-public class UnitOfWork : IUnitOfWork, IAsyncDisposable
+public class UnitOfWork : IUnitOfWork
 {
     private readonly AirportDbContext _context;
     public IFlightRepository Flights { get; }
@@ -48,8 +48,5 @@ public class UnitOfWork : IUnitOfWork, IAsyncDisposable
             throw new ConcurrencyConflictException("The entity was modified by another operation.", ex);
         }
     }
-    
-    public ValueTask DisposeAsync()
-        => _context.DisposeAsync();
 }
 

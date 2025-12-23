@@ -22,14 +22,15 @@ public abstract class EfRepositoryBase<TDomain, TEntity, TKey>
 
     public virtual async Task<TDomain?> GetByIdAsync(TKey id, CancellationToken cancellationToken)
     {
-        var keyName = $"{typeof(TEntity).Name}Id";
+        var entity = await _dbSet.FindAsync([id], cancellationToken);
+        if (entity == null)
+        {
+            return null;
+        }
 
-        var entity = await _dbSet.AsNoTracking()
-                                 .SingleOrDefaultAsync(e => EF.Property<TKey>(e, keyName)!.Equals(id), cancellationToken);
-
+        _context.Entry(entity).State = EntityState.Detached;
         return _mapper.Map<TDomain>(entity);
     }
-
 
     public virtual async Task<IReadOnlyList<TDomain>> GetAllAsync(CancellationToken cancellationToken)
     {
