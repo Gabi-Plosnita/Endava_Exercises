@@ -116,7 +116,7 @@ public class GateService : IGateService
         await ValidateGateCodeIsUniqueForAirport(
             gateToUpdateId: existingGate.GateId,
             airportId: existingGate.AirportId,
-            code: dto.GateCode,
+            code: dto.Code,
             result,
             cancellationToken);
 
@@ -264,7 +264,7 @@ public class GateService : IGateService
                 Code={Code}",
             gate.GateId,
             gate.AirportId,
-            gate.GateCode);
+            gate.Code);
     }
 
     private void LogUpdateStart(int gateId, UpdateGateDto dto)
@@ -274,7 +274,7 @@ public class GateService : IGateService
                 GateId={GateId},
                 Code={Code}",
             gateId,
-            dto.GateCode);
+            dto.Code);
     }
 
     private void LogUpdateFailure(int gateId, Result result)
@@ -296,7 +296,7 @@ public class GateService : IGateService
                 Code={Code}",
             gate.GateId,
             gate.AirportId,
-            gate.GateCode);
+            gate.Code);
     }
 
     private void LogDeleteStart(int gateId)
