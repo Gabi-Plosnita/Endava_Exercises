@@ -6,5 +6,5 @@ public class Gate
 
     public int AirportId { get; set; }
 
-    public string Code { get; set; } = null!;
+    public string GateCode { get; set; } = null!;
 }

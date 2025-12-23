@@ -264,7 +264,7 @@ public class GateService : IGateService
                 Code={Code}",
             gate.GateId,
             gate.AirportId,
-            gate.Code);
+            gate.GateCode);
     }
 
     private void LogUpdateStart(int gateId, UpdateGateDto dto)
@@ -296,7 +296,7 @@ public class GateService : IGateService
                 Code={Code}",
             gate.GateId,
             gate.AirportId,
-            gate.Code);
+            gate.GateCode);
     }
 
     private void LogDeleteStart(int gateId)

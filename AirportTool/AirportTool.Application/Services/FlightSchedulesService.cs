@@ -112,7 +112,7 @@ public class FlightSchedulesService : IFlightSchedulesService
         {
             upsertResultDto.ScheduleConflicts = await ValidateGateOverlapsAsync(
                 gateId: gate.GateId,
-                gateCode: gate.Code,
+                gateCode: gate.GateCode,
                 proposedStartUtc: dto.ScheduledDepartureUtc,
                 proposedEndUtc: dto.ScheduledArrivalUtc,
                 excludeFlightScheduleId: null,
@@ -238,7 +238,7 @@ public class FlightSchedulesService : IFlightSchedulesService
         {
             await ValidateGateOverlapsAsync(
                 gateId: gate.GateId,
-                gateCode: gate.Code,
+                gateCode: gate.GateCode,
                 proposedStartUtc: dto.ScheduledDepartureUtc,
                 proposedEndUtc: dto.ScheduledArrivalUtc,
                 excludeFlightScheduleId: existing.FlightScheduleId,
