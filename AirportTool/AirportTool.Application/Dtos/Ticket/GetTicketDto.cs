@@ -1,6 +1,4 @@
 ﻿using AirportTool.Domain;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace AirportTool.Application;
 
