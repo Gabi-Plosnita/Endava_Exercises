@@ -78,14 +78,9 @@ public class GateService : IGateService
         gate.AirportId = airport!.AirportId;
 
         await _unitOfWork.Gates.AddAndSaveAsync(gate, cancellationToken);
-        var getGateDto = await _unitOfWork.Gates.GetDtoByIdAsync(gate.GateId, cancellationToken);
-        if(getGateDto == null)
+        var getGateDto = await ValidateGateExistsAfterCreationAsync(gate.GateId, result, cancellationToken);
+        if (result.IsFailure || getGateDto == null)
         {
-            result.AddError(new Error
-            {
-                Message = "Gate not found after creation.",
-                Type = ErrorType.Unexpected
-            });
             LogGateNotFoundAfterCreation(gate.GateId);
             LogCreateFailure(dto, result);
             return result;
@@ -205,6 +200,21 @@ public class GateService : IGateService
             };
             result.AddError(error);
         }
+    }
+
+    private async Task<GetGateDto?> ValidateGateExistsAfterCreationAsync(int gateId, Result result, CancellationToken cancellationToken)
+    {
+        var getGateDto = await _unitOfWork.Gates.GetDtoByIdAsync(gateId, cancellationToken);
+        if (getGateDto == null)
+        {
+            var error = new Error
+            {
+                Message = "Gate not found after creation",
+                Type = ErrorType.Unexpected
+            };
+            result.AddError(error);
+        }
+        return getGateDto;
     }
 
     #endregion

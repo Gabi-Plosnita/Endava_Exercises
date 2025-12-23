@@ -87,14 +87,9 @@ public class TicketService : ITicketService
 
         var ticket = _mapper.Map<Ticket>(dto);
         await _unitOfWork.Tickets.AddAndSaveAsync(ticket, cancellationToken);
-        var getTicketDto = await _unitOfWork.Tickets.GetDtoByIdAsync(ticket.TicketId, cancellationToken);
-        if(getTicketDto == null)
+        var getTicketDto = await ValidateTicketExistsAfterCreation(ticket.TicketId, result, cancellationToken);
+        if (result.IsFailure || getTicketDto == null)
         {
-            result.AddError(new Error
-            {
-                Message = "Ticket not found after creation.",
-                Type = ErrorType.Unexpected
-            });
             LogTicketNotFoundAfterCreation(ticket.TicketId);
             LogCreateFailure(dto, result);
             return result;
@@ -203,6 +198,21 @@ public class TicketService : ITicketService
             };
             result.AddError(error);
         }
+    }
+
+    private async Task<GetTicketDto?> ValidateTicketExistsAfterCreation(long ticketId, Result result, CancellationToken cancellationToken)
+    {
+        var getTicketDto = await _unitOfWork.Tickets.GetDtoByIdAsync(ticketId, cancellationToken);
+        if (getTicketDto == null)
+        {
+            var error = new Error
+            {
+                Message = "Ticket not found after creation.",
+                Type = ErrorType.Unexpected
+            };
+            result.AddError(error);
+        }
+        return getTicketDto;
     }
 
     #endregion
