@@ -94,61 +94,87 @@ public class SchedulesController : ControllerBase
     [ProducesResponseType(typeof(List<Error>), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Import([FromForm] ImportSchedulesRequest request, CancellationToken cancellationToken)
     {
-        var file = request.File;
+        var fileResult = ValidateImportFile(request.File);
+        if (fileResult.IsFailure)
+        {
+            return BadRequest(fileResult.Errors);
+        }
+
+        var parseResult = await ParseSchedulesAsync(request.File!, cancellationToken);
+        if (parseResult.IsFailure)
+        {
+            return BadRequest(parseResult.Errors);
+        }
+
+        var summary = await _flightSchedulesService.ImportAsync(parseResult.Value!, cancellationToken);
+        return ToImportResponse(summary);
+    }
+
+    private static Result ValidateImportFile(IFormFile? file)
+    {
+        var result = new Result();
 
         if (file is null || file.Length == 0)
         {
-            return BadRequest(new List<Error>
-            {
-                new Error { Message = "File is required.", Type = ErrorType.Validation }
-            });
+            result.AddError(new Error { Message = "File is required.", Type = ErrorType.Validation });
+            return result;
         }
 
         if (!string.Equals(Path.GetExtension(file.FileName), ".json", StringComparison.OrdinalIgnoreCase))
         {
-            return BadRequest(new List<Error>
-            {
-                new Error { Message = "Invalid file type. Please upload a .json file.", Type = ErrorType.Validation }
-            });
+            result.AddError(new Error { Message = "Invalid file type. Please upload a .json file.", Type = ErrorType.Validation });
+            return result;
         }
 
-        List<UpsertFlightScheduleDto>? rows;
+        return result; 
+    }
+
+    private static async Task<Result<List<UpsertFlightScheduleDto>>> ParseSchedulesAsync(IFormFile file, CancellationToken ct)
+    {
+        var result = new Result<List<UpsertFlightScheduleDto>>();
+
         try
         {
             await using var stream = file.OpenReadStream();
-            rows = await JsonSerializer.DeserializeAsync<List<UpsertFlightScheduleDto>>(
+            var rows = await JsonSerializer.DeserializeAsync<List<UpsertFlightScheduleDto>>(
                 stream,
                 new JsonSerializerOptions { PropertyNameCaseInsensitive = true },
-                cancellationToken);
+                ct);
 
             if (rows is null || rows.Count == 0)
             {
-                return BadRequest(new List<Error>
+                result.AddError(new Error
                 {
-                    new Error { Message = "Invalid JSON content. Expected a non-empty array of schedules.", Type = ErrorType.Validation }
+                    Message = "Invalid JSON content. Expected a non-empty array of schedules.",
+                    Type = ErrorType.Validation
                 });
+                return result;
             }
+
+            result.Value = rows;
+            return result;
         }
         catch (JsonException)
         {
-            return BadRequest(new List<Error>
+            result.AddError(new Error
             {
-                new Error { Message = "Invalid JSON file. Could not parse content.", Type = ErrorType.Validation }
+                Message = "Invalid JSON file. Could not parse content.",
+                Type = ErrorType.Validation
             });
+            return result;
         }
-
-        var summary = await _flightSchedulesService.ImportAsync(rows, cancellationToken);
-
-        var allCreated =
-            summary.Total > 0 &&
-            summary.Created == summary.Total &&
-            summary.Updated == 0 &&
-            summary.Failed == 0 &&
-            (summary.Errors?.Count ?? 0) == 0;
-
-        return allCreated
-            ? StatusCode(StatusCodes.Status201Created, summary)
-            : StatusCode(StatusCodes.Status207MultiStatus, summary);
     }
 
+    private static IActionResult ToImportResponse(ImportSummaryDto summary)
+    {
+        var allCreated = summary.Total > 0 
+                         && summary.Created == summary.Total 
+                         && summary.Updated == 0 
+                         && summary.Failed == 0 
+                         && (summary.Errors?.Count ?? 0) == 0;
+
+        return allCreated
+            ? new ObjectResult(summary) { StatusCode = StatusCodes.Status201Created }
+            : new ObjectResult(summary) { StatusCode = StatusCodes.Status207MultiStatus };
+    }
 }
