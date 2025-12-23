@@ -90,14 +90,9 @@ public class FlightService : IFlightService
         flight.DefaultAircraftId = defaultAircraft?.AircraftId;
 
         await _unitOfWork.Flights.AddAndSaveAsync(flight, cancellationToken);
-        var getFlightDto = await _unitOfWork.Flights.GetDtoByIdAsync(flight.FlightId, cancellationToken);
-        if(getFlightDto == null)
+        var getFlightDto = await ValidateFlightExistsAfterCreationAsync(flight.FlightId, result, cancellationToken);
+        if (result.IsFailure || getFlightDto == null)
         {
-            result.AddError(new Error
-            {
-                Message = "Flight not found after creation.",
-                Type = ErrorType.Unexpected
-            });
             LogFlightNotFoundAfterCreation(flight.FlightId);
             LogCreateFailure(dto, result);
             return result;
@@ -285,6 +280,21 @@ public class FlightService : IFlightService
             };
             result.AddError(error);
         }
+    }
+
+    private async Task<GetFlightDto?> ValidateFlightExistsAfterCreationAsync(int flightId, Result result, CancellationToken cancellationToken)
+    {
+        var getFlightDto = await _unitOfWork.Flights.GetDtoByIdAsync(flightId, cancellationToken);
+        if (getFlightDto == null)
+        {
+            var error = new Error
+            {
+                Message = "Flight not found after creation.",
+                Type = ErrorType.Unexpected
+            };
+            result.AddError(error);
+        }
+        return getFlightDto;
     }
 
     #endregion

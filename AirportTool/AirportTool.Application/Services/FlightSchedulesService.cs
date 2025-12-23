@@ -129,14 +129,9 @@ public class FlightSchedulesService : IFlightSchedulesService
         flightSchedule.AssignedAircraftId = assignedAircraft?.AircraftId;
 
         await _unitOfWork.FlightSchedules.AddAndSaveAsync(flightSchedule, cancellationToken);
-        var getFlightScheduleDto = await _unitOfWork.FlightSchedules.GetDtoByIdAsync(flightSchedule.FlightScheduleId, cancellationToken);
-        if(getFlightScheduleDto == null)
+        var getFlightScheduleDto = await ValidateFlightScheduleExistsAfterCreationAsync(flightSchedule.FlightScheduleId, result, cancellationToken);
+        if (result.IsFailure || getFlightScheduleDto == null)
         {
-            result.AddError(new Error
-            {
-                Message = "FlightSchedule not found after creation.",
-                Type = ErrorType.Unexpected
-            });
             return result;
         }
 
@@ -234,6 +229,22 @@ public class FlightSchedulesService : IFlightSchedulesService
             result.AddError(error);
         }
         return conflicts;
+    }
+
+    private async Task<GetFlightScheduleDto?> ValidateFlightScheduleExistsAfterCreationAsync(
+        int flightScheduleId, Result result, CancellationToken cancellationToken)
+    {
+        var flightScheduleDto = await _unitOfWork.FlightSchedules.GetDtoByIdAsync(flightScheduleId, cancellationToken);
+        if (flightScheduleDto is null)
+        {
+            var error = new Error
+            {
+                Message = $"FlightSchedule with ID {flightScheduleId} does not exist.",
+                Type = ErrorType.Unexpected
+            };
+            result.AddError(error);
+        }
+        return flightScheduleDto;
     }
 
     #endregion

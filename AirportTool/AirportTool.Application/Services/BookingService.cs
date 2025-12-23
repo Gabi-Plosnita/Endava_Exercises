@@ -113,10 +113,11 @@ public class BookingService : IBookingService
             return result;
         }
 
-        var createdBooking = await ValidateCreatedBookingExists(booking.ConfirmationCode, result, cancellationToken);
+        var createdBooking = await ValidateBookingExistsAfterCreationAsync(booking.ConfirmationCode, result, cancellationToken);
         if (result.IsFailure || createdBooking == null)
         {
-            LogCreatePostSaveNotFound(booking.ConfirmationCode);
+            LogBookingCreatedButNotRetreivabale(booking.ConfirmationCode);
+            LogCreateFailure(createBookingDto, result);
             return result;
         }
 
@@ -239,7 +240,7 @@ public class BookingService : IBookingService
         }
     }
 
-    private async Task<Booking?> ValidateCreatedBookingExists(string confirmationCode, Result result, CancellationToken cancellationToken)
+    private async Task<Booking?> ValidateBookingExistsAfterCreationAsync(string confirmationCode, Result result, CancellationToken cancellationToken)
     {
         var booking = await _unitOfWork.Bookings.GetByConfirmationCodeAsync(confirmationCode, cancellationToken);
         if(booking == null)
@@ -308,7 +309,7 @@ public class BookingService : IBookingService
             result.Errors);
     }
 
-    private void LogCreatePostSaveNotFound(string confirmationCode)
+    private void LogBookingCreatedButNotRetreivabale(string confirmationCode)
     {
         _logger.LogError(
             @"Booking creation inconsistency detected:
