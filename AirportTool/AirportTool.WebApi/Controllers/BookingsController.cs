@@ -53,7 +53,7 @@ public class BookingsController : ControllerBase
         }
 
         var confirmationCode = result.Value!.ConfirmationCode;
-        return CreatedAtAction(nameof(GetByCode), new { code = confirmationCode }, new { ConfirmationCode = confirmationCode });
+        return CreatedAtAction(nameof(GetByCode), new { code = confirmationCode }, result.Value);
     }
 
     [HttpDelete("{code}")]
