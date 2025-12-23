@@ -140,6 +140,8 @@ public class FlightSchedulesService : IFlightSchedulesService
         return result;  
     }
 
+
+
     public async Task<ImportResultDto> ImportAsync(IEnumerable<UpsertFlightScheduleDto> dtos, CancellationToken cancellationToken)
     {
         throw new NotImplementedException();
@@ -207,6 +209,8 @@ public class FlightSchedulesService : IFlightSchedulesService
 
     private async Task<IReadOnlyList<ScheduleConflictDto>> ValidateGateOverlapsAsync(
         int gateId,
+        string gateCode,
+        string airportCode,
         DateTime proposedStartUtc,
         DateTime proposedEndUtc,
         int? excludeFlightScheduleId,
@@ -223,7 +227,7 @@ public class FlightSchedulesService : IFlightSchedulesService
         {
             var error = new Error
             {
-                Message = $"Gate has {conflicts.Count} schedule conflict(s) in the selected time window.",
+                Message = $"Gate overlap at {airportCode}:{gateCode} with {conflicts.Count} schedule conflict(s) in the selected time window.",
                 Type = ErrorType.Validation
             };
             result.AddError(error);
