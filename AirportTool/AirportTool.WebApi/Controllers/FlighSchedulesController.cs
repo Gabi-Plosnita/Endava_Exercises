@@ -1,5 +1,4 @@
 ﻿using AirportTool.Application;
-using AirportTool.Domain;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
 
