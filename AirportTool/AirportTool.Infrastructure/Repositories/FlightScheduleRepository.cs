@@ -15,9 +15,10 @@ public class FlightScheduleRepository : EfRepositoryBase<FlightSchedule, FlightS
         int flightId, DateTime departureUtc, CancellationToken cancellationToken)
     {
         var flightScheduleDb = await _context.FlightSchedules
-                                             .FirstOrDefaultAsync(fs => fs.FlightId == flightId
-                                                                  && fs.ScheduledDepartureUtc == departureUtc,
-                                                                  cancellationToken);
+                                             .AsNoTracking()
+                                             .SingleOrDefaultAsync(fs => fs.FlightId == flightId 
+                                                                         && fs.ScheduledDepartureUtc == departureUtc,
+                                                                         cancellationToken);
 
         return _mapper.Map<FlightSchedule>(flightScheduleDb);
     }
