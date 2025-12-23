@@ -9,6 +9,7 @@ public class CreateTicketDto
     public int FlightScheduleId { get; set; }
 
     [Required(ErrorMessage = "FareClass is required.")]
+    [EnumDataType(typeof(FareClass), ErrorMessage = "Invalid FareClass.")]
     public FareClass FareClass { get; set; }
 
     [Range(0.01, double.MaxValue, ErrorMessage = "BasePrice must be a positive value.")]

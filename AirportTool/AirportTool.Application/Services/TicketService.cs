@@ -85,6 +85,13 @@ public class TicketService : ITicketService
             return result;
         }
 
+        await ValidateFareClassIsUniquePerFlightSchedule(dto.FlightScheduleId, dto.FareClass, null, result, cancellationToken);
+        if (result.IsFailure)
+        {
+            LogCreateFailure(dto, result);
+            return result;
+        }
+
         var ticket = _mapper.Map<Ticket>(dto);
         await _unitOfWork.Tickets.AddAndSaveAsync(ticket, cancellationToken);
         var getTicketDto = await ValidateTicketExistsAfterCreation(ticket.TicketId, result, cancellationToken);
@@ -213,6 +220,21 @@ public class TicketService : ITicketService
             result.AddError(error);
         }
         return getTicketDto;
+    }
+
+    private async Task ValidateFareClassIsUniquePerFlightSchedule(
+        int flightScheduleId, FareClass fareClass, long? excludeTicketId, Result result, CancellationToken cancellationToken)
+    {
+        var exists = await _unitOfWork.Tickets.FareClassExistsForScheduleAsync(flightScheduleId, fareClass, excludeTicketId, cancellationToken);
+        if (exists)
+        {
+            var error = new Error
+            {
+                Message = $"Fare class {fareClass} already exists for flight schedule ID {flightScheduleId}.",
+                Type = ErrorType.Validation
+            };
+            result.AddError(error);
+        }
     }
 
     #endregion
