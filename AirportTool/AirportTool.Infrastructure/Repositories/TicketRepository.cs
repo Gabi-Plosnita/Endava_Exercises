@@ -65,4 +65,18 @@ public class TicketRepository : EfRepositoryBase<Ticket, TicketDb, long>, ITicke
                        .AsNoTracking()
                        .AnyAsync(b => b.TicketId == ticketId, cancellationToken);
     }
+
+    public Task<bool> FareClassExistsForScheduleAsync(
+        int flightScheduleId, FareClass fareClass, long? excludeTicketId, CancellationToken cancellationToken)
+    {
+        var querry = _context.Tickets.AsNoTracking()
+                                     .Where(t => t.FlightScheduleId == flightScheduleId && t.FareClass == fareClass);
+
+        if (excludeTicketId.HasValue)
+        {
+            querry = querry.Where(t => t.TicketId != excludeTicketId.Value);
+        }
+
+        return querry.AnyAsync(cancellationToken);
+    }
 }

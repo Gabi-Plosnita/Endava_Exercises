@@ -11,4 +11,6 @@ public interface ITicketRepository : IRepository<Ticket, long>
     Task AddAndSaveAsync(Ticket ticket, CancellationToken cancellationToken);
 
     Task<bool> HasBookingsAsync(long ticketId, CancellationToken cancellationToken);
+
+    Task<bool> FareClassExistsForScheduleAsync(int flightScheduleId, FareClass fareClass, long? excludeTicketId, CancellationToken ct);
 }
