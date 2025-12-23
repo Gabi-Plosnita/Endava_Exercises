@@ -392,7 +392,6 @@ public class FlightSchedulesService : IFlightSchedulesService
 
     #endregion
 
-    //TODO: Logging//
 
     #region Logging Methods
 
