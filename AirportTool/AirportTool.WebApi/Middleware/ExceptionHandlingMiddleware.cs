@@ -24,15 +24,27 @@ public sealed class ApiExceptionHandlingMiddleware
         {
             _logger.LogInformation(ex, "Request was cancelled by the client.");
         }
-        catch (ConcurrencyConflictException ex)
+        catch (DatabaseConcurrencyException ex)
         {
-            _logger.LogWarning(ex, "Concurrency conflict.");
+            _logger.LogWarning(ex, "Database concurrency conflict.");
 
             await WriteProblemDetailsAsync(
                 context,
                 statusCode: StatusCodes.Status409Conflict,
                 title: "Concurrency conflict",
                 detail: ex.Message);
+        }
+        catch (DatabaseException ex)
+        {
+            var (status, title, detail, logLevel) = MapDatabaseException(ex);
+
+            _logger.Log(logLevel, ex, "Database error mapped to {Status}: {Title}", status, title);
+
+            await WriteProblemDetailsAsync(
+                context,
+                statusCode: status,
+                title: title,
+                detail: detail);
         }
         catch (InvalidOperationException ex)
         {
@@ -56,14 +68,42 @@ public sealed class ApiExceptionHandlingMiddleware
         }
     }
 
+    private static (int Status, string Title, string? Detail, LogLevel LogLevel) MapDatabaseException(DatabaseException ex)
+    {
+        return ex switch
+        {
+            DatabaseUniqueConstraintException =>
+                (StatusCodes.Status409Conflict, "Duplicate resource", ex.Message, LogLevel.Information),
+
+            DatabaseConstraintException =>
+                (StatusCodes.Status409Conflict, "Constraint violation", ex.Message, LogLevel.Information),
+
+            DatabaseNotNullException =>
+                (StatusCodes.Status400BadRequest, "Invalid request data", ex.Message, LogLevel.Information),
+
+            DatabaseDataTooLongException =>
+                (StatusCodes.Status400BadRequest, "Invalid request data", ex.Message, LogLevel.Information),
+
+            DatabaseDeadlockException =>
+                (StatusCodes.Status503ServiceUnavailable, "Database busy", "Please retry the request.", LogLevel.Warning),
+
+            DatabaseTimeoutException =>
+                (StatusCodes.Status503ServiceUnavailable, "Database timeout", "Please retry the request.", LogLevel.Warning),
+
+            DatabaseUnavailableException =>
+                (StatusCodes.Status503ServiceUnavailable, "Database unavailable", "Please retry later.", LogLevel.Error),
+
+            DatabaseWriteException =>
+                (StatusCodes.Status500InternalServerError, "Database error", "An unexpected error occurred.", LogLevel.Error),
+
+            _ =>
+                (StatusCodes.Status500InternalServerError, "Database error", "An unexpected error occurred.", LogLevel.Error)
+        };
+    }
+
     private static bool IsRequestCancellation(Exception ex, HttpContext context)
     {
-        if (context.RequestAborted.IsCancellationRequested && ex is OperationCanceledException)
-        {
-            return true;
-        }
-
-        return false;
+        return context.RequestAborted.IsCancellationRequested && ex is OperationCanceledException;
     }
 
     private static async Task WriteProblemDetailsAsync(

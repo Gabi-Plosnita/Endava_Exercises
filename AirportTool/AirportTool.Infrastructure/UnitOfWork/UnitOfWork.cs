@@ -1,4 +1,5 @@
 ﻿using AirportTool.Application;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 
 namespace AirportTool.Infrastructure;
@@ -45,8 +46,41 @@ public class UnitOfWork : IUnitOfWork
         }
         catch (DbUpdateConcurrencyException ex)
         {
-            throw new ConcurrencyConflictException("The entity was modified by another operation.", ex);
+            throw new DatabaseConcurrencyException("The entity was modified by another operation.", ex);
+        }
+        catch (DbUpdateException ex)
+        {
+            var baseEx = ex.GetBaseException();
+
+            if (baseEx is SqlException sqlEx)
+            {
+                switch (sqlEx.Number)
+                {
+                    case 2601:
+                    case 2627:
+                        throw new DatabaseUniqueConstraintException("Duplicate key.", ex);
+
+                    case 547:
+                        throw new DatabaseConstraintException("FK/CHECK constraint violation.", ex);
+
+                    case 515:
+                        throw new DatabaseNotNullException("NOT NULL constraint violation.", ex);
+
+                    case 2628:
+                    case 8152: 
+                        throw new DatabaseDataTooLongException("String/bytes truncated.", ex);
+
+                    case -2:
+                        throw new DatabaseTimeoutException("Database timeout.", ex);
+
+                    default:
+                        throw new DatabaseWriteException("Database update failed.", ex);
+                }
+            }
+
+            throw new DatabaseWriteException("Database update failed.", ex);
         }
     }
+
 }
 
