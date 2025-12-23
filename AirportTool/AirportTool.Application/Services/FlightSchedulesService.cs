@@ -126,6 +126,7 @@ public class FlightSchedulesService : IFlightSchedulesService
         }
 
         var flightSchedule = _mapper.Map<FlightSchedule>(dto);
+        flightSchedule.Status = FlightScheduleStatus.Planned;
         flightSchedule.GateId = gate?.GateId;
         flightSchedule.AssignedAircraftId = assignedAircraft?.AircraftId;
 

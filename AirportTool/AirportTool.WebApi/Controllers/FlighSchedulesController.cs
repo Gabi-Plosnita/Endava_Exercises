@@ -1,6 +1,7 @@
 ﻿using AirportTool.Application;
 using AirportTool.Domain;
 using Microsoft.AspNetCore.Mvc;
+using System.Text.Json;
 
 namespace AirportTool.WebApi;
 
@@ -76,7 +77,6 @@ public class SchedulesController : ControllerBase
     [ProducesResponseType(typeof(List<Error>), StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> Create([FromBody] UpsertFlightScheduleDto dto, CancellationToken cancellationToken)
     {
-        dto.Status = FlightScheduleStatus.Planned;
         var result = await _flightSchedulesService.CreateAsync(dto, cancellationToken);
 
         if (result.IsFailure)
@@ -86,5 +86,80 @@ public class SchedulesController : ControllerBase
         }
 
         return CreatedAtAction(nameof(GetById), new { id = result.Value!.FlightSchedule!.FlightScheduleId }, result.Value);
+    }
+
+    [HttpPost("import")]
+    [Consumes("multipart/form-data")]
+    [ProducesResponseType(typeof(ImportSummaryDto), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(ImportSummaryDto), StatusCodes.Status207MultiStatus)]
+    [ProducesResponseType(typeof(List<Error>), StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> Import([FromForm] IFormFile file, CancellationToken cancellationToken)
+    {
+        if (file is null || file.Length == 0)
+        {
+            return BadRequest(new List<Error>
+            {
+                new Error { Message = "File is required.", Type = ErrorType.Validation }
+            });
+        }
+
+        var ext = Path.GetExtension(file.FileName);
+        if (!string.Equals(ext, ".json", StringComparison.OrdinalIgnoreCase))
+        {
+            return BadRequest(new List<Error>
+            {
+                new Error { Message = "Invalid file type. Please upload a .json file.", Type = ErrorType.Validation }
+            });
+        }
+
+        List<UpsertFlightScheduleDto>? rows;
+        try
+        {
+            await using var stream = file.OpenReadStream();
+
+            var options = new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            };
+
+            rows = await JsonSerializer.DeserializeAsync<List<UpsertFlightScheduleDto>>(stream, options, cancellationToken);
+
+            if (rows is null || rows.Count == 0)
+            {
+                return BadRequest(new List<Error>
+                {
+                    new Error { Message = "Invalid JSON content. Expected a non-empty array of schedules.", Type = ErrorType.Validation }
+                });
+            }
+        }
+        catch (JsonException)
+        {
+            return BadRequest(new List<Error>
+            {
+                new Error { Message = "Invalid JSON file. Could not parse content.", Type = ErrorType.Validation }
+            });
+        }
+        catch (Exception)
+        {
+            return BadRequest(new List<Error>
+            {
+                new Error { Message = "Invalid file. Could not read or parse the uploaded content.", Type = ErrorType.Validation }
+            });
+        }
+
+        var summary = await _flightSchedulesService.ImportAsync(rows, cancellationToken);
+
+        var allCreated = summary.Total > 0
+                         && summary.Created == summary.Total
+                         && summary.Updated == 0
+                         && summary.Failed == 0
+                         && (summary.Errors?.Count ?? 0) == 0;
+
+        if (allCreated)
+        {
+            return StatusCode(StatusCodes.Status201Created, summary);
+        }
+
+        return StatusCode(StatusCodes.Status207MultiStatus, summary);
     }
 }
