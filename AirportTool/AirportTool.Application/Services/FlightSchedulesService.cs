@@ -10,7 +10,7 @@ public class FlightSchedulesService : IFlightSchedulesService
     private readonly IDtoValidator _dtoValidator;
     private readonly IMapper _mapper;
     private ILogger<FlightSchedulesService> _logger;
-    
+
     public FlightSchedulesService(
         IUnitOfWork unitOfWork,
         IDtoValidator dtoValidator,
@@ -91,24 +91,24 @@ public class FlightSchedulesService : IFlightSchedulesService
         }
 
         var flight = await ValidateFlightExistsAsync(dto.FlightId, result, cancellationToken);
-        if(result.IsFailure || flight == null)
+        if (result.IsFailure || flight == null)
         {
             return result;
         }
 
         Gate? gate = null;
-        if(dto.GateCode != null)
+        if (dto.GateCode != null)
         {
-            gate = await ValidateGateExistsAsync(dto.GateCode!, flight.OriginAirportId , result, cancellationToken);
+            gate = await ValidateGateExistsAsync(dto.GateCode!, flight.OriginAirportId, result, cancellationToken);
         }
 
         Aircraft? assignedAircraft = null;
-        if(dto.AssignedAircraftTail != null)
+        if (dto.AssignedAircraftTail != null)
         {
             assignedAircraft = await ValidateAircraftExistsAsync(dto.AssignedAircraftTail, result, cancellationToken);
         }
 
-        if(gate != null)
+        if (gate != null)
         {
             upsertResultDto.ScheduleConflicts = await ValidateGateOverlapsAsync(
                 gateId: gate.GateId,
@@ -138,15 +138,154 @@ public class FlightSchedulesService : IFlightSchedulesService
 
         upsertResultDto.FlightSchedule = getFlightScheduleDto;
 
-        return result;  
+        return result;
     }
 
-
-
-    public async Task<ImportResultDto> ImportAsync(IEnumerable<UpsertFlightScheduleDto> dtos, CancellationToken cancellationToken)
+    public async Task<ImportSummaryDto> ImportAsync(IEnumerable<UpsertFlightScheduleDto> dtos, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        var rows = dtos.ToList();
+
+        var summary = new ImportSummaryDto
+        {
+            Total = rows.Count
+        };
+
+        for (int i = 0; i < rows.Count; i++)
+        {
+            var rowNumber = i + 1;
+            var dto = rows[i];
+
+            var existing = await _unitOfWork.FlightSchedules.GetByFlightAndDepartureAsync(dto.FlightId, dto.ScheduledDepartureUtc, cancellationToken);
+
+            if (existing == null)
+            {
+                var createResult = await CreateAsync(dto, cancellationToken);
+
+                if (createResult.IsFailure || (createResult.Value?.ScheduleConflicts?.Any() ?? false))
+                {
+                    summary.Failed++;
+                    summary.Errors.Add(new ImportRowErrorDto
+                    {
+                        Row = rowNumber,
+                        Message = BuildCreateRowErrorMessage(dto, createResult)
+                    });
+                    continue;
+                }
+
+                summary.Created++;
+            }
+            else
+            {
+                var updateResult = await UpdateExistingAsync(existing, dto, cancellationToken);
+
+                if (updateResult.IsFailure)
+                {
+                    summary.Failed++;
+                    summary.Errors.Add(new ImportRowErrorDto
+                    {
+                        Row = rowNumber,
+                        Message = string.Join("; ", updateResult.Errors.Select(e => e.Message))
+                    });
+                    continue;
+                }
+
+                summary.Updated++;
+            }
+        }
+
+        return summary;
     }
+
+    private async Task<Result> UpdateExistingAsync(FlightSchedule existing, UpsertFlightScheduleDto dto, CancellationToken cancellationToken)
+    {
+        var result = new Result();
+
+        var dtoValidationResult = _dtoValidator.Validate(dto);
+        result.AddErrors(dtoValidationResult.Errors);
+        if (result.IsFailure)
+        {
+            return result;
+        }
+
+        var flight = await ValidateFlightExistsAsync(dto.FlightId, result, cancellationToken);
+        if (result.IsFailure || flight is null)
+        {
+            return result;
+        }
+
+        Gate? gate = null;
+        if (dto.GateCode != null)
+        {
+            gate = await ValidateGateExistsAsync(dto.GateCode, flight.OriginAirportId, result, cancellationToken);
+            if (result.IsFailure)
+            {
+                return result;
+            }
+        }
+
+        Aircraft? aircraft = null;
+        if (dto.AssignedAircraftTail != null)
+        {
+            aircraft = await ValidateAircraftExistsAsync(dto.AssignedAircraftTail, result, cancellationToken);
+            if (result.IsFailure)
+            {
+                return result;
+            }
+        }
+
+        if (gate != null)
+        {
+            await ValidateGateOverlapsAsync(
+                gateId: gate.GateId,
+                gateCode: gate.Code,
+                proposedStartUtc: dto.ScheduledDepartureUtc,
+                proposedEndUtc: dto.ScheduledArrivalUtc,
+                excludeFlightScheduleId: existing.FlightScheduleId,
+                result,
+                cancellationToken);
+
+            if (result.IsFailure)
+            {
+                return result;
+            }
+        }
+
+        existing.ScheduledArrivalUtc = dto.ScheduledArrivalUtc;
+        existing.Status = dto.Status;
+        existing.GateId = gate?.GateId;
+        existing.AssignedAircraftId = aircraft?.AircraftId;
+
+        await _unitOfWork.FlightSchedules.UpdateAsync(existing, cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        return result;
+    }
+
+    #region Helper methods 
+
+    private static string BuildCreateRowErrorMessage(UpsertFlightScheduleDto dto, Result<UpsertFlightScheduleResultDto> res)
+    {
+        if (res.Value?.ScheduleConflicts?.Any() == true)
+        {
+            var any = res.Value.ScheduleConflicts.First();
+
+            return $"Gate overlap at {any.AirportIata}:{dto.GateCode} {FormatUtc(dto.ScheduledDepartureUtc)}–{FormatUtc(dto.ScheduledArrivalUtc)}";
+        }
+
+        if (res.Errors.Count > 0)
+        {
+            return string.Join("; ", res.Errors.Select(e => e.Message));
+        }
+
+        return "Unknown error";
+    }
+
+    private static string FormatUtc(DateTime utc)
+    {
+        return utc.ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ss'Z'");
+    }
+
+    #endregion
 
     #region Business Rules Methods
 
