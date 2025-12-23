@@ -48,7 +48,7 @@ public class UnitOfWork : IUnitOfWork, IAsyncDisposable
             throw new ConcurrencyConflictException("The entity was modified by another operation.", ex);
         }
     }
-
+    
     public ValueTask DisposeAsync()
         => _context.DisposeAsync();
 }
