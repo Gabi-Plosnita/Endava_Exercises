@@ -110,6 +110,8 @@ public class SchedulesController : ControllerBase
         return ToImportResponse(summary);
     }
 
+    #region Helper Methods
+
     private static Result ValidateImportFile(IFormFile? file)
     {
         var result = new Result();
@@ -177,4 +179,6 @@ public class SchedulesController : ControllerBase
             ? new ObjectResult(summary) { StatusCode = StatusCodes.Status201Created }
             : new ObjectResult(summary) { StatusCode = StatusCodes.Status207MultiStatus };
     }
+
+    #endregion
 }
