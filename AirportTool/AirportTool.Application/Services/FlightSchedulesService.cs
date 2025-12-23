@@ -325,7 +325,7 @@ public class FlightSchedulesService : IFlightSchedulesService
         {
             var error = new Error
             {
-                Message = $"Gate with Code {gateCode} not found",
+                Message = $"Gate with Code {gateCode} not found for airport {airportId}",
                 Type = ErrorType.Validation
             };
             result.AddError(error);
