@@ -92,7 +92,7 @@ public class TicketService : ITicketService
         {
             result.AddError(new Error
             {
-                Message = $"Failed to retrieve the created ticket with ID {ticket.TicketId}.",
+                Message = "Ticket not found after creation.",
                 Type = ErrorType.Unexpected
             });
             LogTicketNotFoundAfterCreation(ticket.TicketId);

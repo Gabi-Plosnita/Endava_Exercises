@@ -94,14 +94,9 @@ public class AircraftService : IAircraftService
         aircraft.OwnedByAirlineId = airline?.AirlineId;
 
         await _unitOfWork.Aircrafts.AddAndSaveAsync(aircraft, cancellationToken);
-        var getAircraftDto = await _unitOfWork.Aircrafts.GetDtoByIdAsync(aircraft.AircraftId, cancellationToken);
-        if (getAircraftDto == null)
+        var getAircraftDto = await ValidateAircraftExistsAfterCreationAsync(aircraft.AircraftId, result, cancellationToken);
+        if (result.IsFailure || getAircraftDto == null)
         {
-            result.AddError(new Error
-            {
-                Type = ErrorType.Unexpected,
-                Message = $"Aircraft with ID {aircraft.AircraftId} was created but could not be retrieved."
-            });
             LogAircraftCreatedButNotRetrievable(aircraft);
             LogCreateFailure(dto, result);
             return result;
@@ -229,6 +224,22 @@ public class AircraftService : IAircraftService
             result.AddError(error);
         }
         return aircraft;
+    }
+
+    private async Task<GetAircraftDto?> ValidateAircraftExistsAfterCreationAsync(
+        int aircraftId, Result result, CancellationToken cancellationToken)
+    {
+        var getAircraftDto = await _unitOfWork.Aircrafts.GetDtoByIdAsync(aircraftId, cancellationToken);
+        if (getAircraftDto == null)
+        {
+            var error = new Error
+            {
+                Message = "Aircraft not found after creation.",
+                Type = ErrorType.Unexpected
+            };
+            result.AddError(error);
+        }
+        return getAircraftDto;
     }
 
     #endregion

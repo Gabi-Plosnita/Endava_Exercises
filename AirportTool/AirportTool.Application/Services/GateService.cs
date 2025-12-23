@@ -83,7 +83,7 @@ public class GateService : IGateService
         {
             result.AddError(new Error
             {
-                Message = $"Gate with Id {gate.GateId} not found after creation.",
+                Message = "Gate not found after creation.",
                 Type = ErrorType.Unexpected
             });
             LogGateNotFoundAfterCreation(gate.GateId);

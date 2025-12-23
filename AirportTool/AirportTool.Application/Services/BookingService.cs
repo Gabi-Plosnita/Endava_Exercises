@@ -246,7 +246,7 @@ public class BookingService : IBookingService
         {
             var error = new Error
             {
-                Message = $"Booking with confirmation code '{confirmationCode}' was not found after creation.",
+                Message = "Booking not found after creation.",
                 Type = ErrorType.Unexpected
             };
             result.AddError(error);

@@ -95,7 +95,7 @@ public class FlightService : IFlightService
         {
             result.AddError(new Error
             {
-                Message = $"Flight with ID {flight.FlightId} not found after creation.",
+                Message = "Flight not found after creation.",
                 Type = ErrorType.Unexpected
             });
             LogFlightNotFoundAfterCreation(flight.FlightId);

@@ -130,6 +130,16 @@ public class FlightSchedulesService : IFlightSchedulesService
 
         await _unitOfWork.FlightSchedules.AddAndSaveAsync(flightSchedule, cancellationToken);
         var getFlightScheduleDto = await _unitOfWork.FlightSchedules.GetDtoByIdAsync(flightSchedule.FlightScheduleId, cancellationToken);
+        if(getFlightScheduleDto == null)
+        {
+            result.AddError(new Error
+            {
+                Message = "FlightSchedule not found after creation.",
+                Type = ErrorType.Unexpected
+            });
+            return result;
+        }
+
         upsertResultDto.FlightSchedule = getFlightScheduleDto;
 
         return result;  
