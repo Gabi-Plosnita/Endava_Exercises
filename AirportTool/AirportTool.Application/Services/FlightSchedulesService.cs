@@ -9,7 +9,7 @@ public class FlightSchedulesService : IFlightSchedulesService
     private readonly IUnitOfWork _unitOfWork;
     private readonly IDtoValidator _dtoValidator;
     private readonly IMapper _mapper;
-    private ILogger<FlightSchedulesService> _logger;
+    private readonly ILogger<FlightSchedulesService> _logger;
 
     public FlightSchedulesService(
         IUnitOfWork unitOfWork,
@@ -26,6 +26,7 @@ public class FlightSchedulesService : IFlightSchedulesService
     public async Task<Result<GetFlightScheduleDto?>> GetByIdAsync(int id, CancellationToken cancellationToken)
     {
         var result = new Result<GetFlightScheduleDto?>();
+
         var getFlightScheduleDto = await _unitOfWork.FlightSchedules.GetDtoByIdAsync(id, cancellationToken);
         var found = getFlightScheduleDto != null;
 
@@ -43,36 +44,43 @@ public class FlightSchedulesService : IFlightSchedulesService
         return result;
     }
 
-    public async Task<Result<PagedResult<FlightScheduleSearchDto>>> GetByFilterAsync(FlightScheduleFilterDto dto, CancellationToken cancellationToken)
+    public async Task<Result<PagedResult<FlightScheduleSearchDto>>> GetByFilterAsync(FlightScheduleFilterDto dto,CancellationToken cancellationToken)
     {
         var result = new Result<PagedResult<FlightScheduleSearchDto>>();
+        LogGetByFilterStart(dto);
 
         var dtoValidationResult = _dtoValidator.Validate(dto);
         result.AddErrors(dtoValidationResult.Errors);
         if (result.IsFailure)
         {
+            LogGetByFilterFailure(dto, result);
             return result;
         }
 
         var filteredDtoResult = await _unitOfWork.FlightSchedules.GetFilteredFlightSchedulesAsync(dto, cancellationToken);
         result.Value = filteredDtoResult;
 
+        LogGetByFilterSuccess(dto, filteredDtoResult);
         return result;
     }
 
     public async Task<Result<IReadOnlyList<DailyFlightStatsDto>>> GetDailyStatsAsync(
-        DateOnly startUtc, DateOnly endUtc, CancellationToken cancellationToken)
+        DateOnly startUtc, DateOnly endUtc,CancellationToken cancellationToken)
     {
         var result = new Result<IReadOnlyList<DailyFlightStatsDto>>();
+        LogGetDailyStatsStart(startUtc, endUtc);
 
         ValidateStartAndEndUtc(startUtc, endUtc, result);
         if (result.IsFailure)
         {
+            LogGetDailyStatsFailure(startUtc, endUtc, result);
             return result;
         }
 
         var statsDto = await _unitOfWork.FlightSchedules.GetDailyStatsAsync(startUtc, endUtc, cancellationToken);
         result.Value = statsDto;
+
+        LogGetDailyStatsSuccess(startUtc, endUtc, statsDto);
         return result;
     }
 
@@ -82,17 +90,21 @@ public class FlightSchedulesService : IFlightSchedulesService
         var upsertResultDto = new UpsertFlightScheduleResultDto();
         result.Value = upsertResultDto;
 
+        LogCreateStart(dto);
+
         var dtoValidationResult = _dtoValidator.Validate(dto);
         result.AddErrors(dtoValidationResult.Errors);
 
         if (result.IsFailure)
         {
+            LogCreateFailure(dto, result);
             return result;
         }
 
         var flight = await ValidateFlightExistsAsync(dto.FlightId, result, cancellationToken);
         if (result.IsFailure || flight == null)
         {
+            LogCreateFailure(dto, result);
             return result;
         }
 
@@ -122,6 +134,7 @@ public class FlightSchedulesService : IFlightSchedulesService
 
         if (result.IsFailure || upsertResultDto.ScheduleConflicts.Any())
         {
+            LogCreateFailure(dto, result);
             return result;
         }
 
@@ -131,14 +144,19 @@ public class FlightSchedulesService : IFlightSchedulesService
         flightSchedule.AssignedAircraftId = assignedAircraft?.AircraftId;
 
         await _unitOfWork.FlightSchedules.AddAndSaveAsync(flightSchedule, cancellationToken);
+
         var getFlightScheduleDto = await ValidateFlightScheduleExistsAfterCreationAsync(flightSchedule.FlightScheduleId, result, cancellationToken);
+
         if (result.IsFailure || getFlightScheduleDto == null)
         {
+            LogFlightScheduleNotFoundAfterCreation(flightSchedule.FlightScheduleId);
+            LogCreateFailure(dto, result);
             return result;
         }
 
         upsertResultDto.FlightSchedule = getFlightScheduleDto;
 
+        LogCreateSuccess(flightSchedule);
         return result;
     }
 
@@ -151,10 +169,14 @@ public class FlightSchedulesService : IFlightSchedulesService
             Total = rows.Count
         };
 
+        LogImportStart(summary.Total);
+
         for (int i = 0; i < rows.Count; i++)
         {
             var rowNumber = i + 1;
             var dto = rows[i];
+
+            LogImportRowStart(rowNumber, dto);
 
             var existing = await _unitOfWork.FlightSchedules.GetByFlightAndDepartureAsync(dto.FlightId, dto.ScheduledDepartureUtc, cancellationToken);
 
@@ -165,15 +187,20 @@ public class FlightSchedulesService : IFlightSchedulesService
                 if (createResult.IsFailure || (createResult.Value?.ScheduleConflicts?.Any() ?? false))
                 {
                     summary.Failed++;
+                    var message = BuildCreateRowErrorMessage(dto, createResult);
+
                     summary.Errors.Add(new ImportRowErrorDto
                     {
                         Row = rowNumber,
-                        Message = BuildCreateRowErrorMessage(dto, createResult)
+                        Message = message
                     });
+
+                    LogImportRowFailure(rowNumber, dto, message, createResult.Errors);
                     continue;
                 }
 
                 summary.Created++;
+                LogImportRowCreated(rowNumber, dto);
             }
             else
             {
@@ -182,35 +209,44 @@ public class FlightSchedulesService : IFlightSchedulesService
                 if (updateResult.IsFailure)
                 {
                     summary.Failed++;
+                    var msg = string.Join("; ", updateResult.Errors.Select(e => e.Message));
+
                     summary.Errors.Add(new ImportRowErrorDto
                     {
                         Row = rowNumber,
-                        Message = string.Join("; ", updateResult.Errors.Select(e => e.Message))
+                        Message = msg
                     });
+
+                    LogImportRowFailure(rowNumber, dto, msg, updateResult.Errors);
                     continue;
                 }
 
                 summary.Updated++;
+                LogImportRowUpdated(rowNumber, dto, existing.FlightScheduleId);
             }
         }
 
+        LogImportEnd(summary);
         return summary;
     }
 
     private async Task<Result> UpdateExistingAsync(FlightSchedule existing, UpsertFlightScheduleDto dto, CancellationToken cancellationToken)
     {
         var result = new Result();
+        LogUpdateStart(existing.FlightScheduleId, dto);
 
         var dtoValidationResult = _dtoValidator.Validate(dto);
         result.AddErrors(dtoValidationResult.Errors);
         if (result.IsFailure)
         {
+            LogUpdateFailure(existing.FlightScheduleId, result);
             return result;
         }
 
         var flight = await ValidateFlightExistsAsync(dto.FlightId, result, cancellationToken);
         if (result.IsFailure || flight is null)
         {
+            LogUpdateFailure(existing.FlightScheduleId, result);
             return result;
         }
 
@@ -220,6 +256,7 @@ public class FlightSchedulesService : IFlightSchedulesService
             gate = await ValidateGateExistsAsync(dto.GateCode, flight.OriginAirportId, result, cancellationToken);
             if (result.IsFailure)
             {
+                LogUpdateFailure(existing.FlightScheduleId, result);
                 return result;
             }
         }
@@ -230,6 +267,7 @@ public class FlightSchedulesService : IFlightSchedulesService
             aircraft = await ValidateAircraftExistsAsync(dto.AssignedAircraftTail, result, cancellationToken);
             if (result.IsFailure)
             {
+                LogUpdateFailure(existing.FlightScheduleId, result);
                 return result;
             }
         }
@@ -247,6 +285,7 @@ public class FlightSchedulesService : IFlightSchedulesService
 
             if (result.IsFailure)
             {
+                LogUpdateFailure(existing.FlightScheduleId, result);
                 return result;
             }
         }
@@ -259,17 +298,17 @@ public class FlightSchedulesService : IFlightSchedulesService
         await _unitOfWork.FlightSchedules.UpdateAsync(existing, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
+        LogUpdateSuccess(existing);
         return result;
     }
 
-    #region Helper methods 
+    #region Helper methods
 
     private static string BuildCreateRowErrorMessage(UpsertFlightScheduleDto dto, Result<UpsertFlightScheduleResultDto> res)
     {
         if (res.Value?.ScheduleConflicts?.Any() == true)
         {
             var any = res.Value.ScheduleConflicts.First();
-
             return $"Gate overlap at {any.AirportIata}:{dto.GateCode} {FormatUtc(dto.ScheduledDepartureUtc)}–{FormatUtc(dto.ScheduledArrivalUtc)}";
         }
 
@@ -363,6 +402,7 @@ public class FlightSchedulesService : IFlightSchedulesService
             proposedEndUtc: proposedEndUtc,
             excludeFlightScheduleId: excludeFlightScheduleId,
             cancellationToken);
+
         if (conflicts.Any())
         {
             var error = new Error
@@ -372,11 +412,14 @@ public class FlightSchedulesService : IFlightSchedulesService
             };
             result.AddError(error);
         }
+
         return conflicts;
     }
 
     private async Task<GetFlightScheduleDto?> ValidateFlightScheduleExistsAfterCreationAsync(
-        int flightScheduleId, Result result, CancellationToken cancellationToken)
+        int flightScheduleId,
+        Result result,
+        CancellationToken cancellationToken)
     {
         var flightScheduleDto = await _unitOfWork.FlightSchedules.GetDtoByIdAsync(flightScheduleId, cancellationToken);
         if (flightScheduleDto is null)
@@ -393,19 +436,271 @@ public class FlightSchedulesService : IFlightSchedulesService
 
     #endregion
 
-
     #region Logging Methods
 
     private void LogGetById(int id, bool found)
     {
         if (found)
         {
-            _logger.LogDebug("FlightSchedule with ID {FlightScheduleId} retrieved successfully.", id);
+            _logger.LogDebug("Retrieved FlightSchedule with ID {FlightScheduleId}.", id);
         }
         else
         {
             _logger.LogDebug("FlightSchedule with ID {FlightScheduleId} not found.", id);
         }
+    }
+
+    private void LogGetByFilterStart(FlightScheduleFilterDto dto)
+    {
+        _logger.LogInformation(
+            @"Filtering flight schedules:
+                OriginIata={OriginIata},
+                DestinationIata={DestinationIata},
+                Date={Date}",
+            dto.OriginIata,
+            dto.DestinationIata,
+            dto.Date);
+    }
+
+    private void LogGetByFilterFailure(FlightScheduleFilterDto dto, Result<PagedResult<FlightScheduleSearchDto>> result)
+    {
+        _logger.LogWarning(
+            @"Filter flight schedules failed:
+                Errors={Errors}",
+            result.Errors);
+    }
+
+    private void LogGetByFilterSuccess(FlightScheduleFilterDto dto, PagedResult<FlightScheduleSearchDto> paged)
+    {
+        _logger.LogInformation(
+            @"Filtered flight schedules successfully:
+                PageIndex={PageIndex},
+                PageSize={PageSize},
+                TotalCount={TotalCount}",
+            paged.PageIndex,
+            paged.PageSize,
+            paged.TotalCount);
+    }
+
+    private void LogGetDailyStatsStart(DateOnly startUtc, DateOnly endUtc)
+    {
+        _logger.LogInformation(
+            @"Getting daily flight stats:
+                StartUtc={StartUtc},
+                EndUtc={EndUtc}",
+            startUtc,
+            endUtc);
+    }
+
+    private void LogGetDailyStatsFailure(DateOnly startUtc, DateOnly endUtc, Result result)
+    {
+        _logger.LogWarning(
+            @"Get daily flight stats failed:
+                StartUtc={StartUtc},
+                EndUtc={EndUtc},
+                Errors={Errors}",
+            startUtc,
+            endUtc,
+            result.Errors);
+    }
+
+    private void LogGetDailyStatsSuccess(DateOnly startUtc, DateOnly endUtc, IReadOnlyList<DailyFlightStatsDto> stats)
+    {
+        _logger.LogInformation(
+            @"Daily flight stats retrieved successfully:
+                StartUtc={StartUtc},
+                EndUtc={EndUtc},
+                Days={Days}",
+            startUtc,
+            endUtc,
+            stats.Count);
+    }
+
+    private void LogCreateStart(UpsertFlightScheduleDto dto)
+    {
+        _logger.LogInformation(
+            @"Creating flight schedule:
+                FlightId={FlightId},
+                ScheduledDepartureUtc={ScheduledDepartureUtc},
+                ScheduledArrivalUtc={ScheduledArrivalUtc},
+                GateCode={GateCode},
+                AssignedAircraftTail={AssignedAircraftTail},
+                Status={Status}",
+            dto.FlightId,
+            dto.ScheduledDepartureUtc,
+            dto.ScheduledArrivalUtc,
+            dto.GateCode,
+            dto.AssignedAircraftTail,
+            dto.Status);
+    }
+
+    private void LogCreateFailure(UpsertFlightScheduleDto dto, Result<UpsertFlightScheduleResultDto> result)
+    {
+        _logger.LogWarning(
+            @"Create flight schedule failed:
+                FlightId={FlightId},
+                ScheduledDepartureUtc={ScheduledDepartureUtc},
+                GateCode={GateCode},
+                Errors={Errors}",
+            dto.FlightId,
+            dto.ScheduledDepartureUtc,
+            dto.GateCode,
+            result.Errors);
+    }
+
+    private void LogCreateSuccess(FlightSchedule schedule)
+    {
+        _logger.LogInformation(
+            @"Flight schedule created successfully:
+                FlightScheduleId={FlightScheduleId},
+                FlightId={FlightId},
+                GateId={GateId},
+                AssignedAircraftId={AssignedAircraftId},
+                ScheduledDepartureUtc={ScheduledDepartureUtc},
+                ScheduledArrivalUtc={ScheduledArrivalUtc},
+                Status={Status}",
+            schedule.FlightScheduleId,
+            schedule.FlightId,
+            schedule.GateId,
+            schedule.AssignedAircraftId,
+            schedule.ScheduledDepartureUtc,
+            schedule.ScheduledArrivalUtc,
+            schedule.Status);
+    }
+
+    private void LogUpdateStart(int flightScheduleId, UpsertFlightScheduleDto dto)
+    {
+        _logger.LogInformation(
+            @"Updating flight schedule:
+                FlightScheduleId={FlightScheduleId},
+                FlightId={FlightId},
+                ScheduledDepartureUtc={ScheduledDepartureUtc},
+                ScheduledArrivalUtc={ScheduledArrivalUtc},
+                GateCode={GateCode},
+                AssignedAircraftTail={AssignedAircraftTail},
+                Status={Status}",
+            flightScheduleId,
+            dto.FlightId,
+            dto.ScheduledDepartureUtc,
+            dto.ScheduledArrivalUtc,
+            dto.GateCode,
+            dto.AssignedAircraftTail,
+            dto.Status);
+    }
+
+    private void LogUpdateFailure(int flightScheduleId, Result result)
+    {
+        _logger.LogWarning(
+            @"Update flight schedule failed:
+                FlightScheduleId={FlightScheduleId},
+                Errors={Errors}",
+            flightScheduleId,
+            result.Errors);
+    }
+
+    private void LogUpdateSuccess(FlightSchedule schedule)
+    {
+        _logger.LogInformation(
+            @"Flight schedule updated successfully:
+                FlightScheduleId={FlightScheduleId},
+                FlightId={FlightId},
+                Status={Status}",
+            schedule.FlightScheduleId,
+            schedule.FlightId,
+            schedule.Status);
+    }
+
+    private void LogImportStart(int totalRows)
+    {
+        _logger.LogInformation(
+            @"Importing flight schedules:
+                TotalRows={TotalRows}",
+            totalRows);
+    }
+
+    private void LogImportRowStart(int rowNumber, UpsertFlightScheduleDto dto)
+    {
+        _logger.LogDebug(
+            @"Import row:
+                Row={Row},
+                FlightId={FlightId},
+                ScheduledDepartureUtc={ScheduledDepartureUtc},
+                ScheduledArrivalUtc={ScheduledArrivalUtc},
+                GateCode={GateCode},
+                AssignedAircraftTail={AssignedAircraftTail},
+                Status={Status}",
+            rowNumber,
+            dto.FlightId,
+            dto.ScheduledDepartureUtc,
+            dto.ScheduledArrivalUtc,
+            dto.GateCode,
+            dto.AssignedAircraftTail,
+            dto.Status);
+    }
+
+    private void LogImportRowCreated(int rowNumber, UpsertFlightScheduleDto dto)
+    {
+        _logger.LogInformation(
+            @"Import row created:
+                Row={Row},
+                FlightId={FlightId},
+                ScheduledDepartureUtc={ScheduledDepartureUtc}",
+            rowNumber,
+            dto.FlightId,
+            dto.ScheduledDepartureUtc);
+    }
+
+    private void LogImportRowUpdated(int rowNumber, UpsertFlightScheduleDto dto, int flightScheduleId)
+    {
+        _logger.LogInformation(
+            @"Import row updated:
+                Row={Row},
+                FlightScheduleId={FlightScheduleId},
+                FlightId={FlightId},
+                ScheduledDepartureUtc={ScheduledDepartureUtc}",
+            rowNumber,
+            flightScheduleId,
+            dto.FlightId,
+            dto.ScheduledDepartureUtc);
+    }
+
+    private void LogImportRowFailure(int rowNumber, UpsertFlightScheduleDto dto, string message, IReadOnlyList<Error> errors)
+    {
+        _logger.LogWarning(
+            @"Import row failed:
+                Row={Row},
+                FlightId={FlightId},
+                ScheduledDepartureUtc={ScheduledDepartureUtc},
+                GateCode={GateCode},
+                Message={Message},
+                Errors={Errors}",
+            rowNumber,
+            dto.FlightId,
+            dto.ScheduledDepartureUtc,
+            dto.GateCode,
+            message,
+            errors);
+    }
+
+    private void LogImportEnd(ImportSummaryDto summary)
+    {
+        _logger.LogInformation(
+            @"Import finished:
+                Total={Total},
+                Created={Created},
+                Updated={Updated},
+                Failed={Failed}",
+            summary.Total,
+            summary.Created,
+            summary.Updated,
+            summary.Failed);
+    }
+
+    private void LogFlightScheduleNotFoundAfterCreation(int flightScheduleId)
+    {
+        _logger.LogError(
+            @"FlightSchedule with ID {FlightScheduleId} not found after creation.",
+            flightScheduleId);
     }
 
     #endregion
