@@ -102,7 +102,7 @@ public class BookingService : IBookingService
         {
             await _unitOfWork.SaveChangesAsync(cancellationToken);
         }
-        catch (ConcurrencyConflictException)
+        catch (DatabaseConcurrencyException)
         {
             LogCreateConflict(createBookingDto, booking.ConfirmationCode);
             result.AddError(new Error
@@ -171,7 +171,7 @@ public class BookingService : IBookingService
         {
             await _unitOfWork.SaveChangesAsync(cancellationToken);
         }
-        catch (ConcurrencyConflictException)
+        catch (DatabaseConcurrencyException)
         {
             LogCancelConflict(confirmationCode, booking.BookingId, booking.TicketId);
 
