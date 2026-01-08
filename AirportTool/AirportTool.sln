@@ -17,6 +17,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "sql", "sql", "{02EA681E-C7D
 		02_seed_initial_data.sql = 02_seed_initial_data.sql
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AirportTool.Tests", "AirportTool.Tests\AirportTool.Tests.csproj", "{2048C5BD-B9CE-4CA7-B6CE-38144134E723}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,10 @@ Global
 		{3671BE16-1345-49B6-A109-39ADB7398410}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3671BE16-1345-49B6-A109-39ADB7398410}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3671BE16-1345-49B6-A109-39ADB7398410}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2048C5BD-B9CE-4CA7-B6CE-38144134E723}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2048C5BD-B9CE-4CA7-B6CE-38144134E723}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2048C5BD-B9CE-4CA7-B6CE-38144134E723}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2048C5BD-B9CE-4CA7-B6CE-38144134E723}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
