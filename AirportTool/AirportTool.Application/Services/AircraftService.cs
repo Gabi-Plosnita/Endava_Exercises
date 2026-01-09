@@ -202,7 +202,7 @@ public class AircraftService : IAircraftService
         {
             var error = new Error
             {
-                Message = $"Airline with IATA code {airlineIataCode} not found.",
+                Message = $"Airline with IATA code '{airlineIataCode}' not found.",
                 Type = ErrorType.Validation
             };
             result.AddError(error);
