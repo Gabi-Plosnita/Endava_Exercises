@@ -26,7 +26,7 @@ public class GateRepository : EfRepositoryBase<Gate, GateDb, int>, IGateReposito
                        .SingleOrDefaultAsync(cancellationToken);
     }
 
-    public async Task<Gate?> GetByAirlineIdAndCodeAsync(int airportId, string code, CancellationToken cancellationToken)
+    public async Task<Gate?> GetByAirportIdAndCodeAsync(int airportId, string code, CancellationToken cancellationToken)
     {
         var gateDb = await _context.Gates
                            .AsNoTracking()

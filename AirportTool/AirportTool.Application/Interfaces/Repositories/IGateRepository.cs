@@ -6,7 +6,7 @@ public interface IGateRepository : IRepository<Gate, int>
 {
     Task<GetGateDto?> GetDtoByIdAsync(int id, CancellationToken cancellationToken);
 
-    Task<Gate?> GetByAirlineIdAndCodeAsync(int airportId, string code, CancellationToken cancellationToken);
+    Task<Gate?> GetByAirportIdAndCodeAsync(int airportId, string code, CancellationToken cancellationToken);
 
     Task<Gate?> GetByCodeAndAirportAsync(string code, int airportId, CancellationToken cancellationToken);
 
