@@ -38,6 +38,8 @@ public class AircraftService_GetByIdAsync_Tests
                                    _logger.Object);
     }
 
+    #region GetByIdAsync Tests
+
     [Fact]
     public async Task GetByIdAsync_WhenAircraftNotFound_ReturnsNotFoundErrorAndFailure()
     {
@@ -73,6 +75,10 @@ public class AircraftService_GetByIdAsync_Tests
         result.IsSuccessful.Should().BeTrue();
         result.Value.Should().BeSameAs(dto);
     }
+
+    #endregion
+
+    #region GetByFilterAsync Tests
 
     [Fact]
     public async Task GetByFilterAsync_WhenDtoValidationFails_ReturnsFailureAndDoesNotCallRepository()
@@ -144,6 +150,10 @@ public class AircraftService_GetByIdAsync_Tests
         _dtoValidator.Verify(v => v.Validate(dto), Times.Once);
         _aircraftRepository.Verify(r => r.GetDtoByFilterAsync(dto, _ct), Times.Once);
     }
+
+    #endregion
+
+    #region CreateAsync Tests
 
     [Fact]
     public async Task CreateAsync_WhenDtoValidationFails_ReturnsFailureAndDoesNotPersist()
@@ -349,4 +359,238 @@ public class AircraftService_GetByIdAsync_Tests
         _aircraftRepository.Verify(r => r.GetDtoByIdAsync(generatedId, _ct), Times.Once);
         _airlineRepository.Verify(r => r.GetByIataCodeAsync(ownedByAirlineIataCode, _ct), Times.Once);
     }
+
+    #endregion
+
+    #region UpdateAsync Tests
+
+    [Fact]
+    public async Task UpdateAsync_WhenDtoValidationFails_ReturnsFailureAndDoesNotSave()
+    {
+        // Arrange
+        var id = _fixture.Create<int>();
+        var dto = _fixture.Build<UpdateAircraftDto>().Create();
+
+        var errors = new List<Error>
+        {
+            new Error { Type = ErrorType.Validation, Message = "Invalid DTO" }
+        };
+        var dtoValidationResult = new Result();
+        dtoValidationResult.Errors.AddRange(errors);
+
+        _dtoValidator.Setup(v => v.Validate(dto))
+                     .Returns(dtoValidationResult);
+
+        // Act
+        var result = await _sut.UpdateAsync(id, dto, _ct);
+
+        // Assert
+        result.IsFailure.Should().BeTrue();
+        result.Errors.Should().BeEquivalentTo(errors);
+
+        _aircraftRepository.Verify(r => r.GetByIdAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Never);
+        _unitOfWork.Verify(u => u.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task UpdateAsync_WhenAircraftNotFound_ReturnsNotFoundFailureAndDoesNotSave()
+    {
+        // Arrange
+        var id = _fixture.Create<int>();
+
+        var dto = _fixture.Build<UpdateAircraftDto>()
+                          .With(d => d.OwnedByAirlineIataCode, (string?)null)
+                          .Create();
+
+        var dtoValidationResult = new Result();
+        _dtoValidator.Setup(v => v.Validate(dto))
+                     .Returns(dtoValidationResult);
+
+        _aircraftRepository.Setup(r => r.GetByIdAsync(id, _ct))
+                           .ReturnsAsync((Aircraft?)null);
+
+        // Act
+        var result = await _sut.UpdateAsync(id, dto, _ct);
+
+        // Assert
+        result.IsFailure.Should().BeTrue();
+        result.Errors.Should().ContainSingle(e =>
+            e.Type == ErrorType.NotFound &&
+            e.Message == $"Aircraft with ID {id} not found.");
+
+        _unitOfWork.Verify(u => u.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Never);
+        _aircraftRepository.Verify(r => r.GetByIdAsync(id, _ct), Times.Once);
+    }
+
+    [Fact]
+    public async Task UpdateAsync_WhenTailNumberAlreadyUsedByAnotherAircraft_ReturnsValidationFailure()
+    {
+        // Arrange
+        var id = _fixture.Create<int>();
+        var tailNumber = _fixture.Create<string>();
+
+        var dto = _fixture.Build<UpdateAircraftDto>()
+                          .With(d => d.TailNumber, tailNumber)
+                          .With(d => d.OwnedByAirlineIataCode, (string?)null)
+                          .Create();
+
+        var dtoValidationResult = new Result();
+        _dtoValidator.Setup(v => v.Validate(dto))
+                     .Returns(dtoValidationResult);
+
+        var existing = new Aircraft { AircraftId = id };
+
+        _aircraftRepository.Setup(r => r.GetByIdAsync(id, _ct))
+                           .ReturnsAsync(existing);
+
+        _aircraftRepository.Setup(r => r.GetByTailNumberAsync(tailNumber, _ct))
+                           .ReturnsAsync(new Aircraft { AircraftId = id + 1, TailNumber = tailNumber });
+
+        // Act
+        var result = await _sut.UpdateAsync(id, dto, _ct);
+
+        // Assert
+        result.IsFailure.Should().BeTrue();
+        result.Errors.Should().ContainSingle(e =>
+            e.Type == ErrorType.Validation &&
+            e.Message == $"An aircraft with tail number '{tailNumber}' already exists.");
+
+        _unitOfWork.Verify(u => u.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Never);
+        _aircraftRepository.Verify(r => r.GetByIdAsync(id, _ct), Times.Once);
+    }
+
+    [Fact]
+    public async Task UpdateAsync_WhenOwnedByAirlineIataCodeNotFound_ReturnsValidationFailure()
+    {
+        // Arrange
+        var id = _fixture.Create<int>();
+        var tailNumber = _fixture.Create<string>();
+        var airlineCode = _fixture.Create<string>();
+
+        var dto = _fixture.Build<UpdateAircraftDto>()
+                          .With(d => d.TailNumber, tailNumber)
+                          .With(d => d.OwnedByAirlineIataCode, airlineCode)
+                          .Create();
+
+        var dtoValidationResult = new Result();
+        _dtoValidator.Setup(v => v.Validate(dto))
+                     .Returns(dtoValidationResult);
+
+        var existing = new Aircraft { AircraftId = id };
+
+        _aircraftRepository.Setup(r => r.GetByIdAsync(id, _ct))
+                           .ReturnsAsync(existing);
+
+        _aircraftRepository.Setup(r => r.GetByTailNumberAsync(tailNumber, _ct))
+                           .ReturnsAsync((Aircraft?)null);
+
+        _airlineRepository.Setup(r => r.GetByIataCodeAsync(airlineCode, _ct))
+                          .ReturnsAsync((Airline?)null);
+
+        // Act
+        var result = await _sut.UpdateAsync(id, dto, _ct);
+
+        // Assert
+        result.IsFailure.Should().BeTrue();
+        result.Errors.Should().ContainSingle(e =>
+            e.Type == ErrorType.Validation &&
+            e.Message == $"Airline with IATA code '{airlineCode}' not found.");
+
+        _unitOfWork.Verify(u => u.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task UpdateAsync_WhenTailNumberBelongsToSameAircraft_UpdatesAircraftAndSavesChanges()
+    {
+        // Arrange
+        var id = _fixture.Create<int>();
+        var tailNumber = _fixture.Create<string>();
+
+        var dto = _fixture.Build<UpdateAircraftDto>()
+                          .With(d => d.TailNumber, tailNumber)
+                          .With(d => d.OwnedByAirlineIataCode, (string?)null)
+                          .Create();
+
+        var dtoValidationResult = new Result();
+        _dtoValidator.Setup(v => v.Validate(dto))
+                     .Returns(dtoValidationResult);
+
+        var existing = new Aircraft { AircraftId = id };
+
+        _aircraftRepository.Setup(r => r.GetByIdAsync(id, _ct))
+                           .ReturnsAsync(existing);
+
+        _aircraftRepository.Setup(r => r.GetByTailNumberAsync(tailNumber, _ct))
+                           .ReturnsAsync(new Aircraft { AircraftId = id, TailNumber = tailNumber });
+
+        _mapper.Setup(m => m.Map(dto, existing))
+               .Returns(existing);
+
+        _aircraftRepository.Setup(r => r.UpdateAsync(existing, _ct))
+                           .Returns(Task.CompletedTask);
+
+        _unitOfWork.Setup(u => u.SaveChangesAsync(_ct))
+                   .ReturnsAsync(1);
+
+        // Act
+        var result = await _sut.UpdateAsync(id, dto, _ct);
+
+        // Assert
+        result.IsSuccessful.Should().BeTrue();
+
+        _unitOfWork.Verify(u => u.SaveChangesAsync(_ct), Times.Once);
+    }
+
+    [Fact]
+    public async Task UpdateAsync_WhenAllValidationsPass_UpdatesAircraftAndSavesChanges()
+    {
+        // Arrange
+        var id = _fixture.Create<int>();
+        var tailNumber = _fixture.Create<string>();
+        var airlineCode = _fixture.Create<string>();
+
+        var dto = _fixture.Build<UpdateAircraftDto>()
+                          .With(d => d.TailNumber, tailNumber)
+                          .With(d => d.OwnedByAirlineIataCode, airlineCode)
+                          .Create();
+
+        var dtoValidationResult = new Result();
+        _dtoValidator.Setup(v => v.Validate(dto))
+                     .Returns(dtoValidationResult);
+
+        var existing = new Aircraft { AircraftId = id };
+
+        _aircraftRepository.Setup(r => r.GetByIdAsync(id, _ct))
+                           .ReturnsAsync(existing);
+
+        _aircraftRepository.Setup(r => r.GetByTailNumberAsync(tailNumber, _ct))
+                           .ReturnsAsync((Aircraft?)null);
+
+        var airline = new Airline { AirlineId = _fixture.Create<int>(), Iatacode = airlineCode };
+
+        _airlineRepository.Setup(r => r.GetByIataCodeAsync(airlineCode, _ct))
+                          .ReturnsAsync(airline);
+
+        _mapper.Setup(m => m.Map(dto, existing))
+               .Returns(existing);
+
+        _aircraftRepository.Setup(r => r.UpdateAsync(existing, _ct))
+                           .Returns(Task.CompletedTask);
+
+        _unitOfWork.Setup(u => u.SaveChangesAsync(_ct))
+                   .ReturnsAsync(1);
+
+        // Act
+        var result = await _sut.UpdateAsync(id, dto, _ct);
+
+        // Assert
+        result.IsSuccessful.Should().BeTrue();
+        result.Errors.Should().BeEmpty();
+
+        existing.OwnedByAirlineId.Should().Be(airline.AirlineId);
+
+        _unitOfWork.Verify(u => u.SaveChangesAsync(_ct), Times.Once);
+    }
+
+    #endregion
 }
