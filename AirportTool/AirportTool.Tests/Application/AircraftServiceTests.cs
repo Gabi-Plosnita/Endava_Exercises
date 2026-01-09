@@ -536,4 +536,59 @@ public class AircraftService_GetByIdAsync_Tests
     }
 
     #endregion
+
+    #region DeleteAsync Tests
+
+    [Fact]
+    public async Task DeleteByIdAsync_WhenAircraftNotFound_ReturnsNotFoundFailureAndDoesNotRemove()
+    {
+        // Arrange
+        var id = _fixture.Create<int>();
+
+        _aircraftRepository.Setup(r => r.GetByIdAsync(id, _ct))
+                           .ReturnsAsync((Aircraft?)null);
+
+        // Act
+        var result = await _sut.DeleteByIdAsync(id, _ct);
+
+        // Assert
+        result.IsFailure.Should().BeTrue();
+        result.Errors.Should().ContainSingle(e =>
+            e.Type == ErrorType.NotFound &&
+            e.Message == $"Aircraft with ID {id} not found.");
+
+        _aircraftRepository.Verify(r => r.RemoveAsync(It.IsAny<Aircraft>(), It.IsAny<CancellationToken>()), Times.Never);
+        _unitOfWork.Verify(u => u.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task DeleteByIdAsync_WhenAircraftFound_RemovesAircraftAndSavesChanges()
+    {
+        // Arrange
+        var id = _fixture.Create<int>();
+        var existing = _fixture.Build<Aircraft>()
+                               .With(a => a.AircraftId, id)
+                               .Create();
+
+        _aircraftRepository.Setup(r => r.GetByIdAsync(id, _ct))
+                           .ReturnsAsync(existing);
+
+        _aircraftRepository.Setup(r => r.RemoveAsync(existing, _ct))
+                           .Returns(Task.CompletedTask);
+
+        _unitOfWork.Setup(u => u.SaveChangesAsync(_ct))
+                   .ReturnsAsync(1);
+
+        // Act
+        var result = await _sut.DeleteByIdAsync(id, _ct);
+
+        // Assert
+        result.IsSuccessful.Should().BeTrue();
+        result.Errors.Should().BeEmpty();
+
+        _aircraftRepository.Verify(r => r.RemoveAsync(existing, _ct), Times.Once);
+        _unitOfWork.Verify(u => u.SaveChangesAsync(_ct), Times.Once);
+    }
+
+    #endregion
 }
