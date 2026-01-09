@@ -6,7 +6,7 @@ using AwesomeAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
 
-namespace AirportTool.Tests;
+namespace AirportTool.Tests.Application;
 
 public class AircraftService_GetByIdAsync_Tests
 {
@@ -89,12 +89,11 @@ public class AircraftService_GetByIdAsync_Tests
         // Arrange
         var dto = _fixture.Create<AircraftFilterDto>();
 
-        var dtoValidationResult = new Result();
         var validationErrors = new List<Error>
         {
             new() { Type = ErrorType.Validation, Message = "AirlineIataCode is too long." }
         };
-        dtoValidationResult.Errors.AddRange(validationErrors);
+        var dtoValidationResult = new Result(validationErrors);
 
         _dtoValidator.Setup(v => v.Validate(dto))
                      .Returns(dtoValidationResult);
@@ -155,8 +154,7 @@ public class AircraftService_GetByIdAsync_Tests
         {
             new Error { Type = ErrorType.Validation, Message = "Invalid DTO" }
         };
-        var dtoValidationResult = new Result();
-        dtoValidationResult.Errors.AddRange(validationErrors);
+        var dtoValidationResult = new Result(validationErrors);
 
         _dtoValidator.Setup(v => v.Validate(dto))
                      .Returns(dtoValidationResult);
@@ -338,8 +336,7 @@ public class AircraftService_GetByIdAsync_Tests
         {
             new Error { Type = ErrorType.Validation, Message = "Invalid DTO" }
         };
-        var dtoValidationResult = new Result();
-        dtoValidationResult.Errors.AddRange(errors);
+        var dtoValidationResult = new Result(errors);
 
         _dtoValidator.Setup(v => v.Validate(dto))
                      .Returns(dtoValidationResult);
