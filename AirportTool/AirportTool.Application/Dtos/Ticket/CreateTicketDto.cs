@@ -12,10 +12,10 @@ public class CreateTicketDto
     [EnumDataType(typeof(FareClass), ErrorMessage = "Invalid FareClass.")]
     public FareClass FareClass { get; set; }
 
-    [Range(0.01, double.MaxValue, ErrorMessage = "BasePrice must be a positive value.")]
+    [Range(typeof(decimal), "0.01", "79228162514264337593543950335", ErrorMessage = "BasePrice must be a positive value.")]
     public decimal BasePrice { get; set; }
 
-    [Range(0.01, double.MaxValue, ErrorMessage = "Taxes must be a positive value.")]
+    [Range(typeof(decimal), "0.01", "79228162514264337593543950335", ErrorMessage = "Taxes must be a positive value.")]
     public decimal Taxes { get; set; }
 
     [Required(ErrorMessage = "Currency is required.")]
