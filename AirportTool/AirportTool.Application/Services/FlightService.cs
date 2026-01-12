@@ -216,7 +216,7 @@ public class FlightService : IFlightService
         {
             var error = new Error
             {
-                Message = $"Flight with Number {flightNumber} already exists for Airline {airlineIataCode}",
+                Message = $"Flight with Number '{flightNumber}' already exists for Airline '{airlineIataCode}'",
                 Type = ErrorType.Validation
             };
             result.AddError(error);
@@ -230,7 +230,7 @@ public class FlightService : IFlightService
         {
             var error = new Error
             {
-                Message = $"Flight with ID {flightId} not found.",
+                Message = $"Flight with ID '{flightId}' not found.",
                 Type = ErrorType.NotFound
             };
             result.AddError(error);
@@ -245,7 +245,7 @@ public class FlightService : IFlightService
         {
             var error = new Error
             {
-                Message = $"Airport with IataCode {iataCode} not found.",
+                Message = $"Airport with IataCode '{iataCode}' not found.",
                 Type = ErrorType.Validation
             };
             result.AddError(error);
@@ -260,7 +260,7 @@ public class FlightService : IFlightService
         {
             var error = new Error
             {
-                Message = $"Aircraft with TailNumber {tailNumber} not found.",
+                Message = $"Aircraft with TailNumber '{tailNumber}' not found.",
                 Type = ErrorType.Validation
             };
             result.AddError(error);
@@ -275,7 +275,7 @@ public class FlightService : IFlightService
         {
             var error = new Error
             {
-                Message = $"Flight with ID {flightId} cannot be deleted because it has associated schedules.",
+                Message = $"Flight with ID '{flightId}' cannot be deleted because it has associated schedules.",
                 Type = ErrorType.Validation
             };
             result.AddError(error);

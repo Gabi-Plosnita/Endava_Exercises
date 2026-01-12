@@ -43,7 +43,7 @@ public class FlightRepository : EfRepositoryBase<Flight, FlightDb, int>, IFlight
         return _mapper.Map<Flight>(flightDb);
     }
 
-    public async Task<Flight> GetByAirlineIdAndFlightNumberAsync(
+    public async Task<Flight?> GetByAirlineIdAndFlightNumberAsync(
         int airlineId, string flightNumber, CancellationToken cancellationToken)
     {
         var flightDb = await _context.Flights
