@@ -28,6 +28,7 @@ public class AircraftService : IAircraftService
 
         var getAircraftDto = await _unitOfWork.Aircrafts.GetDtoByIdAsync(id, cancellationToken);
         var found = getAircraftDto != null;
+
         if (!found)
         {
             result.AddError(new Error

@@ -37,7 +37,6 @@ public class TicketService : ITicketService
                 Message = $"Ticket with ID '{ticketId}' not found.",
                 Type = ErrorType.NotFound
             });
-            return result;
         }
 
         LogGetById(ticketId, found);
@@ -61,7 +60,7 @@ public class TicketService : ITicketService
         var getTicketDtos = await _unitOfWork.Tickets.GetByFlightScheduleIdAsync(flightScheduleId, cancellationToken);
         result.Value = getTicketDtos;
 
-        LogGetByFlightScheduleIdSuccess(flightScheduleId, getTicketDtos?.Count ?? 0);
+        LogGetByFlightScheduleIdSuccess(flightScheduleId, getTicketDtos.Count);
         return result;
     }
 
