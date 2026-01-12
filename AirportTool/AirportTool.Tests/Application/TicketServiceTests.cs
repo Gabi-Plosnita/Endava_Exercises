@@ -353,7 +353,7 @@ public class TicketService_Tests
         result.IsFailure.Should().BeTrue();
         result.Errors.Should().ContainSingle(e =>
             e.Type == ErrorType.NotFound &&
-            e.Message == $"Ticket with ID {ticketId} does not exist.");
+            e.Message == $"Ticket with ID '{ticketId}' does not exist.");
 
         _unitOfWork.Verify(u => u.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Never);
         _ticketRepository.Verify(r => r.UpdateAsync(It.IsAny<Ticket>(), It.IsAny<CancellationToken>()), Times.Never);
