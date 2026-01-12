@@ -6,12 +6,12 @@ namespace AirportTool.WebApi;
 
 [ApiController]
 [Route("api/[controller]")]
-public class SchedulesController : ControllerBase
+public class FlightSchedulesController : ControllerBase
 {
     private readonly IFlightSchedulesService _flightSchedulesService;
     private readonly IResultSeverityResolver _severityResolver;
 
-    public SchedulesController(
+    public FlightSchedulesController(
         IFlightSchedulesService flightSchedulesService,
         IResultSeverityResolver severityResolver)
     {
