@@ -230,10 +230,9 @@ public class BookingService : IBookingService
     {
         if (quantity > seatInventory)
         {
-            var seatWord = seatInventory == 1 ? "seat" : "seats";
             var error = new Error
             {
-                Message = $"Only {seatInventory} {seatWord} available, but {quantity} were requested",
+                Message = $"Only {seatInventory} seats available, but {quantity} were requested",
                 Type = ErrorType.Validation
             };
             result.AddError(error);

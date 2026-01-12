@@ -223,7 +223,7 @@ public class BookingService_Tests
         result.Value.Should().BeNull();
         result.Errors.Should().ContainSingle(e =>
             e.Type == ErrorType.Validation &&
-            e.Message == $"Only {seatInventory} seat available, but {requestedQuantity} were requested");
+            e.Message == $"Only {seatInventory} seats available, but {requestedQuantity} were requested");
 
         _bookingRepository.Verify(r => r.AddAsync(It.IsAny<Booking>(), It.IsAny<CancellationToken>()), Times.Never);
         _ticketRepository.Verify(r => r.UpdateAsync(It.IsAny<Ticket>(), It.IsAny<CancellationToken>()), Times.Never);
