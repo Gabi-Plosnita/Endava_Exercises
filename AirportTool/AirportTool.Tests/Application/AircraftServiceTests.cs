@@ -317,6 +317,7 @@ public class AircraftService_GetByIdAsync_Tests
 
         mappedAircraft.OwnedByAirlineId.Should().Be(airline.AirlineId);
 
+        _mapper.Verify(m => m.Map<Aircraft>(dto), Times.Once);
         _aircraftRepository.Verify(r => r.AddAndSaveAsync(mappedAircraft, _ct), Times.Once);
         _aircraftRepository.Verify(r => r.GetDtoByIdAsync(generatedId, _ct), Times.Once);
     }
@@ -482,6 +483,7 @@ public class AircraftService_GetByIdAsync_Tests
         // Assert
         result.IsSuccessful.Should().BeTrue();
 
+        _mapper.Verify(m => m.Map(dto, existing), Times.Once);
         _unitOfWork.Verify(u => u.SaveChangesAsync(_ct), Times.Once);
     }
 
@@ -525,10 +527,10 @@ public class AircraftService_GetByIdAsync_Tests
 
         // Assert
         result.IsSuccessful.Should().BeTrue();
-        result.Errors.Should().BeEmpty();
 
         existing.OwnedByAirlineId.Should().Be(airline.AirlineId);
 
+        _mapper.Verify(m => m.Map(dto, existing), Times.Once);
         _unitOfWork.Verify(u => u.SaveChangesAsync(_ct), Times.Once);
     }
 
