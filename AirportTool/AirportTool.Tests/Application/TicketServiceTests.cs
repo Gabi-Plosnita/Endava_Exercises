@@ -298,6 +298,7 @@ public class TicketService_Tests
         result.IsSuccessful.Should().BeTrue();
         result.Value.Should().BeSameAs(createdDto);
 
+        _mapper.Verify(m => m.Map<Ticket>(dto), Times.Once);
         _ticketRepository.Verify(r => r.AddAndSaveAsync(mappedTicket, _ct), Times.Once);
         _ticketRepository.Verify(r => r.GetDtoByIdAsync(generatedId, _ct), Times.Once);
     }
@@ -392,6 +393,7 @@ public class TicketService_Tests
         result.IsSuccessful.Should().BeTrue();
         result.Errors.Should().BeEmpty();
 
+        _mapper.Verify(m => m.Map(dto, existingTicket), Times.Once);
         _ticketRepository.Verify(r => r.UpdateAsync(existingTicket, _ct), Times.Once);
         _unitOfWork.Verify(u => u.SaveChangesAsync(_ct), Times.Once);
     }
