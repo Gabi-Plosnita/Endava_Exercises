@@ -34,7 +34,7 @@ public class FlightSchedulesService : IFlightSchedulesService
         {
             result.AddError(new Error
             {
-                Message = $"FlightSchedule with ID {id} not found.",
+                Message = $"FlightSchedule with ID '{id}' not found.",
                 Type = ErrorType.NotFound
             });
         }
@@ -349,7 +349,7 @@ public class FlightSchedulesService : IFlightSchedulesService
         {
             var error = new Error
             {
-                Message = $"Flight with ID {flightId} does not exist.",
+                Message = $"Flight with ID '{flightId}' does not exist.",
                 Type = ErrorType.Validation
             };
             result.AddError(error);
@@ -364,7 +364,7 @@ public class FlightSchedulesService : IFlightSchedulesService
         {
             var error = new Error
             {
-                Message = $"Gate with Code {gateCode} not found for airport {airportId}",
+                Message = $"Gate with Code '{gateCode}' not found for airport '{airportId}'",
                 Type = ErrorType.Validation
             };
             result.AddError(error);
@@ -379,7 +379,7 @@ public class FlightSchedulesService : IFlightSchedulesService
         {
             var error = new Error
             {
-                Message = $"Aircraft with Tail {assignedAircraftTail} not found",
+                Message = $"Aircraft with Tail '{assignedAircraftTail}' not found",
                 Type = ErrorType.Validation
             };
             result.AddError(error);
@@ -407,7 +407,7 @@ public class FlightSchedulesService : IFlightSchedulesService
         {
             var error = new Error
             {
-                Message = $"Gate overlap at gate with code {gateCode}. {conflicts.Count} schedule conflict(s) found in the selected time window.",
+                Message = $"Gate overlap at gate with code '{gateCode}'. {conflicts.Count} schedule conflict(s) found in the selected time window.",
                 Type = ErrorType.Validation
             };
             result.AddError(error);
@@ -426,7 +426,7 @@ public class FlightSchedulesService : IFlightSchedulesService
         {
             var error = new Error
             {
-                Message = $"FlightSchedule with ID {flightScheduleId} does not exist.",
+                Message = $"FlightSchedule with ID '{flightScheduleId}' does not exist.",
                 Type = ErrorType.Unexpected
             };
             result.AddError(error);
