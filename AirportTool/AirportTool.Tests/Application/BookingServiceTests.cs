@@ -131,6 +131,8 @@ public class BookingService_Tests
 
         var expectedTotal = (basePrice + taxes) * quantity;
         result.Value!.TotalPrice.Should().Be(expectedTotal);
+
+        _mapper.Verify(m => m.Map<GetBookingDto>(booking), Times.Once);
     }
 
     #endregion
@@ -422,6 +424,8 @@ public class BookingService_Tests
         var expectedTotal = (basePrice + taxes) * quantity;
         result.Value!.TotalPrice.Should().Be(expectedTotal);
 
+        _mapper.Verify(m => m.Map<Booking>(dto), Times.Once);
+        _mapper.Verify(m => m.Map<GetBookingDto>(createdBooking), Times.Once);
         _bookingRepository.Verify(r => r.AddAsync(mappedBooking, _ct), Times.Once);
         _ticketRepository.Verify(r => r.UpdateAsync(ticket, _ct), Times.Once);
         _unitOfWork.Verify(u => u.SaveChangesAsync(_ct), Times.Once);
