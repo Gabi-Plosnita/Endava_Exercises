@@ -4,7 +4,7 @@ namespace AirportTool.Application;
 
 public class CreateBookingDto
 {
-    [Range(1, long.MaxValue, ErrorMessage = "TicketId must be a positive value.")]
+    [Range(typeof(long), "1", "9223372036854775807", ErrorMessage = "TicketId must be a positive value.")]
     public long TicketId { get; set; }
 
     [Required(ErrorMessage = "PassengerFullName is required.")]
