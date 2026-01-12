@@ -8,7 +8,7 @@ using Moq;
 
 namespace AirportTool.Tests.Application.Services;
 
-public class AircraftService_GetByIdAsync_Tests
+public class AircraftServiceTests
 {
     private readonly Mock<IUnitOfWork> _unitOfWork;
     private readonly Mock<IAircraftRepository> _aircraftRepository;
@@ -20,7 +20,7 @@ public class AircraftService_GetByIdAsync_Tests
     private readonly CancellationToken _ct = CancellationToken.None;
     private readonly Fixture _fixture = new();
 
-    public AircraftService_GetByIdAsync_Tests()
+    public AircraftServiceTests()
     {
         _unitOfWork = new Mock<IUnitOfWork>(MockBehavior.Strict);
         _aircraftRepository = new Mock<IAircraftRepository>(MockBehavior.Strict);

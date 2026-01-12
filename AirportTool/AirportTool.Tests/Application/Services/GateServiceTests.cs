@@ -8,7 +8,7 @@ using Moq;
 
 namespace AirportTool.Tests.Application.Services;
 
-public class GateService_Tests
+public class GateServiceTests
 {
     private readonly Mock<IUnitOfWork> _unitOfWork;
     private readonly Mock<IGateRepository> _gateRepository;
@@ -21,7 +21,7 @@ public class GateService_Tests
     private readonly CancellationToken _ct = CancellationToken.None;
     private readonly Fixture _fixture = new();
 
-    public GateService_Tests()
+    public GateServiceTests()
     {
         _unitOfWork = new Mock<IUnitOfWork>(MockBehavior.Strict);
         _gateRepository = new Mock<IGateRepository>(MockBehavior.Strict);

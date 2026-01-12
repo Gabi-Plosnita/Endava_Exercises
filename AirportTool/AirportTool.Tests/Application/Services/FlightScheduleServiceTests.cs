@@ -8,7 +8,7 @@ using Moq;
 
 namespace AirportTool.Tests.Application.Services;
 
-public class FlightSchedulesService_Tests
+public class FlightSchedulesServiceTests
 {
     private readonly Mock<IUnitOfWork> _unitOfWork;
     private readonly Mock<IFlightScheduleRepository> _flightScheduleRepository;
@@ -23,7 +23,7 @@ public class FlightSchedulesService_Tests
     private readonly CancellationToken _ct = CancellationToken.None;
     private readonly Fixture _fixture;
 
-    public FlightSchedulesService_Tests()
+    public FlightSchedulesServiceTests()
     {
         _unitOfWork = new Mock<IUnitOfWork>(MockBehavior.Strict);
         _flightScheduleRepository = new Mock<IFlightScheduleRepository>(MockBehavior.Strict);

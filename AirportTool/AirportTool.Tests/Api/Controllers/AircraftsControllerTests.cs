@@ -7,9 +7,9 @@ using Microsoft.AspNetCore.Mvc;
 using Moq;
 using System.Net;
 
-namespace AirportTool.Tests.WebApi;
+namespace AirportTool.Tests.Api.Controllers;
 
-public class AircraftsController_Tests
+public class AircraftsControllerTests
 {
     private readonly Mock<IAircraftService> _aircraftService;
     private readonly Mock<IResultSeverityResolver> _severityResolver;
@@ -18,7 +18,7 @@ public class AircraftsController_Tests
     private readonly CancellationToken _ct = CancellationToken.None;
     private readonly Fixture _fixture = new();
 
-    public AircraftsController_Tests()
+    public AircraftsControllerTests()
     {
         _aircraftService = new Mock<IAircraftService>(MockBehavior.Strict);
         _severityResolver = new Mock<IResultSeverityResolver>(MockBehavior.Strict);
