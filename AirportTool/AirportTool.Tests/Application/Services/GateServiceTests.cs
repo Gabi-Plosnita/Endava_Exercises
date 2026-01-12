@@ -6,7 +6,7 @@ using AwesomeAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
 
-namespace AirportTool.Tests.Application;
+namespace AirportTool.Tests.Application.Services;
 
 public class GateService_Tests
 {
