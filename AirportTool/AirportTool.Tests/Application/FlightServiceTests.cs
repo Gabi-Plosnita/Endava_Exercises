@@ -406,6 +406,7 @@ public class FlightService_Tests
         mappedFlight.DestinationAirportId.Should().Be(destinationAirport.AirportId);
         mappedFlight.DefaultAircraftId.Should().Be(defaultAircraft.AircraftId);
 
+        _mapper.Verify(m => m.Map<Flight>(dto), Times.Once);
         _flightRepository.Verify(r => r.AddAndSaveAsync(mappedFlight, _ct), Times.Once);
         _flightRepository.Verify(r => r.GetDtoByIdAsync(generatedId, _ct), Times.Once);
     }
@@ -712,6 +713,7 @@ public class FlightService_Tests
         // Assert
         result.IsSuccessful.Should().BeTrue();
 
+        _mapper.Verify(m => m.Map(dto, existingFlight), Times.Once);
         _unitOfWork.Verify(u => u.SaveChangesAsync(_ct), Times.Once);
     }
 
@@ -774,6 +776,7 @@ public class FlightService_Tests
         existingFlight.DestinationAirportId.Should().Be(destinationAirport.AirportId);
         existingFlight.DefaultAircraftId.Should().Be(aircraft.AircraftId);
 
+        _mapper.Verify(m => m.Map(dto, existingFlight), Times.Once);
         _unitOfWork.Verify(u => u.SaveChangesAsync(_ct), Times.Once);
     }
 
