@@ -34,7 +34,7 @@ public class TicketService : ITicketService
         {
             result.AddError(new Error
             {
-                Message = $"Ticket with ID {ticketId} not found.",
+                Message = $"Ticket with ID '{ticketId}' not found.",
                 Type = ErrorType.NotFound
             });
             return result;
@@ -171,7 +171,7 @@ public class TicketService : ITicketService
         {
             var error = new Error
             {
-                Message = $"Flight schedule with ID {flightScheduleId} does not exist.",
+                Message = $"Flight schedule with ID '{flightScheduleId}' does not exist.",
                 Type = ErrorType.NotFound
             };
             result.AddError(error);
