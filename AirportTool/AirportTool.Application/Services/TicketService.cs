@@ -185,7 +185,7 @@ public class TicketService : ITicketService
         {
             var error = new Error
             {
-                Message = $"Ticket with ID {ticketId} does not exist.",
+                Message = $"Ticket with ID '{ticketId}' does not exist.",
                 Type = ErrorType.NotFound
             };
             result.AddError(error);
@@ -200,7 +200,7 @@ public class TicketService : ITicketService
         {
             var error = new Error
             {
-                Message = $"Ticket with ID {ticketId} has associated bookings and cannot be deleted.",
+                Message = $"Ticket with ID '{ticketId}' has associated bookings and cannot be deleted.",
                 Type = ErrorType.Validation
             };
             result.AddError(error);
