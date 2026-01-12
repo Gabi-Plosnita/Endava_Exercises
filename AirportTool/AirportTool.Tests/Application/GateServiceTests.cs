@@ -258,6 +258,7 @@ public class GateService_Tests
 
         mappedGate.AirportId.Should().Be(airport.AirportId);
 
+        _mapper.Verify(m => m.Map<Gate>(dto), Times.Once);
         _gateRepository.Verify(r => r.AddAndSaveAsync(mappedGate, _ct), Times.Once);
         _gateRepository.Verify(r => r.GetDtoByIdAsync(generatedGateId, _ct), Times.Once);
     }
@@ -389,6 +390,7 @@ public class GateService_Tests
         result.IsSuccessful.Should().BeTrue();
         result.Errors.Should().BeEmpty();
 
+        _mapper.Verify(m => m.Map(dto, existingGate), Times.Once);
         _unitOfWork.Verify(u => u.SaveChangesAsync(_ct), Times.Once);
     }
 
@@ -429,6 +431,7 @@ public class GateService_Tests
         result.IsSuccessful.Should().BeTrue();
         result.Errors.Should().BeEmpty();
 
+        _mapper.Verify(m => m.Map(dto, existingGate), Times.Once);
         _unitOfWork.Verify(u => u.SaveChangesAsync(_ct), Times.Once);
     }
 
