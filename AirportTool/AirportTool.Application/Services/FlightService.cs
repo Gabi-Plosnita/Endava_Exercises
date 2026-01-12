@@ -199,7 +199,7 @@ public class FlightService : IFlightService
         {
             var error = new Error
             {
-                Message = $"Airline with IataCode {iataCode} not found.",
+                Message = $"Airline with IataCode '{iataCode}' not found.",
                 Type = ErrorType.Validation
             };
             result.AddError(error);
