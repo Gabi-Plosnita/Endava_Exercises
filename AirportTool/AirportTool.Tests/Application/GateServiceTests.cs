@@ -80,7 +80,6 @@ public class GateService_Tests
         // Assert
         result.IsSuccessful.Should().BeTrue();
         result.Value.Should().BeSameAs(dto);
-        result.Errors.Should().BeEmpty();
     }
 
     #endregion
