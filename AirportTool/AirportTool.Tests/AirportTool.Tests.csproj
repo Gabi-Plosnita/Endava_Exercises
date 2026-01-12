@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
@@ -23,6 +23,7 @@
     <ProjectReference Include="..\AirportTool.Application\AirportTool.Application.csproj" />
     <ProjectReference Include="..\AirportTool.Domain\AirportTool.Domain.csproj" />
     <ProjectReference Include="..\AirportTool.Infrastructure\AirportTool.Infrastructure.csproj" />
+    <ProjectReference Include="..\AirportTool.WebApi\AirportTool.WebApi.csproj" />
   </ItemGroup>
 
   <ItemGroup>
