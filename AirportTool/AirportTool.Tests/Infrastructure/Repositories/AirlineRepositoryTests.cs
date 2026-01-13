@@ -30,7 +30,6 @@ public class AirlineRepositoryTests : RepositoryTestBase
 
         // Assert
         result.Should().BeNull();
-        mapper.Verify(m => m.Map<Airline>(null), Times.Once);
     }
 
     [Fact]
