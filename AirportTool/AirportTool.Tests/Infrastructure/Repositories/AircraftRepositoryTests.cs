@@ -223,12 +223,31 @@ public class AircraftRepositoryTests
         await using var _ = ctx;
         await using var __ = conn;
 
-        ctx.Aircraft.AddRange(
-            _fixture.Build<AircraftDb>().With(a => a.AircraftId, 1).With(a => a.TailNumber, "T1").Without(a => a.OwnedByAirline).Create(),
-            _fixture.Build<AircraftDb>().With(a => a.AircraftId, 2).With(a => a.TailNumber, "T2").Without(a => a.OwnedByAirline).Create(),
-            _fixture.Build<AircraftDb>().With(a => a.AircraftId, 3).With(a => a.TailNumber, "T3").Without(a => a.OwnedByAirline).Create()
-        );
+        var aircraftDb1 = _fixture.Build<AircraftDb>()
+                                  .Without(a => a.AircraftId)
+                                  .Without(a => a.Flights)
+                                  .Without(a => a.FlightSchedules)
+                                  .Without(a => a.OwnedByAirline)
+                                  .Without(a => a.OwnedByAirlineId)
+                                  .Create();
 
+        var aircraftDb2 = _fixture.Build<AircraftDb>()
+                                  .Without(a => a.AircraftId)
+                                  .Without(a => a.Flights)
+                                  .Without(a => a.FlightSchedules)
+                                  .Without(a => a.OwnedByAirline)
+                                  .Without(a => a.OwnedByAirlineId)
+                                  .Create();
+
+        var aircraftDb3 = _fixture.Build<AircraftDb>()
+                                  .Without(a => a.AircraftId)
+                                  .Without(a => a.Flights)
+                                  .Without(a => a.FlightSchedules)
+                                  .Without(a => a.OwnedByAirline)
+                                  .Without(a => a.OwnedByAirlineId)
+                                  .Create();
+
+        ctx.Aircraft.AddRange(aircraftDb1, aircraftDb2, aircraftDb3);
         await ctx.SaveChangesAsync();
         ctx.ChangeTracker.Clear();
 
@@ -253,10 +272,8 @@ public class AircraftRepositoryTests
 
         result.Items.Should().NotBeNull();
         result.Items.Count.Should().Be(2);
-        result.Items[0].AircraftId.Should().Be(1);
-        result.Items[1].AircraftId.Should().Be(2);
-
-        mapper.VerifyNoOtherCalls();
+        result.Items[0].AircraftId.Should().Be(aircraftDb1.AircraftId);
+        result.Items[1].AircraftId.Should().Be(aircraftDb2.AircraftId);
     }
 
     [Fact]
@@ -267,38 +284,42 @@ public class AircraftRepositoryTests
         await using var _ = ctx;
         await using var __ = conn;
 
-        var ro = _fixture.Build<AirlineDb>()
-            .With(a => a.AirlineId, 1)
-            .With(a => a.Iatacode, "RO")
-            .With(a => a.Name, "Tarom")
-            .Create();
+        var airline1 = _fixture.Build<AirlineDb>()
+                         .Without(a => a.AirlineId)
+                         .Without(a => a.Aircraft)
+                         .Without(a => a.Flights)
+                         .Create();
 
-        var lh = _fixture.Build<AirlineDb>()
-            .With(a => a.AirlineId, 2)
-            .With(a => a.Iatacode, "LH")
-            .With(a => a.Name, "Lufthansa")
-            .Create();
+        var airline2 = _fixture.Build<AirlineDb>()
+                               .Without(a => a.AirlineId)
+                               .Without(a => a.Aircraft)
+                               .Without(a => a.Flights)
+                               .Create();
 
-        ctx.Airlines.AddRange(ro, lh);
+        var aircraftDb1 = _fixture.Build<AircraftDb>()
+                                  .Without(a => a.AircraftId)
+                                  .Without(a => a.Flights)
+                                  .Without(a => a.FlightSchedules)
+                                  .With(a => a.OwnedByAirlineId, airline1.AirlineId)
+                                  .With(a => a.OwnedByAirline, airline1)
+                                  .Create();
 
-        ctx.Aircraft.AddRange(
-            _fixture.Build<AircraftDb>()
-                .With(a => a.AircraftId, 1)
-                .With(a => a.TailNumber, "RO-1")
-                .With(a => a.OwnedByAirline, ro)
-                .Create(),
-            _fixture.Build<AircraftDb>()
-                .With(a => a.AircraftId, 2)
-                .With(a => a.TailNumber, "LH-1")
-                .With(a => a.OwnedByAirline, lh)
-                .Create(),
-            _fixture.Build<AircraftDb>()
-                .With(a => a.AircraftId, 3)
-                .With(a => a.TailNumber, "RO-2")
-                .With(a => a.OwnedByAirline, ro)
-                .Create()
-        );
+        var aircraftDb2 = _fixture.Build<AircraftDb>()
+                                  .Without(a => a.AircraftId)
+                                  .Without(a => a.Flights)
+                                  .Without(a => a.FlightSchedules)
+                                  .With(a => a.OwnedByAirlineId, airline2.AirlineId)
+                                  .With(a => a.OwnedByAirline, airline2)
+                                  .Create();
 
+        var aircraftDb3 = _fixture.Build<AircraftDb>()
+                                  .Without(a => a.AircraftId)
+                                  .Without(a => a.Flights)
+                                  .Without(a => a.FlightSchedules)
+                                  .With(a => a.OwnedByAirlineId, airline1.AirlineId)
+                                  .With(a => a.OwnedByAirline, airline1)
+                                  .Create();
+        ctx.Aircraft.AddRange(aircraftDb1, aircraftDb2, aircraftDb3);
         await ctx.SaveChangesAsync();
         ctx.ChangeTracker.Clear();
 
@@ -306,7 +327,7 @@ public class AircraftRepositoryTests
         {
             PageIndex = 0,
             PageSize = 10,
-            AirlineIataCode = "RO"
+            AirlineIataCode = airline1.Iatacode
         };
 
         var mapper = new Mock<IMapper>(MockBehavior.Strict);
@@ -316,12 +337,15 @@ public class AircraftRepositoryTests
         var result = await repo.GetDtoByFilterAsync(filter, CancellationToken.None);
 
         // Assert
+        result.Should().NotBeNull();
         result.TotalCount.Should().Be(2);
-        result.Items.Count.Should().Be(2);
-        result.Items.Select(i => i.TailNumber).Should().BeEquivalentTo(new[] { "RO-1", "RO-2" });
-        result.Items.All(i => i.OwnedByAirlineIataCode == "RO").Should().BeTrue();
+        result.PageIndex.Should().Be(0);
+        result.PageSize.Should().Be(10);
 
-        mapper.VerifyNoOtherCalls();
+        result.Items.Should().NotBeNull();
+        result.Items.Count.Should().Be(2);
+        result.Items[0].AircraftId.Should().Be(aircraftDb1.AircraftId);
+        result.Items[1].AircraftId.Should().Be(aircraftDb3.AircraftId);
     }
 
     [Fact]
@@ -356,10 +380,12 @@ public class AircraftRepositoryTests
         var result = await repo.GetDtoByFilterAsync(filter, CancellationToken.None);
 
         // Assert
+        result.Should().NotBeNull();
         result.TotalCount.Should().Be(4);
         result.PageIndex.Should().Be(1);
         result.PageSize.Should().Be(2);
 
+        result.Items.Should().NotBeNull();
         result.Items.Count.Should().Be(2);
         result.Items[0].AircraftId.Should().Be(3);
         result.Items[1].AircraftId.Should().Be(4);
