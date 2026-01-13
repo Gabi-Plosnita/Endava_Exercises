@@ -4,44 +4,13 @@ using AirportTool.Infrastructure;
 using AutoFixture;
 using AutoMapper;
 using AwesomeAssertions;
-using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Moq;
 
 namespace AirportTool.Tests.Infrastructure.Repositories;
 
-public class AircraftRepositoryTests
+public class AircraftRepositoryTests : RepositoryTestBase
 {
-    private readonly Fixture _fixture;
-
-    public AircraftRepositoryTests()
-    {
-        _fixture = new Fixture();
-
-        _fixture.Behaviors.OfType<ThrowingRecursionBehavior>()
-            .ToList()
-            .ForEach(b => _fixture.Behaviors.Remove(b));
-
-        _fixture.Behaviors.Add(new OmitOnRecursionBehavior());
-    }
-
-    private static (AirportDbContext ctx, SqliteConnection conn) CreateSqliteInMemoryContext()
-    {
-        var conn = new SqliteConnection("DataSource=:memory:");
-        conn.Open();
-
-        var options = new DbContextOptionsBuilder<AirportDbContext>()
-            .UseSqlite(conn)
-            .EnableSensitiveDataLogging()
-            .Options;
-
-        var ctx = new AirportDbContext(options);
-
-        ctx.Database.OpenConnection();
-        ctx.Database.EnsureCreated();
-
-        return (ctx, conn);
-    }
 
     #region GetByTailNumberAsync
 

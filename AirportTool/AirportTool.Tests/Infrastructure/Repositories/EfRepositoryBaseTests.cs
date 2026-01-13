@@ -210,11 +210,3 @@ public class EfRepositoryBaseTests
 
     #endregion
 }
-
-internal sealed class TestGateRepository : EfRepositoryBase<Gate, GateDb, int>
-{
-    public TestGateRepository(AirportDbContext context, IMapper mapper)
-        : base(context, mapper)
-    {
-    }
-}
