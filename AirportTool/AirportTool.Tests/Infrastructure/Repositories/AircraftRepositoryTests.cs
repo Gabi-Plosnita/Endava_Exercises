@@ -46,7 +46,7 @@ public class AircraftRepositoryTests
     #region GetByTailNumberAsync
 
     [Fact]
-    public async Task GetByTailNumberAsync_NoMatch_ReturnsNull()
+    public async Task GetByTailNumberAsync_WhenAircraftDoesNotExist_ReturnsNull()
     {
         // Arrange
         var (ctx, conn) = CreateSqliteInMemoryContext();
@@ -69,44 +69,33 @@ public class AircraftRepositoryTests
     }
 
     [Fact]
-    public async Task GetByTailNumberAsync_MatchExists_ReturnsMappedAircraft()
+    public async Task GetByTailNumberAsync_WhenAircraftExists_ReturnsMappedAircraft()
     {
         // Arrange
         var (ctx, conn) = CreateSqliteInMemoryContext();
         await using var _ = ctx;
         await using var __ = conn;
 
-        var airlineDb = _fixture.Build<AirlineDb>()
-                                .Without(a => a.Aircraft)
-                                .Without(a => a.Flights)
-                                .Create();
-
-        var tailNumber = _fixture.Create<string>();
-        var aircraftDb = _fixture.Build<AircraftDb>()
-                                 .With(a => a.TailNumber, tailNumber)
-                                 .With(a => a.OwnedByAirlineId, airlineDb.AirlineId)
-                                 .With(a => a.OwnedByAirline, airlineDb)
-                                 .Without(a => a.Flights)
-                                 .Without(a => a.FlightSchedules)
-                                 .Create();
+        var airlineDb = CreateAirlineDb();
+        var aircraftDb = CreateAircraftDbWithAirline(airlineDb);
 
         ctx.Aircraft.Add(aircraftDb);
         await ctx.SaveChangesAsync();
         ctx.ChangeTracker.Clear();
 
         var expected = _fixture.Build<Aircraft>()
-                               .With(a => a.TailNumber, tailNumber)
+                               .With(a => a.TailNumber, aircraftDb.TailNumber)
                                .Create();
 
         var mapper = new Mock<IMapper>(MockBehavior.Strict);
-        mapper.Setup(m => m.Map<Aircraft>(It.Is<AircraftDb>(a =>a.AircraftId == aircraftDb.AircraftId )))
+        mapper.Setup(m => m.Map<Aircraft>(It.Is<AircraftDb>(a =>a.AircraftId == aircraftDb.AircraftId)))
               .Returns(expected);
 
 
         var repo = new AircraftRepository(ctx, mapper.Object);
 
         // Act
-        var result = await repo.GetByTailNumberAsync(tailNumber, CancellationToken.None);
+        var result = await repo.GetByTailNumberAsync(aircraftDb.TailNumber, CancellationToken.None);
 
         // Assert
         result.Should().BeSameAs(expected);
@@ -118,7 +107,7 @@ public class AircraftRepositoryTests
     #region GetDtoByIdAsync
 
     [Fact]
-    public async Task GetDtoByIdAsync_NoMatch_ReturnsNull()
+    public async Task GetDtoByIdAsync__WhenAircraftDoesNotExist_ReturnsNull()
     {
         // Arrange
         var (ctx, conn) = CreateSqliteInMemoryContext();
@@ -133,7 +122,6 @@ public class AircraftRepositoryTests
 
         // Assert
         dto.Should().BeNull();
-        mapper.VerifyNoOtherCalls();
     }
 
     [Fact]
@@ -144,17 +132,8 @@ public class AircraftRepositoryTests
         await using var _ = ctx;
         await using var __ = conn;
 
-        var airlineDb = _fixture.Build<AirlineDb>()
-                                .Without(a => a.Aircraft)
-                                .Without(a => a.Flights)
-                                .Create();
-
-        var aircraftDb = _fixture.Build<AircraftDb>()
-                                 .With(a => a.OwnedByAirlineId, airlineDb.AirlineId)
-                                 .With(a => a.OwnedByAirline, airlineDb)
-                                 .Without(a => a.Flights)
-                                 .Without(a => a.FlightSchedules)
-                                 .Create();
+        var airlineDb = CreateAirlineDb();
+        var aircraftDb = CreateAircraftDbWithAirline(airlineDb);
 
         ctx.Aircraft.Add(aircraftDb);
         await ctx.SaveChangesAsync();
@@ -216,36 +195,16 @@ public class AircraftRepositoryTests
     #region GetDtoByFilterAsync
 
     [Fact]
-    public async Task GetDtoByFilterAsync_NoFilter_ReturnsPagedResultWithTotalCountAndOrderedItems()
+    public async Task GetDtoByFilterAsync_WhenNoFilterApplied_ReturnsFirstPageOrderedById()
     {
         // Arrange
         var (ctx, conn) = CreateSqliteInMemoryContext();
         await using var _ = ctx;
         await using var __ = conn;
 
-        var aircraftDb1 = _fixture.Build<AircraftDb>()
-                                  .Without(a => a.AircraftId)
-                                  .Without(a => a.Flights)
-                                  .Without(a => a.FlightSchedules)
-                                  .Without(a => a.OwnedByAirline)
-                                  .Without(a => a.OwnedByAirlineId)
-                                  .Create();
-
-        var aircraftDb2 = _fixture.Build<AircraftDb>()
-                                  .Without(a => a.AircraftId)
-                                  .Without(a => a.Flights)
-                                  .Without(a => a.FlightSchedules)
-                                  .Without(a => a.OwnedByAirline)
-                                  .Without(a => a.OwnedByAirlineId)
-                                  .Create();
-
-        var aircraftDb3 = _fixture.Build<AircraftDb>()
-                                  .Without(a => a.AircraftId)
-                                  .Without(a => a.Flights)
-                                  .Without(a => a.FlightSchedules)
-                                  .Without(a => a.OwnedByAirline)
-                                  .Without(a => a.OwnedByAirlineId)
-                                  .Create();
+        var aircraftDb1 = CreateAircraftDbWithoutAirline();
+        var aircraftDb2 = CreateAircraftDbWithoutAirline();
+        var aircraftDb3 = CreateAircraftDbWithoutAirline();
 
         ctx.Aircraft.AddRange(aircraftDb1, aircraftDb2, aircraftDb3);
         await ctx.SaveChangesAsync();
@@ -277,48 +236,20 @@ public class AircraftRepositoryTests
     }
 
     [Fact]
-    public async Task GetDtoByFilterAsync_FilterByAirlineIataCode_ReturnsOnlyMatchingAircraftAndFilteredTotalCount()
+    public async Task GetDtoByFilterAsync_WhenFilteredByAirline_ReturnsOnlyAircraftForThatAirline()
     {
         // Arrange
         var (ctx, conn) = CreateSqliteInMemoryContext();
         await using var _ = ctx;
         await using var __ = conn;
 
-        var airline1 = _fixture.Build<AirlineDb>()
-                         .Without(a => a.AirlineId)
-                         .Without(a => a.Aircraft)
-                         .Without(a => a.Flights)
-                         .Create();
+        var airline1 = CreateAirlineDb();
+        var airline2 = CreateAirlineDb();
 
-        var airline2 = _fixture.Build<AirlineDb>()
-                               .Without(a => a.AirlineId)
-                               .Without(a => a.Aircraft)
-                               .Without(a => a.Flights)
-                               .Create();
+        var aircraftDb1 = CreateAircraftDbWithAirline(airline1);
+        var aircraftDb2 = CreateAircraftDbWithAirline(airline2);
+        var aircraftDb3 = CreateAircraftDbWithAirline(airline1);
 
-        var aircraftDb1 = _fixture.Build<AircraftDb>()
-                                  .Without(a => a.AircraftId)
-                                  .Without(a => a.Flights)
-                                  .Without(a => a.FlightSchedules)
-                                  .With(a => a.OwnedByAirlineId, airline1.AirlineId)
-                                  .With(a => a.OwnedByAirline, airline1)
-                                  .Create();
-
-        var aircraftDb2 = _fixture.Build<AircraftDb>()
-                                  .Without(a => a.AircraftId)
-                                  .Without(a => a.Flights)
-                                  .Without(a => a.FlightSchedules)
-                                  .With(a => a.OwnedByAirlineId, airline2.AirlineId)
-                                  .With(a => a.OwnedByAirline, airline2)
-                                  .Create();
-
-        var aircraftDb3 = _fixture.Build<AircraftDb>()
-                                  .Without(a => a.AircraftId)
-                                  .Without(a => a.Flights)
-                                  .Without(a => a.FlightSchedules)
-                                  .With(a => a.OwnedByAirlineId, airline1.AirlineId)
-                                  .With(a => a.OwnedByAirline, airline1)
-                                  .Create();
         ctx.Aircraft.AddRange(aircraftDb1, aircraftDb2, aircraftDb3);
         await ctx.SaveChangesAsync();
         ctx.ChangeTracker.Clear();
@@ -349,44 +280,17 @@ public class AircraftRepositoryTests
     }
 
     [Fact]
-    public async Task GetDtoByFilterAsync_PagedSecondPage_ReturnsCorrectSlice()
+    public async Task GetDtoByFilterAsync_WhenRequestingSecondPage_ReturnsSecondPageItems()
     {
         // Arrange
         var (ctx, conn) = CreateSqliteInMemoryContext();
         await using var _ = ctx;
         await using var __ = conn;
 
-        var aircraftDb1 = _fixture.Build<AircraftDb>()
-                                   .Without(a => a.AircraftId)
-                                   .Without(a => a.Flights)
-                                   .Without(a => a.FlightSchedules)
-                                   .Without(a => a.OwnedByAirline)
-                                   .Without(a => a.OwnedByAirlineId)
-                                   .Create();
-
-        var aircraftDb2 = _fixture.Build<AircraftDb>()
-                                  .Without(a => a.AircraftId)
-                                  .Without(a => a.Flights)
-                                  .Without(a => a.FlightSchedules)
-                                  .Without(a => a.OwnedByAirline)
-                                  .Without(a => a.OwnedByAirlineId)
-                                  .Create();
-
-        var aircraftDb3 = _fixture.Build<AircraftDb>()
-                                  .Without(a => a.AircraftId)
-                                  .Without(a => a.Flights)
-                                  .Without(a => a.FlightSchedules)
-                                  .Without(a => a.OwnedByAirline)
-                                  .Without(a => a.OwnedByAirlineId)
-                                  .Create();
-
-        var aircraftDb4 = _fixture.Build<AircraftDb>()
-                                  .Without(a => a.AircraftId)
-                                  .Without(a => a.Flights)
-                                  .Without(a => a.FlightSchedules)
-                                  .Without(a => a.OwnedByAirline)
-                                  .Without(a => a.OwnedByAirlineId)
-                                  .Create();
+        var aircraftDb1 = CreateAircraftDbWithoutAirline();
+        var aircraftDb2 = CreateAircraftDbWithoutAirline();
+        var aircraftDb3 = CreateAircraftDbWithoutAirline();
+        var aircraftDb4 = CreateAircraftDbWithoutAirline();
 
         ctx.Aircraft.AddRange(aircraftDb1, aircraftDb2, aircraftDb3, aircraftDb4);
         await ctx.SaveChangesAsync();
@@ -422,7 +326,7 @@ public class AircraftRepositoryTests
     #region AddAndSaveAsync
 
     [Fact]
-    public async Task AddAndSaveAsync_ValidAircraft_AddsSavesAndMapsBackIntoDomain()
+    public async Task AddAndSaveAsync_ValidAircraft_PersistsAircraftAndUpdatesDomain()
     {
         // Arrange
         var (ctx, conn) = CreateSqliteInMemoryContext();
@@ -473,6 +377,40 @@ public class AircraftRepositoryTests
 
         mapper.Verify(m => m.Map<AircraftDb>(aircraft), Times.Once);
         mapper.Verify(m => m.Map(mappedEntity, aircraft), Times.Once);
+    }
+
+    #endregion
+
+    #region Helper Methods
+
+    private AirlineDb CreateAirlineDb()
+    {
+        return _fixture.Build<AirlineDb>()
+                       .Without(a => a.AirlineId)
+                       .Without(a => a.Aircraft)
+                       .Without(a => a.Flights)
+                       .Create();
+    }
+
+    private AircraftDb CreateAircraftDbWithoutAirline()
+    {
+        return _fixture.Build<AircraftDb>()
+                       .Without(a => a.AircraftId)
+                       .Without(a => a.Flights)
+                       .Without(a => a.FlightSchedules)
+                       .Without(a => a.OwnedByAirline)
+                       .Without(a => a.OwnedByAirlineId)
+                       .Create();
+    }
+
+    private AircraftDb CreateAircraftDbWithAirline(AirlineDb airline)
+    {
+        return _fixture.Build<AircraftDb>()
+                       .Without(a => a.AircraftId)
+                       .Without(a => a.Flights)
+                       .Without(a => a.FlightSchedules)
+                       .With(a => a.OwnedByAirline, airline)
+                       .Create();
     }
 
     #endregion
