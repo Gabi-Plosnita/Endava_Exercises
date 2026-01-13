@@ -384,15 +384,15 @@ public class AircraftRepositoryTests
                                .Create();
 
         var mappedEntity = _fixture.Build<AircraftDb>()
-            .With(a => a.TailNumber, aircraft.TailNumber)
-            .With(a => a.Model, aircraft.Model)
-            .With(a => a.SeatCapacity, aircraft.SeatCapacity)
-            .Without(a => a.AircraftId)
-            .Without(a => a.OwnedByAirlineId)
-            .Without(a => a.OwnedByAirline)
-            .Without(a => a.Flights)
-            .Without(a => a.FlightSchedules)
-            .Create();
+                                   .With(a => a.TailNumber, aircraft.TailNumber)
+                                   .With(a => a.Model, aircraft.Model)
+                                   .With(a => a.SeatCapacity, aircraft.SeatCapacity)
+                                   .Without(a => a.AircraftId)
+                                   .Without(a => a.OwnedByAirlineId)
+                                   .Without(a => a.OwnedByAirline)
+                                   .Without(a => a.Flights)
+                                   .Without(a => a.FlightSchedules)
+                                   .Create();
 
         var mapper = new Mock<IMapper>(MockBehavior.Strict);
 
