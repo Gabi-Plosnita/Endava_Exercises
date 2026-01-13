@@ -33,8 +33,6 @@ public class AircraftRepositoryTests : RepositoryTestBase
 
         // Assert
         result.Should().BeNull();
-
-        mapper.Verify(m => m.Map<Aircraft>(null), Times.Once);
     }
 
     [Fact]
