@@ -125,7 +125,7 @@ public class AircraftRepositoryTests
     }
 
     [Fact]
-    public async Task GetDtoByIdAsync_AircraftHasAssociatedAirline_ReturnsDtoWithAirlineFields()
+    public async Task GetDtoByIdAsync_WhenAircraftHasAssociatedAirline_ReturnsDtoWithAirlineFields()
     {
         // Arrange
         var (ctx, conn) = CreateSqliteInMemoryContext();
@@ -156,7 +156,7 @@ public class AircraftRepositoryTests
     }
 
     [Fact]
-    public async Task GetDtoByIdAsync_AircraftHasNoAssociatedAirline_ReturnsDtoWithNullAirlineFields()
+    public async Task GetDtoByIdAsync_WhenAircraftHasNoAssociatedAirline_ReturnsDtoWithNullAirlineFields()
     {
         // Arrange
         var (ctx, conn) = CreateSqliteInMemoryContext();
@@ -326,7 +326,7 @@ public class AircraftRepositoryTests
     #region AddAndSaveAsync
 
     [Fact]
-    public async Task AddAndSaveAsync_ValidAircraft_PersistsAircraftAndUpdatesDomain()
+    public async Task AddAndSaveAsync_WhenValidAircraft_PersistsAircraftAndUpdatesDomain()
     {
         // Arrange
         var (ctx, conn) = CreateSqliteInMemoryContext();

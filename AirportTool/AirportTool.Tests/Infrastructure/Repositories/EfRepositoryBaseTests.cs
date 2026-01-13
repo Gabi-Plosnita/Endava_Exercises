@@ -32,7 +32,7 @@ public class EfRepositoryBaseTests
     #region GetByIdAsync
 
     [Fact]
-    public async Task GetByIdAsync_EntityDoesNotExist_ReturnsNull()
+    public async Task GetByIdAsync_WhenEntityDoesNotExist_ReturnsNull()
     {
         // Arrange
         var (ctx, conn) = CreateSqliteInMemoryContext();
@@ -50,7 +50,7 @@ public class EfRepositoryBaseTests
     }
 
     [Fact]
-    public async Task GetByIdAsync_EntityExists_DetachesEntityAndReturnsMappedDomain()
+    public async Task GetByIdAsync_WhenEntityExists_DetachesEntityAndReturnsMappedDomain()
     {
         // Arrange
         var (ctx, conn) = CreateSqliteInMemoryContext();
@@ -86,7 +86,7 @@ public class EfRepositoryBaseTests
     #region GetAllAsync
 
     [Fact]
-    public async Task GetAllAsync_EntitiesExist_ReturnsMappedList()
+    public async Task GetAllAsync_WhenEntitiesExist_ReturnsMappedList()
     {
         // Arrange
         var (ctx, conn) = CreateSqliteInMemoryContext();
@@ -126,7 +126,7 @@ public class EfRepositoryBaseTests
     #region AddAsync
 
     [Fact]
-    public async Task AddAsync_ValidDomain_AddsEntityWithAddedState()
+    public async Task AddAsync_WhenDomainIsValid_AddsEntityWithAddedState()
     {
         // Arrange
         var (ctx, conn) = CreateSqliteInMemoryContext();
@@ -155,7 +155,7 @@ public class EfRepositoryBaseTests
     #region UpdateAsync
 
     [Fact]
-    public async Task UpdateAsync_ValidDomain_MarksEntityAsModified()
+    public async Task UpdateAsync_WhenDomainIsValid_MarksEntityAsModified()
     {
         // Arrange
         var (ctx, conn) = CreateSqliteInMemoryContext();
@@ -184,7 +184,7 @@ public class EfRepositoryBaseTests
     #region RemoveAsync
 
     [Fact]
-    public async Task RemoveAsync_ValidDomain_MarksEntityAsDeleted()
+    public async Task RemoveAsync_WhenDomainIsValid_MarksEntityAsDeleted()
     {
         // Arrange
         var (ctx, conn) = CreateSqliteInMemoryContext();
