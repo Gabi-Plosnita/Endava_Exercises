@@ -379,7 +379,9 @@ public class AircraftRepositoryTests
         await using var _ = ctx;
         await using var __ = conn;
 
-        var aircraft = _fixture.Create<Aircraft>();
+        var aircraft = _fixture.Build<Aircraft>()
+                               .Without(a => a.OwnedByAirlineId)
+                               .Create();
 
         var mappedEntity = _fixture.Build<AircraftDb>()
             .With(a => a.TailNumber, aircraft.TailNumber)
@@ -398,6 +400,7 @@ public class AircraftRepositoryTests
               .Returns(mappedEntity);
 
         mapper.Setup(m => m.Map(mappedEntity, aircraft))
+              .Returns(aircraft)
               .Callback(() =>
               {
                   aircraft.AircraftId = mappedEntity.AircraftId;
