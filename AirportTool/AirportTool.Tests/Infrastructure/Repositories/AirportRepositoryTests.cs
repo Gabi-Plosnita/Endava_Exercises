@@ -65,17 +65,4 @@ public class AirportRepositoryTests : RepositoryTestBase
     }
 
     #endregion
-
-    #region Helper Methods
-
-    private AirportDb CreateAirportDb()
-    {
-        return _fixture.Build<AirportDb>()
-                       .Without(a => a.AirportId)
-                       .Without(a => a.FlightDestinationAirports)
-                       .Without(a => a.FlightOriginAirports)
-                       .Without(a => a.Gates)
-                       .Create();
-    }
-    #endregion
 }

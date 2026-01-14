@@ -66,17 +66,4 @@ public class AirlineRepositoryTests : RepositoryTestBase
     }
 
     #endregion
-
-    #region Helper Methods
-
-    private AirlineDb CreateAirlineDb()
-    {
-        return _fixture.Build<AirlineDb>()
-            .Without(a => a.AirlineId)
-            .Without(a => a.Aircraft)
-            .Without(a => a.Flights)
-            .Create();
-    }
-
-    #endregion
 }

@@ -43,8 +43,7 @@ public class AircraftRepositoryTests : RepositoryTestBase
         await using var _ = ctx;
         await using var __ = conn;
 
-        var airlineDb = CreateAirlineDb();
-        var aircraftDb = CreateAircraftDbWithAirline(airlineDb);
+        var aircraftDb = CreateAircraftDbWithAirline();
 
         ctx.Aircraft.Add(aircraftDb);
         await ctx.SaveChangesAsync();
@@ -99,8 +98,7 @@ public class AircraftRepositoryTests : RepositoryTestBase
         await using var _ = ctx;
         await using var __ = conn;
 
-        var airlineDb = CreateAirlineDb();
-        var aircraftDb = CreateAircraftDbWithAirline(airlineDb);
+        var aircraftDb = CreateAircraftDbWithAirline();
 
         ctx.Aircraft.Add(aircraftDb);
         await ctx.SaveChangesAsync();
@@ -118,8 +116,8 @@ public class AircraftRepositoryTests : RepositoryTestBase
         dto.TailNumber.Should().Be(aircraftDb.TailNumber);
         dto.Model.Should().Be(aircraftDb.Model);
         dto.SeatCapacity.Should().Be(aircraftDb.SeatCapacity);
-        dto.OwnedByAirlineIataCode.Should().Be(airlineDb.Iatacode);
-        dto.OwnedByAirlineName.Should().Be(airlineDb.Name);
+        dto.OwnedByAirlineIataCode.Should().Be(aircraftDb.OwnedByAirline!.Iatacode);
+        dto.OwnedByAirlineName.Should().Be(aircraftDb.OwnedByAirline.Name);
     }
 
     [Fact]
@@ -344,40 +342,6 @@ public class AircraftRepositoryTests : RepositoryTestBase
 
         mapper.Verify(m => m.Map<AircraftDb>(aircraft), Times.Once);
         mapper.Verify(m => m.Map(mappedEntity, aircraft), Times.Once);
-    }
-
-    #endregion
-
-    #region Helper Methods
-
-    private AirlineDb CreateAirlineDb()
-    {
-        return _fixture.Build<AirlineDb>()
-                       .Without(a => a.AirlineId)
-                       .Without(a => a.Aircraft)
-                       .Without(a => a.Flights)
-                       .Create();
-    }
-
-    private AircraftDb CreateAircraftDbWithoutAirline()
-    {
-        return _fixture.Build<AircraftDb>()
-                       .Without(a => a.AircraftId)
-                       .Without(a => a.Flights)
-                       .Without(a => a.FlightSchedules)
-                       .Without(a => a.OwnedByAirline)
-                       .Without(a => a.OwnedByAirlineId)
-                       .Create();
-    }
-
-    private AircraftDb CreateAircraftDbWithAirline(AirlineDb airline)
-    {
-        return _fixture.Build<AircraftDb>()
-                       .Without(a => a.AircraftId)
-                       .Without(a => a.Flights)
-                       .Without(a => a.FlightSchedules)
-                       .With(a => a.OwnedByAirline, airline)
-                       .Create();
     }
 
     #endregion
