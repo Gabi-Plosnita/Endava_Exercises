@@ -123,6 +123,14 @@ public abstract class RepositoryTestBase
                        .Create();
     }
 
+    protected FlightDb CreateFlightDbWithDefaultAircraft()
+    {
+        var flightDb = CreateFlightDb();
+        var defaultAircraft = CreateAircraftDbWithoutAirline();
+        flightDb.DefaultAircraft = defaultAircraft;
+        return flightDb;
+    }
+
     protected FlightScheduleDb CreateFlightScheduleDb()
     {
         var gateDb = CreateGateDb();
