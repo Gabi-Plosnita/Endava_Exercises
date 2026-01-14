@@ -30,7 +30,7 @@ public abstract class RepositoryTestBase
             .EnableSensitiveDataLogging()
             .Options;
 
-        var ctx = new AirportDbContext(options);
+        var ctx = new TestAirportDbContext(options);
 
         ctx.Database.OpenConnection();
         ctx.Database.EnsureCreated();
@@ -39,6 +39,17 @@ public abstract class RepositoryTestBase
     }
 
     #region Entities Creation Helpers
+
+    protected GateDb CreateGateDb()
+    {
+        var airportDb = CreateAirportDb();
+        return _fixture.Build<GateDb>()
+                       .Without(g => g.GateId)
+                       .Without(g => g.AirportId)
+                       .Without(g => g.FlightSchedules)
+                       .With(g => g.Airport, airportDb)
+                       .Create();
+    }
 
     protected AirlineDb CreateAirlineDb()
     {
@@ -68,6 +79,7 @@ public abstract class RepositoryTestBase
                        .Without(a => a.Flights)
                        .Without(a => a.FlightSchedules)
                        .With(a => a.OwnedByAirline, airlineDb)
+                       .Without(a => a.OwnedByAirlineId)
                        .Create();
     }
 
@@ -78,6 +90,7 @@ public abstract class RepositoryTestBase
                        .Without(a => a.Flights)
                        .Without(a => a.FlightSchedules)
                        .With(a => a.OwnedByAirline, airlineDb)
+                       .Without(a => a.OwnedByAirlineId)
                        .Create();
     }
 
@@ -112,6 +125,7 @@ public abstract class RepositoryTestBase
 
     protected FlightScheduleDb CreateFlightScheduleDb()
     {
+        var gateDb = CreateGateDb();
         var flightDb = CreateFlightDb();
         return _fixture.Build<FlightScheduleDb>()
                        .With(fs => fs.Flight, flightDb)
@@ -120,6 +134,8 @@ public abstract class RepositoryTestBase
                        .Without(fs => fs.Tickets)
                        .Without(fs => fs.AssignedAircraft)
                        .Without(fs => fs.AssignedAircraftId)
+                       .With(fs => fs.Gate, gateDb) 
+                       .Without(fs => fs.GateId)
                        .Create();
     }
 
@@ -127,7 +143,7 @@ public abstract class RepositoryTestBase
     {
         var flightScheduleDb = CreateFlightScheduleDb();
         return _fixture.Build<TicketDb>()
-                       .With(t => t.RowVersion, new byte[] { 1 })
+                       .With(t => t.RowVersion, new byte[1])
                        .With(t => t.FlightSchedule, flightScheduleDb)
                        .Without(t => t.FlightScheduleId)
                        .Without(t => t.TicketId)
@@ -141,7 +157,7 @@ public abstract class RepositoryTestBase
         return _fixture.Build<BookingDb>()
                        .With(b => b.Ticket, ticketDb)
                        .Without(b => b.TicketId)
-                       .With(b => b.RowVersion, new byte[] { 1 })
+                       .With(b => b.RowVersion, new byte[1])
                        .Without(b => b.BookingId)
                        .Create();
     }
