@@ -419,3 +419,4 @@ FodyWeavers.xsd
 
 # Custom files
 MiniBank Console/MiniBank Console/accounts.json
+coverageresults/
